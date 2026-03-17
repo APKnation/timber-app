@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Basic colors -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    
+    <!-- Timber-themed palette -->
+    <!-- Primary colors - Earthy browns -->
+    <color name="timber_primary">#6D4C41</color>
+    <color name="timber_primary_dark">#4E342E</color>
+    <color name="timber_primary_light">#8D6E63</color>
+    
+    <!-- Secondary colors - Forest greens -->
+    <color name="timber_secondary">#388E3C</color>
+    <color name="timber_secondary_dark">#2E7D32</color>
+    <color name="timber_secondary_light">#4CAF50</color>
+    
+    <!-- Accent colors -->
+    <color name="timber_accent">#FF6F00</color>
+    <color name="timber_accent_light">#FFB300</color>
+    
+    <!-- Background colors -->
+    <color name="timber_background">#FAFAFA</color>
+    <color name="timber_surface">#FFFFFF</color>
+    <color name="timber_card">#FFFFFF</color>
+    
+    <!-- Text colors -->
+    <color name="timber_text_primary">#212121</color>
+    <color name="timber_text_secondary">#757575</color>
+    <color name="timber_text_hint">#BDBDBD</color>
+    
+    <!-- Status colors -->
+    <color name="timber_success">#4CAF50</color>
+    <color name="timber_warning">#FF9800</color>
+    <color name="timber_error">#F44336</color>
+    <color name="timber_info">#2196F3</color>
+    
+    <!-- Category colors for timber types -->
+    <color name="mahogany">#8B4513</color>
+    <color name="teak">#D2691E</color>
+    <color name="pine">#228B22</color>
+    <color name="oak">#8B4513</color>
+    <color name="cedar">#DEB887</color>
+    
+    <!-- UI specific colors -->
+    <color name="divider">#E0E0E0</color>
+    <color name="overlay">#80000000</color>
+    <color name="shimmer">#E0E0E0</color>
+</resources>

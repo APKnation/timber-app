@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Authentication -->
+    <string name="login">Ingia</string>
+    <string name="signup">Jisajili</string>
+    <string name="email">Barua pepe</string>
+    <string name="password">Nywila</string>
+    <string name="confirm_password">Thibitisha Nywila</string>
+    <string name="full_name">Jina Kamili</string>
+    <string name="phone_number">Namba ya Simu</string>
+    <string name="forgot_password">Umesahau Nywila?</string>
+    <string name="already_have_account">Tayari una akaunti? Ingia</string>
+    <string name="dont_have_account">Huna akaunti? Jisajili</string>
+    
+    <!-- User Roles -->
+    <string name="buyer">Mnunuzi</string>
+    <string name="seller">Mauzaji</string>
+    <string name="admin">Msimamizi</string>
+    <string name="select_role">Chagua Jukumu Lako</string>
+    
+    <!-- Navigation -->
+    <string name="dashboard">Dashibodi</string>
+    <string name="marketplace">Soko</string>
+    <string name="auctions">Mauzo</string>
+    <string name="payments">Malipo</string>
+    <string name="analytics">Uchambuzi</string>
+    <string name="profile">Wasifu</string>
+    <string name="settings">Mipangilio</string>
+    
+    <!-- Marketplace -->
+    <string name="search_timber">Tafuta mbao...</string>
+    <string name="filter">Chuja</string>
+    <string name="category">Aina</string>
+    <string name="price">Bei</string>
+    <string name="location">Mahali</string>
+    <string name="description">Maelezo</string>
+    <string name="view_details">Ona Maelezo</string>
+    
+    <!-- Timber Categories -->
+    <string name="mahogany">Mahogany</string>
+    <string name="teak">Teak</string>
+    <string name="pine">Pine</string>
+    <string name="oak">Oak</string>
+    <string name="cedar">Cedar</string>
+    
+    <!-- Auction -->
+    <string name="current_bid">Bei ya Sasa</string>
+    <string name="place_bid">Weka Ofa</string>
+    <string name="reserve_price">Bei Akiba</string>
+    <string name="auction_ends">Mauzo Yaisha</string>
+    <string name="bid_amount">Kiasi cha Ofa</string>
+    
+    <!-- Payment -->
+    <string name="mpesa">M-Pesa</string>
+    <string name="airtel_money">Airtel Money</string>
+    <string name="tigo_pesa">Tigo Pesa</string>
+    <string name="select_payment_method">Chagua Njia ya Malipo</string>
+    <string name="proceed_to_payment">Endelea kwa Malipo</string>
+    
+    <!-- Common -->
+    <string name="submit">Wasilisha</string>
+    <string name="cancel">Ghairi</string>
+    <string name="save">Hifadhi</string>
+    <string name="delete">Futa</string>
+    <string name="edit">Hariri</string>
+    <string name="add">Ongeza</string>
+    <string name="loading">Inapakia...</string>
+    <string name="error">Hitilafu</string>
+    <string name="success">Mafanikio</string>
+    <string name="retry">Jaribu Tena</string>
+    <string name="ok">Sawa</string>
+    <string name="yes">Ndiyo</string>
+    <string name="no">Hapana</string>
+    
+    <!-- Messages -->
+    <string name="login_success">Umefanikiwa kuingia</string>
+    <string name="login_failed">Imeshindwa kuingia</string>
+    <string name="signup_success">Akaunti imeundwa kwa mafanikio</string>
+    <string name="signup_failed">Imeshindwa kuanzisha akaunti</string>
+    <string name="network_error">Hitilafu ya mtandao. Tafadhali angalia muunganisho wako.</string>
+    <string name="invalid_email">Anwani ya barua pepe si sahihi</string>
+    <string name="password_mismatch">Nywila hazilingani</string>
+</resources>
