@@ -3,13 +3,19 @@ package com.timbertrade.app.dashboard;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.GridLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,20 +29,15 @@ public class RealDashboardActivity extends Activity {
         
         try {
             super.onCreate(savedInstanceState);
-            Log.d(TAG, "super.onCreate completed");
-            
-            // Create professional dashboard layout
-            createProfessionalDashboard();
-            Log.d(TAG, "RealDashboardActivity setup complete");
-            
+            createNativeAppDashboard();
         } catch (Exception e) {
             Log.e(TAG, "Error in RealDashboardActivity: " + e.getMessage(), e);
             e.printStackTrace();
             
-            // Fallback to clean version
+            // Fallback
             try {
                 TextView errorText = new TextView(this);
-                errorText.setText("TimberTrade Dashboard\n\nError loading dashboard\n\nPlease restart the app.");
+                errorText.setText("TimberTrade Dashboard Error\nPlease restart the app.");
                 errorText.setTextSize(16);
                 errorText.setPadding(50, 50, 50, 50);
                 errorText.setBackgroundColor(Color.parseColor("#2E7D32"));
@@ -44,537 +45,432 @@ public class RealDashboardActivity extends Activity {
                 errorText.setGravity(Gravity.CENTER);
                 setContentView(errorText);
             } catch (Exception ex) {
-                Log.e(TAG, "Even error display failed: " + ex.getMessage(), ex);
+                Log.e(TAG, "Even error display failed", ex);
             }
         }
     }
     
-    private void createProfessionalDashboard() {
-        Log.d(TAG, "createProfessionalDashboard: Creating professional layout");
+    private void createNativeAppDashboard() {
+        // Root is a RelativeLayout to support fixed bottom navigation
+        RelativeLayout root = new RelativeLayout(this);
+        root.setBackgroundColor(Color.parseColor("#F5F7FA")); // Modern light gray app background
         
-        // Main container
-        LinearLayout mainLayout = new LinearLayout(this);
-        mainLayout.setOrientation(LinearLayout.VERTICAL);
-        mainLayout.setBackgroundColor(Color.parseColor("#F8F9FA")); // Modern light background
+        // --- Bottom Navigation View ---
+        int bottomNavId = View.generateViewId();
+        LinearLayout bottomNav = createNativeBottomNav();
+        bottomNav.setId(bottomNavId);
         
-        // Header Section
-        createHeaderSection(mainLayout);
+        RelativeLayout.LayoutParams navParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        navParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        root.addView(bottomNav, navParams);
+        // -----------------------------
         
-        // Welcome Section for First-Time Users
-        createWelcomeSection(mainLayout);
+        // --- Scrollable Content ---
+        ScrollView scrollView = new ScrollView(this);
+        scrollView.setVerticalScrollBarEnabled(false);
+        RelativeLayout.LayoutParams scrollParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        scrollParams.addRule(RelativeLayout.ABOVE, bottomNavId);
         
-        // Stats Section
-        createStatsSection(mainLayout);
+        LinearLayout scrollContent = new LinearLayout(this);
+        scrollContent.setOrientation(LinearLayout.VERTICAL);
+        scrollContent.setPadding(0, 0, 0, 60); // Padding bottom for smooth scrolling over nav
         
-        // Recent Activity Section
-        createRecentActivitySection(mainLayout);
+        // Add App Components
+        scrollContent.addView(createAppBar());
+        scrollContent.addView(createOverviewCards());
+        scrollContent.addView(createQuickActionsGrid());
+        scrollContent.addView(createRecentActivityList());
         
-        // Bottom Navigation
-        createBottomNavigation(mainLayout);
-        
-        setContentView(mainLayout);
-        Log.d(TAG, "Professional dashboard created successfully");
+        scrollView.addView(scrollContent);
+        root.addView(scrollView, scrollParams);
+        // -----------------------------
+
+        setContentView(root);
     }
-    
-    private void createHeaderSection(LinearLayout mainLayout) {
-        Log.d(TAG, "createHeaderSection: Creating header");
+
+    private View createAppBar() {
+        LinearLayout appBar = new LinearLayout(this);
+        appBar.setOrientation(LinearLayout.HORIZONTAL);
+        appBar.setPadding(40, 50, 40, 50);
+        appBar.setGravity(Gravity.CENTER_VERTICAL);
+        appBar.setBackgroundColor(Color.WHITE);
+        appBar.setElevation(8);
         
-        // Header container with gradient
-        LinearLayout headerLayout = new LinearLayout(this);
-        headerLayout.setOrientation(LinearLayout.VERTICAL);
+        // Profile Icon (Simulated)
+        TextView profileIcon = new TextView(this);
+        profileIcon.setText("AK");
+        profileIcon.setTextColor(Color.WHITE);
+        profileIcon.setTextSize(18);
+        profileIcon.setTypeface(null, Typeface.BOLD);
+        profileIcon.setGravity(Gravity.CENTER);
         
-        // Create gradient background
-        GradientDrawable gradientDrawable = new GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{Color.parseColor("#2E7D32"), Color.parseColor("#1B5E20")}
-        );
-        gradientDrawable.setCornerRadius(0);
-        headerLayout.setBackground(gradientDrawable);
-        headerLayout.setPadding(30, 50, 30, 50);
+        GradientDrawable profileBg = new GradientDrawable();
+        profileBg.setShape(GradientDrawable.OVAL);
+        profileBg.setColor(Color.parseColor("#2E7D32"));
+        profileIcon.setBackground(profileBg);
         
-        // Title with shadow effect
-        TextView titleText = new TextView(this);
-        titleText.setText("TimberManagement App");
-        titleText.setTextSize(28);
-        titleText.setTextColor(Color.WHITE);
-        titleText.setGravity(Gravity.CENTER);
-        titleText.setShadowLayer(2, 1, 1, Color.parseColor("#000000"));
-        titleText.setPadding(0, 0, 0, 15);
-        headerLayout.addView(titleText);
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(120, 120);
+        profileIcon.setLayoutParams(iconParams);
         
-        // Subtitle
-        TextView subtitleText = new TextView(this);
-        subtitleText.setText("Timber Management System");
-        subtitleText.setTextSize(16);
-        subtitleText.setTextColor(Color.parseColor("#E8F5E8"));
-        subtitleText.setGravity(Gravity.CENTER);
-        subtitleText.setPadding(0, 0, 0, 20);
-        headerLayout.addView(subtitleText);
-        
-        // User info card
-        LinearLayout userCard = createCard(Color.parseColor("#FFFFFF"), 20);
-        userCard.setPadding(20, 15, 20, 15);
-        
-        TextView userText = new TextView(this);
-        userText.setText("Welcome, Atanasi Kafuka\nBuyer Account\n+254 712 345 678");
-        userText.setTextSize(14);
-        userText.setTextColor(Color.parseColor("#333333"));
-        userText.setGravity(Gravity.CENTER);
-        userCard.addView(userText);
-        
-        headerLayout.addView(userCard);
-        mainLayout.addView(headerLayout);
-        
-        // Add spacing
-        addSpacer(mainLayout, 20);
-    }
-    
-    private void createStatsSection(LinearLayout mainLayout) {
-        Log.d(TAG, "createStatsSection: Creating stats");
-        
-        // Stats container
-        LinearLayout statsLayout = new LinearLayout(this);
-        statsLayout.setOrientation(LinearLayout.HORIZONTAL);
-        statsLayout.setPadding(20, 0, 20, 0);
-        
-        // Active Orders
-        LinearLayout activeOrdersLayout = createEnhancedStatCard("Active Orders", "12", Color.parseColor("#4CAF50"));
-        statsLayout.addView(activeOrdersLayout);
-        
-        // Pending Payments
-        LinearLayout pendingPaymentsLayout = createEnhancedStatCard("Pending Payments", "3", Color.parseColor("#FF9800"));
-        statsLayout.addView(pendingPaymentsLayout);
-        
-        // Total Revenue
-        LinearLayout revenueLayout = createEnhancedStatCard("Total Revenue", "$45,230", Color.parseColor("#2196F3"));
-        statsLayout.addView(revenueLayout);
-        
-        mainLayout.addView(statsLayout);
-        
-        // Add spacing
-        addSpacer(mainLayout, 20);
-    }
-    
-    private LinearLayout createEnhancedStatCard(String title, String value, int color) {
-        LinearLayout cardLayout = new LinearLayout(this);
-        cardLayout.setOrientation(LinearLayout.VERTICAL);
-        cardLayout.setBackgroundColor(Color.WHITE);
-        
-        // Create card with shadow effect
-        GradientDrawable cardBackground = new GradientDrawable();
-        cardBackground.setColor(Color.WHITE);
-        cardBackground.setCornerRadius(12);
-        cardLayout.setBackground(cardBackground);
-        cardLayout.setPadding(20, 20, 20, 20);
-        cardLayout.setElevation(4);
-        
-        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f
-        );
-        cardParams.setMargins(8, 0, 8, 0);
-        cardLayout.setLayoutParams(cardParams);
-        
-        // Value
-        TextView valueText = new TextView(this);
-        valueText.setText(value);
-        valueText.setTextSize(20);
-        valueText.setTextColor(color);
-        valueText.setGravity(Gravity.CENTER);
-        valueText.setPadding(0, 5, 0, 5);
-        valueText.setTypeface(null, android.graphics.Typeface.BOLD);
-        cardLayout.addView(valueText);
-        
-        // Title
-        TextView titleText = new TextView(this);
-        titleText.setText(title);
-        titleText.setTextSize(12);
-        titleText.setTextColor(Color.parseColor("#666666"));
-        titleText.setGravity(Gravity.CENTER);
-        cardLayout.addView(titleText);
-        
-        return cardLayout;
-    }
-    
-    private void createQuickActionsSection(LinearLayout mainLayout) {
-        Log.d(TAG, "createQuickActionsSection: Creating quick actions");
-        
-        // Section title
-        TextView actionsTitle = new TextView(this);
-        actionsTitle.setText("Quick Actions");
-        actionsTitle.setTextSize(20);
-        actionsTitle.setTextColor(Color.parseColor("#333333"));
-        actionsTitle.setPadding(20, 0, 20, 15);
-        actionsTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-        mainLayout.addView(actionsTitle);
-        
-        // Actions container
-        LinearLayout actionsLayout = new LinearLayout(this);
-        actionsLayout.setOrientation(LinearLayout.HORIZONTAL);
-        actionsLayout.setPadding(20, 0, 20, 0);
-        
-        // New Order Button
-        Button newOrderBtn = createEnhancedActionButton("New Order", Color.parseColor("#4CAF50"));
-        newOrderBtn.setOnClickListener(v -> {
-            Log.d(TAG, "New Order button clicked");
-            Intent intent = new Intent(RealDashboardActivity.this, com.timbertrade.app.orders.NewOrderActivity.class);
-            startActivity(intent);
-        });
-        actionsLayout.addView(newOrderBtn);
-        
-        // View Inventory Button
-        Button inventoryBtn = createEnhancedActionButton("Inventory", Color.parseColor("#2196F3"));
-        inventoryBtn.setOnClickListener(v -> {
-            Log.d(TAG, "Inventory button clicked");
-            Intent intent = new Intent(RealDashboardActivity.this, com.timbertrade.app.inventory.InventoryActivity.class);
-            startActivity(intent);
-        });
-        actionsLayout.addView(inventoryBtn);
-        
-        // Reports Button
-        Button reportsBtn = createEnhancedActionButton("Reports", Color.parseColor("#FF9800"));
-        reportsBtn.setOnClickListener(v -> {
-            Log.d(TAG, "Reports button clicked");
-            Intent intent = new Intent(RealDashboardActivity.this, com.timbertrade.app.reports.ReportsActivity.class);
-            startActivity(intent);
-        });
-        actionsLayout.addView(reportsBtn);
-        
-        mainLayout.addView(actionsLayout);
-        
-        // Add spacing
-        addSpacer(mainLayout, 20);
-    }
-    
-    private Button createEnhancedActionButton(String text, int color) {
-        Button button = new Button(this);
-        button.setText(text);
-        button.setBackgroundColor(color);
-        button.setTextColor(Color.WHITE);
-        button.setPadding(15, 20, 15, 20);
-        
-        // Create rounded button
-        GradientDrawable buttonBackground = new GradientDrawable();
-        buttonBackground.setColor(color);
-        buttonBackground.setCornerRadius(12);
-        button.setBackground(buttonBackground);
-        button.setElevation(3);
-        
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f
-        );
-        btnParams.setMargins(5, 0, 5, 0);
-        button.setLayoutParams(btnParams);
-        
-        return button;
-    }
-    
-    private void createRecentActivitySection(LinearLayout mainLayout) {
-        Log.d(TAG, "createRecentActivitySection: Creating recent activity");
-        
-        // Section title
-        TextView activityTitle = new TextView(this);
-        activityTitle.setText("Recent Activity");
-        activityTitle.setTextSize(20);
-        activityTitle.setTextColor(Color.parseColor("#333333"));
-        activityTitle.setPadding(20, 0, 20, 15);
-        activityTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-        mainLayout.addView(activityTitle);
-        
-        // Activity container
-        LinearLayout activityLayout = createCard(Color.WHITE, 12);
-        activityLayout.setPadding(20, 15, 20, 20);
-        LinearLayout.LayoutParams activityParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        activityParams.setMargins(20, 0, 20, 20);
-        activityLayout.setLayoutParams(activityParams);
-        
-        // Activity items
-        addEnhancedActivityItem(activityLayout, "New order received", "Oak Wood - 50 units", "2 hours ago", Color.parseColor("#4CAF50"));
-        addEnhancedActivityItem(activityLayout, "Payment confirmed", "Order #1234 - $2,340", "5 hours ago", Color.parseColor("#FF9800"));
-        addEnhancedActivityItem(activityLayout, "Inventory updated", "Pine Wood stock +100 units", "1 day ago", Color.parseColor("#2196F3"));
-        addEnhancedActivityItem(activityLayout, "Report generated", "Monthly summary ready", "2 days ago", Color.parseColor("#9C27B0"));
-        
-        mainLayout.addView(activityLayout);
-        
-        // Add spacing
-        addSpacer(mainLayout, 20);
-    }
-    
-    private void addEnhancedActivityItem(LinearLayout parent, String title, String description, String time, int color) {
-        LinearLayout itemLayout = new LinearLayout(this);
-        itemLayout.setOrientation(LinearLayout.VERTICAL);
-        itemLayout.setPadding(0, 12, 0, 12);
-        
-        // Text content
+        // Title Texts
         LinearLayout textLayout = new LinearLayout(this);
         textLayout.setOrientation(LinearLayout.VERTICAL);
-        textLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        ));
+        textLayout.setPadding(30, 0, 0, 0);
         
-        // Title
+        TextView greeting = new TextView(this);
+        greeting.setText("Good Morning, Atanasi!" );
+        greeting.setTextSize(14);
+        greeting.setTextColor(Color.parseColor("#757575"));
+        
+        TextView appTitle = new TextView(this);
+        appTitle.setText("TimberManager");
+        appTitle.setTextSize(22);
+        appTitle.setTextColor(Color.parseColor("#212121"));
+        appTitle.setTypeface(null, Typeface.BOLD);
+        
+        textLayout.addView(greeting);
+        textLayout.addView(appTitle);
+        
+        appBar.addView(profileIcon);
+        appBar.addView(textLayout);
+        
+        return appBar;
+    }
+
+    private View createOverviewCards() {
+        LinearLayout sectionLayout = new LinearLayout(this);
+        sectionLayout.setOrientation(LinearLayout.VERTICAL);
+        sectionLayout.setPadding(40, 60, 40, 30);
+        
+        TextView sectionTitle = new TextView(this);
+        sectionTitle.setText("Financial Overview");
+        sectionTitle.setTextSize(18);
+        sectionTitle.setTypeface(null, Typeface.BOLD);
+        sectionTitle.setTextColor(Color.parseColor("#212121"));
+        sectionTitle.setPadding(0, 0, 0, 20);
+        sectionLayout.addView(sectionTitle);
+        
+        // Horizontal Row of Cards
+        LinearLayout cardsRow = new LinearLayout(this);
+        cardsRow.setOrientation(LinearLayout.HORIZONTAL);
+        cardsRow.setWeightSum(2f);
+        
+        // Balance Card
+        LinearLayout balanceCard = createNativeCard(Color.WHITE);
+        balanceCard.setPadding(40, 40, 40, 40);
+        LinearLayout.LayoutParams p1 = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        p1.setMargins(0, 0, 20, 0);
+        balanceCard.setLayoutParams(p1);
+        
+        TextView balanceLabel = new TextView(this);
+        balanceLabel.setText("Total Revenue");
+        balanceLabel.setTextSize(13);
+        balanceLabel.setTextColor(Color.parseColor("#757575"));
+        
+        TextView balanceValue = new TextView(this);
+        balanceValue.setText("$45,230.00");
+        balanceValue.setTextSize(24);
+        balanceValue.setTypeface(null, Typeface.BOLD);
+        balanceValue.setTextColor(Color.parseColor("#2E7D32"));
+        balanceValue.setPadding(0, 10, 0, 0);
+        
+        balanceCard.addView(balanceLabel);
+        balanceCard.addView(balanceValue);
+        
+        // Orders Card
+        LinearLayout ordersCard = createNativeCard(Color.parseColor("#2E7D32")); // Primary color card
+        ordersCard.setPadding(40, 40, 40, 40);
+        LinearLayout.LayoutParams p2 = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        p2.setMargins(20, 0, 0, 0);
+        ordersCard.setLayoutParams(p2);
+        
+        TextView ordersLabel = new TextView(this);
+        ordersLabel.setText("Active Orders");
+        ordersLabel.setTextSize(13);
+        ordersLabel.setTextColor(Color.parseColor("#E8F5E8"));
+        
+        TextView ordersValue = new TextView(this);
+        ordersValue.setText("12");
+        ordersValue.setTextSize(24);
+        ordersValue.setTypeface(null, Typeface.BOLD);
+        ordersValue.setTextColor(Color.WHITE);
+        ordersValue.setPadding(0, 10, 0, 0);
+        
+        ordersCard.addView(ordersLabel);
+        ordersCard.addView(ordersValue);
+        
+        cardsRow.addView(balanceCard);
+        cardsRow.addView(ordersCard);
+        
+        sectionLayout.addView(cardsRow);
+        return sectionLayout;
+    }
+
+    private View createQuickActionsGrid() {
+        LinearLayout sectionLayout = new LinearLayout(this);
+        sectionLayout.setOrientation(LinearLayout.VERTICAL);
+        sectionLayout.setPadding(40, 30, 40, 30);
+        
+        TextView sectionTitle = new TextView(this);
+        sectionTitle.setText("App Services");
+        sectionTitle.setTextSize(18);
+        sectionTitle.setTypeface(null, Typeface.BOLD);
+        sectionTitle.setTextColor(Color.parseColor("#212121"));
+        sectionTitle.setPadding(0, 0, 0, 20);
+        sectionLayout.addView(sectionTitle);
+        
+        // Row 1
+        LinearLayout row1 = new LinearLayout(this);
+        row1.setOrientation(LinearLayout.HORIZONTAL);
+        row1.setWeightSum(2f);
+        
+        View action1 = createActionCard("New Order", "#E3F2FD", "#1976D2", v -> {
+            startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.orders.NewOrderActivity.class));
+        });
+        
+        View action2 = createActionCard("Inventory", "#E8F5E9", "#2E7D32", v -> {
+            startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.inventory.InventoryActivity.class));
+        });
+        
+        row1.addView(action1);
+        row1.addView(action2);
+        
+        // Row 2
+        LinearLayout row2 = new LinearLayout(this);
+        row2.setOrientation(LinearLayout.HORIZONTAL);
+        row2.setWeightSum(2f);
+        row2.setPadding(0, 40, 0, 0);
+        
+        View action3 = createActionCard("Reports", "#FFF3E0", "#F57C00", v -> {
+            startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.reports.ReportsActivity.class));
+        });
+        
+        View action4 = createActionCard("Marketplace", "#F3E5F5", "#7B1FA2", v -> {
+            startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.marketplace.MarketplaceActivity.class));
+        });
+        
+        row2.addView(action3);
+        row2.addView(action4);
+        
+        sectionLayout.addView(row1);
+        sectionLayout.addView(row2);
+        
+        return sectionLayout;
+    }
+
+    private View createActionCard(String title, String bgColor, String textColor, View.OnClickListener listener) {
+        LinearLayout outerLayout = new LinearLayout(this);
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        p.setMargins(15, 0, 15, 0);
+        outerLayout.setLayoutParams(p);
+        
+        LinearLayout card = createNativeCard(Color.WHITE);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setGravity(Gravity.CENTER);
+        card.setPadding(30, 50, 30, 50);
+        card.setOnClickListener(listener);
+        
+        // Icon circular background
+        TextView iconView = new TextView(this);
+        iconView.setText(title.substring(0, 1)); // First letter as icon
+        iconView.setTextSize(24);
+        iconView.setTextColor(Color.parseColor(textColor));
+        iconView.setTypeface(null, Typeface.BOLD);
+        iconView.setGravity(Gravity.CENTER);
+        
+        GradientDrawable iconBg = new GradientDrawable();
+        iconBg.setShape(GradientDrawable.OVAL);
+        iconBg.setColor(Color.parseColor(bgColor));
+        
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(110, 110);
+        iconParams.setMargins(0, 0, 0, 20);
+        iconView.setLayoutParams(iconParams);
+        iconView.setBackground(iconBg);
+        
         TextView titleText = new TextView(this);
         titleText.setText(title);
         titleText.setTextSize(14);
-        titleText.setTextColor(Color.parseColor("#333333"));
-        titleText.setTypeface(null, android.graphics.Typeface.BOLD);
-        textLayout.addView(titleText);
+        titleText.setTextColor(Color.parseColor("#424242"));
+        titleText.setTypeface(null, Typeface.BOLD);
+        titleText.setGravity(Gravity.CENTER);
         
-        // Description
+        card.addView(iconView);
+        card.addView(titleText);
+        
+        outerLayout.addView(card);
+        return outerLayout;
+    }
+
+    private View createRecentActivityList() {
+        LinearLayout sectionLayout = new LinearLayout(this);
+        sectionLayout.setOrientation(LinearLayout.VERTICAL);
+        sectionLayout.setPadding(40, 40, 40, 60);
+        
+        TextView sectionTitle = new TextView(this);
+        sectionTitle.setText("Recent Activity");
+        sectionTitle.setTextSize(18);
+        sectionTitle.setTypeface(null, Typeface.BOLD);
+        sectionTitle.setTextColor(Color.parseColor("#212121"));
+        sectionTitle.setPadding(0, 0, 0, 20);
+        sectionLayout.addView(sectionTitle);
+        
+        LinearLayout listCard = createNativeCard(Color.WHITE);
+        listCard.setPadding(20, 10, 20, 10);
+        
+        listCard.addView(createActivityListItem("Order Completed", "Oak Wood - 50 units", "2h ago"));
+        listCard.addView(createDivider());
+        listCard.addView(createActivityListItem("Payment Received", "Order #1234 - $2,340", "5h ago"));
+        listCard.addView(createDivider());
+        listCard.addView(createActivityListItem("Stock Alert", "Pine Wood low on stock", "1d ago"));
+        
+        sectionLayout.addView(listCard);
+        return sectionLayout;
+    }
+
+    private View createActivityListItem(String title, String subtitle, String time) {
+        LinearLayout item = new LinearLayout(this);
+        item.setOrientation(LinearLayout.HORIZONTAL);
+        item.setPadding(30, 30, 30, 30);
+        item.setGravity(Gravity.CENTER_VERTICAL);
+        
+        // Simple dot icon
+        View dot = new View(this);
+        GradientDrawable dotBg = new GradientDrawable();
+        dotBg.setShape(GradientDrawable.OVAL);
+        dotBg.setColor(Color.parseColor("#2E7D32"));
+        LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(24, 24);
+        dotParams.setMargins(0, 0, 30, 0);
+        dot.setLayoutParams(dotParams);
+        dot.setBackground(dotBg);
+        
+        // Text Layout (takes remaining space)
+        LinearLayout textLayout = new LinearLayout(this);
+        textLayout.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        textLayout.setLayoutParams(textParams);
+        
+        TextView titleText = new TextView(this);
+        titleText.setText(title);
+        titleText.setTextSize(15);
+        titleText.setTextColor(Color.parseColor("#212121"));
+        titleText.setTypeface(null, Typeface.BOLD);
+        
         TextView descText = new TextView(this);
-        descText.setText(description);
-        descText.setTextSize(12);
-        descText.setTextColor(Color.parseColor("#666666"));
-        descText.setPadding(0, 2, 0, 2);
+        descText.setText(subtitle);
+        descText.setTextSize(13);
+        descText.setTextColor(Color.parseColor("#757575"));
+        descText.setPadding(0, 5, 0, 0);
+        
+        textLayout.addView(titleText);
         textLayout.addView(descText);
         
-        // Time
+        // Time text (aligned to the end)
         TextView timeText = new TextView(this);
         timeText.setText(time);
-        timeText.setTextSize(10);
-        timeText.setTextColor(color);
-        textLayout.addView(timeText);
+        timeText.setTextSize(12);
+        timeText.setTextColor(Color.parseColor("#9E9E9E"));
         
-        itemLayout.addView(textLayout);
+        item.addView(dot);
+        item.addView(textLayout);
+        item.addView(timeText);
         
-        // Divider
+        return item;
+    }
+
+    private View createDivider() {
         View divider = new View(this);
         divider.setBackgroundColor(Color.parseColor("#EEEEEE"));
-        divider.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1));
-        parent.addView(divider);
-        
-        parent.addView(itemLayout);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 2);
+        lp.setMargins(30, 0, 30, 0);
+        divider.setLayoutParams(lp);
+        return divider;
     }
-    
-    private void createBottomNavigation(LinearLayout mainLayout) {
-        Log.d(TAG, "createBottomNavigation: Creating bottom navigation");
+
+    private LinearLayout createNativeBottomNav() {
+        LinearLayout navBar = new LinearLayout(this);
+        navBar.setOrientation(LinearLayout.HORIZONTAL);
+        navBar.setBackgroundColor(Color.WHITE);
+        navBar.setElevation(20); // prominent shadow at the bottom
+        navBar.setPadding(0, 20, 0, 30);
+        navBar.setWeightSum(4f);
         
-        // Navigation container
-        LinearLayout navLayout = new LinearLayout(this);
-        navLayout.setOrientation(LinearLayout.HORIZONTAL);
-        navLayout.setBackgroundColor(Color.WHITE);
-        navLayout.setPadding(0, 15, 0, 15);
-        navLayout.setElevation(8);
+        // We add a top border just in case elevation isn't visibly casting upward
+        View border = new View(this);
+        border.setBackgroundColor(Color.parseColor("#E0E0E0"));
+        navBar.addView(border, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
         
-        // Home button
-        Button homeBtn = createNavButton("Home", Color.parseColor("#2E7D32"));
-        homeBtn.setOnClickListener(v -> {
-            Toast.makeText(this, "Already on Dashboard", Toast.LENGTH_SHORT).show();
-        });
-        navLayout.addView(homeBtn);
+        navBar.addView(createBottomNavItem("Home", "#2E7D32", true, true));
+        navBar.addView(createBottomNavItem("Market", "#757575", false, false));
+        navBar.addView(createBottomNavItem("Orders", "#757575", false, false));
+        navBar.addView(createBottomNavItem("Profile", "#757575", false, false));
         
-        // Marketplace button
-        Button marketBtn = createNavButton("Market", Color.parseColor("#666666"));
-        marketBtn.setOnClickListener(v -> {
-            Log.d(TAG, "Marketplace button clicked");
-            Intent intent = new Intent(RealDashboardActivity.this, com.timbertrade.app.marketplace.MarketplaceActivity.class);
-            startActivity(intent);
-        });
-        navLayout.addView(marketBtn);
-        
-        // Orders button
-        Button ordersBtn = createNavButton("Orders", Color.parseColor("#666666"));
-        ordersBtn.setOnClickListener(v -> {
-            Toast.makeText(this, "Orders coming soon!", Toast.LENGTH_SHORT).show();
-        });
-        navLayout.addView(ordersBtn);
-        
-        // Profile button
-        Button profileBtn = createNavButton("Profile", Color.parseColor("#666666"));
-        profileBtn.setOnClickListener(v -> {
-            Toast.makeText(this, "Profile coming soon!", Toast.LENGTH_SHORT).show();
-        });
-        navLayout.addView(profileBtn);
-        
-        mainLayout.addView(navLayout);
+        return navBar;
     }
-    
-    private Button createNavButton(String text, int color) {
-        Button button = new Button(this);
-        button.setText(text);
-        button.setBackgroundColor(Color.TRANSPARENT);
-        button.setTextColor(color);
-        button.setTextSize(12);
-        button.setPadding(0, 5, 0, 5);
+
+    private View createBottomNavItem(String title, String color, boolean isActive, boolean isClickable) {
+        LinearLayout itemLayout = new LinearLayout(this);
+        itemLayout.setOrientation(LinearLayout.VERTICAL);
+        itemLayout.setGravity(Gravity.CENTER);
         
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f
-        );
-        button.setLayoutParams(params);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        itemLayout.setLayoutParams(params);
         
-        return button;
-    }
-    
-    private LinearLayout createCard(int backgroundColor, int cornerRadius) {
-        LinearLayout card = new LinearLayout(this);
-        GradientDrawable background = new GradientDrawable();
-        background.setColor(backgroundColor);
-        background.setCornerRadius(cornerRadius);
-        card.setBackground(background);
-        card.setElevation(2);
-        return card;
-    }
-    
-    private void addSpacer(LinearLayout parent, int height) {
-        TextView spacer = new TextView(this);
-        spacer.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, height));
-        parent.addView(spacer);
-    }
-    
-    private void createWelcomeSection(LinearLayout mainLayout) {
-        Log.d(TAG, "createWelcomeSection: Creating welcome section for first-time users");
+        // Simulated Icon (First letter)
+        TextView icon = new TextView(this);
+        icon.setText(title.substring(0, 1));
+        icon.setTextSize(20);
+        icon.setTypeface(null, Typeface.BOLD);
+        icon.setTextColor(Color.parseColor(color));
+        icon.setGravity(Gravity.CENTER);
+        icon.setPadding(0, 15, 0, 5);
         
-        // Welcome card container
-        LinearLayout welcomeCard = createCard(Color.WHITE, 16);
-        welcomeCard.setOrientation(LinearLayout.VERTICAL);
-        welcomeCard.setPadding(25, 25, 25, 25);
-        welcomeCard.setElevation(3);
+        // Label
+        TextView label = new TextView(this);
+        label.setText(title);
+        label.setTextSize(11);
+        label.setTextColor(Color.parseColor(color));
+        label.setGravity(Gravity.CENTER);
         
-        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        cardParams.setMargins(20, 0, 20, 0);
-        welcomeCard.setLayoutParams(cardParams);
-        
-        // Welcome title
-        TextView welcomeTitle = new TextView(this);
-        welcomeTitle.setText("Welcome to TimberManagement App!");
-        welcomeTitle.setTextSize(20);
-        welcomeTitle.setTextColor(Color.parseColor("#2E7D32"));
-        welcomeTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-        welcomeTitle.setGravity(Gravity.CENTER);
-        welcomeTitle.setPadding(0, 0, 0, 15);
-        welcomeCard.addView(welcomeTitle);
-        
-        // Quick Action Buttons at Top
-        TextView actionsTitle = new TextView(this);
-        actionsTitle.setText("Quick Start:");
-        actionsTitle.setTextSize(16);
-        actionsTitle.setTextColor(Color.parseColor("#2E7D32"));
-        actionsTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-        actionsTitle.setPadding(0, 10, 0, 15);
-        welcomeCard.addView(actionsTitle);
-        
-        // Buttons container
-        LinearLayout buttonsLayout = new LinearLayout(this);
-        buttonsLayout.setOrientation(LinearLayout.HORIZONTAL);
-        buttonsLayout.setPadding(0, 0, 0, 20);
-        
-        // New Order Button
-        Button newOrderBtn = createWelcomeButton("New Order", Color.parseColor("#4CAF50"));
-        newOrderBtn.setOnClickListener(v -> {
-            startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.orders.NewOrderActivity.class));
-        });
-        buttonsLayout.addView(newOrderBtn);
-        
-        // Inventory Button
-        Button inventoryBtn = createWelcomeButton("Inventory", Color.parseColor("#2196F3"));
-        inventoryBtn.setOnClickListener(v -> {
-            startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.inventory.InventoryActivity.class));
-        });
-        buttonsLayout.addView(inventoryBtn);
-        
-        // Reports Button
-        Button reportsBtn = createWelcomeButton("Reports", Color.parseColor("#FF9800"));
-        reportsBtn.setOnClickListener(v -> {
-            startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.reports.ReportsActivity.class));
-        });
-        buttonsLayout.addView(reportsBtn);
-        
-        welcomeCard.addView(buttonsLayout);
-        
-        // Welcome message
-        TextView welcomeMessage = new TextView(this);
-        welcomeMessage.setText("Your complete timber management solution is here! This app helps you manage orders, track inventory, and generate business reports with ease.");
-        welcomeMessage.setTextSize(14);
-        welcomeMessage.setTextColor(Color.parseColor("#333333"));
-        welcomeMessage.setPadding(0, 0, 0, 20);
-        welcomeCard.addView(welcomeMessage);
-        
-        // Features overview
-        TextView featuresTitle = new TextView(this);
-        featuresTitle.setText("What You Can Do:");
-        featuresTitle.setTextSize(16);
-        featuresTitle.setTextColor(Color.parseColor("#2E7D32"));
-        featuresTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-        featuresTitle.setPadding(0, 10, 0, 15);
-        welcomeCard.addView(featuresTitle);
-        
-        // Features list
-        String[] features = {
-            "1. Manage Orders - Create, edit, and track timber orders",
-            "2. Track Inventory - Monitor stock levels and supplies", 
-            "3. Generate Reports - Business analytics and insights",
-            "4. Easy Navigation - Switch between sections seamlessly",
-            "5. Mobile Ready - Access your data anywhere"
-        };
-        
-        for (String feature : features) {
-            TextView featureText = new TextView(this);
-            featureText.setText(feature);
-            featureText.setTextSize(13);
-            featureText.setTextColor(Color.parseColor("#555555"));
-            featureText.setPadding(0, 5, 0, 5);
-            welcomeCard.addView(featureText);
+        if (isActive) {
+            label.setTypeface(null, Typeface.BOLD);
+            // Optionally add an indicator pill
+            View indicator = new View(this);
+            GradientDrawable pill = new GradientDrawable();
+            pill.setCornerRadius(10);
+            pill.setColor(Color.parseColor(color));
+            indicator.setBackground(pill);
+            LinearLayout.LayoutParams indentParams = new LinearLayout.LayoutParams(40, 8);
+            indentParams.setMargins(0, 10, 0, 0);
+            itemLayout.addView(indicator, indentParams);
         }
         
-        // Getting started section
-        TextView gettingStartedTitle = new TextView(this);
-        gettingStartedTitle.setText("Getting Started:");
-        gettingStartedTitle.setTextSize(16);
-        gettingStartedTitle.setTextColor(Color.parseColor("#2E7D32"));
-        gettingStartedTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-        gettingStartedTitle.setPadding(0, 20, 0, 10);
-        welcomeCard.addView(gettingStartedTitle);
+        itemLayout.addView(icon);
+        itemLayout.addView(label);
         
-        TextView gettingStartedText = new TextView(this);
-        gettingStartedText.setText("1. Use the navigation bar below to explore different sections\n2. Click 'New Order' to create your first timber order\n3. Check 'Inventory' to see current stock levels\n4. Generate 'Reports' to view business analytics");
-        gettingStartedText.setTextSize(13);
-        gettingStartedText.setTextColor(Color.parseColor("#555555"));
-        gettingStartedText.setPadding(0, 0, 0, 10);
-        welcomeCard.addView(gettingStartedText);
+        if (!isClickable && !isActive) {
+            itemLayout.setOnClickListener(v -> Toast.makeText(this, title + " coming soon!", Toast.LENGTH_SHORT).show());
+        } else if (title.equals("Market")) {
+            itemLayout.setOnClickListener(v -> {
+                startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.marketplace.MarketplaceActivity.class));
+            });
+        }
         
-        // Pro tip
-        TextView tipTitle = new TextView(this);
-        tipTitle.setText("Pro Tip:");
-        tipTitle.setTextSize(14);
-        tipTitle.setTextColor(Color.parseColor("#FF9800"));
-        tipTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-        tipTitle.setPadding(0, 15, 0, 5);
-        welcomeCard.addView(tipTitle);
-        
-        TextView tipText = new TextView(this);
-        tipText.setText("All your data is saved locally on this device. You can create unlimited orders, inventory items, and reports without any limits!");
-        tipText.setTextSize(12);
-        tipText.setTextColor(Color.parseColor("#666666"));
-        tipText.setPadding(0, 0, 0, 0);
-        welcomeCard.addView(tipText);
-        
-        mainLayout.addView(welcomeCard);
+        return itemLayout;
     }
-    
-    private Button createWelcomeButton(String text, int color) {
-        Button button = new Button(this);
-        button.setText(text);
-        button.setBackgroundColor(color);
-        button.setTextColor(Color.WHITE);
-        button.setTextSize(12);
-        button.setPadding(15, 12, 15, 12);
+
+    private LinearLayout createNativeCard(int backgroundColor) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
         
-        // Create rounded button
-        GradientDrawable buttonBackground = new GradientDrawable();
-        buttonBackground.setColor(color);
-        buttonBackground.setCornerRadius(8);
-        button.setBackground(buttonBackground);
-        button.setElevation(2);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(backgroundColor);
+        bg.setCornerRadius(24f); // Large rounded corners for modern app look
         
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f
-        );
-        btnParams.setMargins(5, 0, 5, 0);
-        button.setLayoutParams(btnParams);
+        card.setBackground(bg);
+        card.setElevation(8f); // Material shadow
         
-        return button;
+        return card;
     }
 }
