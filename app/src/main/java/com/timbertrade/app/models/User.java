@@ -1,7 +1,12 @@
 package com.timbertrade.app.models;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.annotation.NonNull;
+
 import java.util.Date;
 
+@Entity(tableName = "models")
 public class User {
     private String userId;
     private String fullName;

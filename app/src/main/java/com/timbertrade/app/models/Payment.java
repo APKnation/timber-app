@@ -1,8 +1,13 @@
 package com.timbertrade.app.models;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.Date;
 
+@Entity(tableName = "models")
 public class Payment implements Serializable {
     private String paymentId;
     private String transactionId;

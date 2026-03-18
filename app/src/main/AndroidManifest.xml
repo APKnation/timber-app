@@ -21,12 +21,8 @@
         <!-- Real Dashboard Activity -->
         <activity
             android:name=".dashboard.RealDashboardActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@android:style/Theme.Light.NoTitleBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         
         <!-- Marketplace Activity -->
@@ -71,11 +67,16 @@
             android:exported="false"
             android:theme="@android:style/Theme.Light.NoTitleBar" />
         
-        <!-- Authentication Activities (Disabled) -->
+        <!-- Authentication Activities (Enabled as App Entry) -->
         <activity
             android:name=".auth.LoginActivity"
-            android:exported="false"
-            android:theme="@style/Theme.TimberTrade" />
+            android:exported="true"
+            android:theme="@android:style/Theme.Light.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         
         <activity
             android:name=".auth.SignupActivity"

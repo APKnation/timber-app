@@ -1,8 +1,15 @@
 package com.timbertrade.app.models;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 
+@Entity(tableName = "inventory")
 public class InventoryItem implements Serializable {
+    @PrimaryKey
+    @NonNull
     private String id;
     private String woodType;
     private String description;

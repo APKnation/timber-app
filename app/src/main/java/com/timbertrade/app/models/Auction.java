@@ -1,10 +1,15 @@
 package com.timbertrade.app.models;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+@Entity(tableName = "models")
 public class Auction implements Serializable {
     private String auctionId;
     private String productId;

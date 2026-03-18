@@ -62,6 +62,10 @@ dependencies {
     // Localization
     implementation("androidx.appcompat:appcompat:1.6.1")
     
+    // Room Database
+    implementation("androidx.room:room-runtime:2.6.1")
+    annotationProcessor("androidx.room:room-compiler:2.6.1")
+    
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

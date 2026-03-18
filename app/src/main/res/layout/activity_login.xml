@@ -1,153 +1,150 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="@color/timber_background"
-    tools:context=".auth.LoginActivity">
+    android:background="#F3F4F6">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
+    <!-- Gradient Header Background -->
+    <View
+        android:id="@+id/headerBackground"
+        android:layout_width="0dp"
+        android:layout_height="300dp"
+        android:background="#059669"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Application Brand Name -->
+    <TextView
+        android:id="@+id/logoText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="24dp">
+        android:layout_marginTop="80dp"
+        android:text="TimberTrade"
+        android:textColor="#FFFFFF"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Logo and Title -->
-        <ImageView
-            android:id="@+id/ivLogo"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_marginTop="48dp"
-            android:src="@drawable/ic_timber_logo"
-            android:contentDescription="@string/app_name"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/subLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Premium Lumber Management"
+        android:textColor="#D1FAE5"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/logoText" />
 
-        <TextView
-            android:id="@+id/tvAppName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/app_name"
-            android:textColor="@color/timber_primary"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivLogo" />
+    <!-- Sign In Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="32dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/subLogo">
 
-        <TextView
-            android:id="@+id/tvTagline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Tanzanian Timber Marketplace"
-            android:textColor="@color/timber_text_secondary"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvAppName" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="32dp">
 
-        <!-- Login Form -->
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilEmail"
-            style="@style/TimberTextInputLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="48dp"
-            android:hint="@string/email"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvTagline">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etEmail"
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:gravity="center"
+                android:text="Sign In"
+                android:textColor="#1F2937"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <!-- Email Field -->
+            <EditText
+                android:id="@+id/emailInput"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="16dp"
+                android:background="#F9FAFB"
+                android:hint="Email Address"
                 android:inputType="textEmailAddress"
-                android:maxLines="1" />
+                android:paddingHorizontal="16dp"
+                android:textColor="#1F2937"
+                android:textColorHint="#9CA3AF" />
 
-        </com.google.android.material.textfield.TextInputLayout>
+            <!-- Password Field -->
+            <EditText
+                android:id="@+id/passwordInput"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginBottom="8dp"
+                android:background="#F9FAFB"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:paddingHorizontal="16dp"
+                android:textColor="#1F2937"
+                android:textColorHint="#9CA3AF" />
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilPassword"
-            style="@style/TimberTextInputLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:hint="@string/password"
-            app:passwordToggleEnabled="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tilEmail">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginBottom="24dp"
+                android:padding="8dp"
+                android:text="Forgot Password?"
+                android:textColor="#059669"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etPassword"
+            <!-- Login Button -->
+            <Button
+                android:id="@+id/loginBtn"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:backgroundTint="#059669"
+                android:text="Authenticate"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp" />
+
+            <!-- Register Link -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:maxLines="1" />
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:orientation="horizontal">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="New to TimberTrade? "
+                    android:textColor="#6B7280" />
 
-        <!-- Forgot Password -->
-        <TextView
-            android:id="@+id/tvForgotPassword"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/forgot_password"
-            android:textColor="@color/timber_primary"
-            android:textSize="14sp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tilPassword" />
+                <TextView
+                    android:id="@+id/registerLink"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Create Account"
+                    android:textColor="#059669"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-        <!-- Login Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLogin"
-            style="@style/PrimaryButton"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_marginTop="24dp"
-            android:text="@string/login"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvForgotPassword" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
-        <!-- Progress Bar -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:visibility="gone"
-            android:indeterminateTint="@color/timber_primary"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/btnLogin" />
-
-        <!-- Sign Up Link -->
-        <TextView
-            android:id="@+id/tvSignUp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            android:text="@string/dont_have_account"
-            android:textColor="@color/timber_text_secondary"
-            android:textSize="14sp"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
