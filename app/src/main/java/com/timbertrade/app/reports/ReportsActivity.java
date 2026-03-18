@@ -1,25 +1,24 @@
 package com.timbertrade.app.reports;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.timbertrade.app.dashboard.RealDashboardActivity;
-import com.timbertrade.app.inventory.InventoryActivity;
 import com.timbertrade.app.models.Report;
-import com.timbertrade.app.orders.NewOrderActivity;
 import com.timbertrade.app.utils.DataManager;
 
 import java.util.List;
@@ -28,464 +27,418 @@ public class ReportsActivity extends Activity {
     
     private static final String TAG = "ReportsActivity";
     private DataManager dataManager;
-    private TableLayout reportsTable;
+    private LinearLayout listContainer;
     private LinearLayout formLayout;
-    private boolean isFormVisible = false;
     private Report editingReport = null;
     
+    // Modern Color Palette
+    private final int COLOR_PRIMARY = Color.parseColor("#F97316"); // Orange
+    private final int COLOR_PRIMARY_DARK = Color.parseColor("#EA580C");
+    private final int COLOR_BG = Color.parseColor("#F3F4F6"); 
+    private final int COLOR_TEXT_PRIMARY = Color.parseColor("#1F2937");
+    private final int COLOR_TEXT_SECONDARY = Color.parseColor("#6B7280");
+    private final int COLOR_WHITE = Color.WHITE;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate: Starting ReportsActivity");
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: Starting Advanced ReportsActivity");
         
         try {
-            super.onCreate(savedInstanceState);
             dataManager = DataManager.getInstance();
-            
-            // Create main layout
-            createMainLayout();
-            
+            createAdvancedMainLayout();
         } catch (Exception e) {
             Log.e(TAG, "Error in ReportsActivity: " + e.getMessage(), e);
         }
     }
-    
-    private void createMainLayout() {
-        // Main container
-        LinearLayout mainLayout = new LinearLayout(this);
-        mainLayout.setOrientation(LinearLayout.VERTICAL);
-        mainLayout.setBackgroundColor(Color.parseColor("#F5F5F5"));
+
+    private void createAdvancedMainLayout() {
+        RelativeLayout root = new RelativeLayout(this);
+        root.setBackgroundColor(COLOR_BG);
         
-        // Header
-        createHeader(mainLayout);
-        
-        // Navigation bar
-        createNavigationBar(mainLayout);
-        
-        // Content area with scroll
-        ScrollView scrollView = new ScrollView(this);
-        LinearLayout contentLayout = new LinearLayout(this);
-        contentLayout.setOrientation(LinearLayout.VERTICAL);
-        contentLayout.setPadding(20, 20, 20, 20);
-        
-        // Reports table
-        createReportsTable(contentLayout);
-        
-        // Add/Edit form (initially hidden)
-        createReportForm(contentLayout);
-        
-        scrollView.addView(contentLayout);
-        mainLayout.addView(scrollView);
-        
-        setContentView(mainLayout);
-    }
-    
-    private void createHeader(LinearLayout parent) {
-        LinearLayout headerLayout = new LinearLayout(this);
-        headerLayout.setOrientation(LinearLayout.VERTICAL);
-        
-        // Gradient background
-        android.graphics.drawable.GradientDrawable gradientDrawable = new android.graphics.drawable.GradientDrawable(
-                android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{Color.parseColor("#FF9800"), Color.parseColor("#F57C00")}
+        // 1. Decorative Header Background
+        View headerBg = new View(this);
+        GradientDrawable gradientBg = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[]{COLOR_PRIMARY, COLOR_PRIMARY_DARK} 
         );
-        gradientDrawable.setCornerRadius(0);
-        headerLayout.setBackground(gradientDrawable);
-        headerLayout.setPadding(30, 40, 30, 40);
+        headerBg.setBackground(gradientBg);
         
-        // Title
+        RelativeLayout.LayoutParams headerBgParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(200)
+        );
+        headerBgParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        root.addView(headerBg, headerBgParams);
+
+        // Custom App Bar Toolbar
+        int toolbarId = View.generateViewId();
+        LinearLayout toolbar = new LinearLayout(this);
+        toolbar.setId(toolbarId);
+        toolbar.setOrientation(LinearLayout.HORIZONTAL);
+        toolbar.setPadding(dpToPx(20), dpToPx(40), dpToPx(20), dpToPx(20));
+        toolbar.setGravity(Gravity.CENTER_VERTICAL);
+        
+        TextView backBtn = new TextView(this);
+        backBtn.setText("← Back");
+        backBtn.setTextColor(Color.parseColor("#FFEDD5")); // Light orange
+        backBtn.setTextSize(16);
+        backBtn.setTypeface(null, Typeface.BOLD);
+        backBtn.setPadding(0, dpToPx(10), dpToPx(20), dpToPx(10));
+        backBtn.setOnClickListener(v -> finish());
+        toolbar.addView(backBtn);
+        
         TextView titleText = new TextView(this);
-        titleText.setText("Reports & Analytics");
+        titleText.setText("Analytics");
         titleText.setTextSize(24);
-        titleText.setTextColor(Color.WHITE);
-        titleText.setGravity(Gravity.CENTER);
-        titleText.setShadowLayer(2, 1, 1, Color.parseColor("#000000"));
-        headerLayout.addView(titleText);
+        titleText.setTextColor(COLOR_WHITE);
+        titleText.setTypeface(null, Typeface.BOLD);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        titleText.setLayoutParams(titleParams);
+        toolbar.addView(titleText);
         
-        // Subtitle
-        TextView subtitleText = new TextView(this);
-        subtitleText.setText("Business Intelligence and Analytics");
-        subtitleText.setTextSize(14);
-        subtitleText.setTextColor(Color.parseColor("#FFF3E0"));
-        subtitleText.setGravity(Gravity.CENTER);
-        subtitleText.setPadding(0, 10, 0, 0);
-        headerLayout.addView(subtitleText);
-        
-        parent.addView(headerLayout);
-    }
-    
-    private void createNavigationBar(LinearLayout parent) {
-        LinearLayout navLayout = new LinearLayout(this);
-        navLayout.setOrientation(LinearLayout.HORIZONTAL);
-        navLayout.setBackgroundColor(Color.WHITE);
-        navLayout.setPadding(10, 15, 10, 15);
-        navLayout.setElevation(4);
-        
-        // Dashboard button
-        Button dashboardBtn = createNavButton("Dashboard", Color.parseColor("#666666"));
-        dashboardBtn.setOnClickListener(v -> {
-            startActivity(new Intent(this, RealDashboardActivity.class));
-        });
-        navLayout.addView(dashboardBtn);
-        
-        // Orders button
-        Button ordersBtn = createNavButton("Orders", Color.parseColor("#666666"));
-        ordersBtn.setOnClickListener(v -> {
-            startActivity(new Intent(this, NewOrderActivity.class));
-        });
-        navLayout.addView(ordersBtn);
-        
-        // Inventory button
-        Button inventoryBtn = createNavButton("Inventory", Color.parseColor("#666666"));
-        inventoryBtn.setOnClickListener(v -> {
-            startActivity(new Intent(this, InventoryActivity.class));
-        });
-        navLayout.addView(inventoryBtn);
-        
-        // Reports button (active)
-        Button reportsBtn = createNavButton("Reports", Color.parseColor("#FF9800"));
-        reportsBtn.setOnClickListener(v -> {
-            Toast.makeText(this, "Already on Reports page", Toast.LENGTH_SHORT).show();
-        });
-        navLayout.addView(reportsBtn);
-        
-        parent.addView(navLayout);
-    }
-    
-    private Button createNavButton(String text, int color) {
-        Button button = new Button(this);
-        button.setText(text);
-        button.setBackgroundColor(Color.TRANSPARENT);
-        button.setTextColor(color);
-        button.setTextSize(12);
-        button.setPadding(0, 5, 0, 5);
-        
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f
-        );
-        button.setLayoutParams(params);
-        
-        return button;
-    }
-    
-    private void createReportsTable(LinearLayout parent) {
-        // Section title with add button
-        LinearLayout titleLayout = new LinearLayout(this);
-        titleLayout.setOrientation(LinearLayout.HORIZONTAL);
-        titleLayout.setGravity(Gravity.CENTER_VERTICAL);
-        
-        TextView titleText = new TextView(this);
-        titleText.setText("Reports List");
-        titleText.setTextSize(20);
-        titleText.setTextColor(Color.parseColor("#333333"));
-        titleText.setTypeface(null, android.graphics.Typeface.BOLD);
-        titleText.setLayoutParams(new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f
-        ));
-        titleLayout.addView(titleText);
-        
-        Button addBtn = new Button(this);
-        addBtn.setText("Generate New Report");
-        addBtn.setBackgroundColor(Color.parseColor("#FF9800"));
-        addBtn.setTextColor(Color.WHITE);
-        addBtn.setPadding(20, 10, 20, 10);
+        // Add Button inside Toolbar
+        TextView addBtn = new TextView(this);
+        addBtn.setText("+ REPORT");
+        addBtn.setTextColor(COLOR_WHITE);
+        addBtn.setTextSize(14);
+        addBtn.setTypeface(null, Typeface.BOLD);
+        addBtn.setPadding(dpToPx(20), dpToPx(10), dpToPx(20), dpToPx(10));
+        GradientDrawable addBtnBg = new GradientDrawable();
+        addBtnBg.setColor(Color.parseColor("#C2410C")); // Darker orange
+        addBtnBg.setCornerRadius(dpToPx(100));
+        addBtn.setBackground(addBtnBg);
         addBtn.setOnClickListener(v -> showReportForm());
-        titleLayout.addView(addBtn);
+        toolbar.addView(addBtn);
         
-        parent.addView(titleLayout);
+        RelativeLayout.LayoutParams toolbarParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        toolbarParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        root.addView(toolbar, toolbarParams);
+
+        // 3. Scrollable Foreground Content
+        ScrollView scrollView = new ScrollView(this);
+        scrollView.setVerticalScrollBarEnabled(false);
+        RelativeLayout.LayoutParams scrollParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        scrollParams.addRule(RelativeLayout.BELOW, toolbarId);
         
-        // Table
-        reportsTable = new TableLayout(this);
-        reportsTable.setBackgroundColor(Color.WHITE);
-        reportsTable.setPadding(10, 10, 10, 10);
+        LinearLayout scrollContent = new LinearLayout(this);
+        scrollContent.setOrientation(LinearLayout.VERTICAL);
+        scrollContent.setPadding(dpToPx(20), dpToPx(10), dpToPx(20), dpToPx(40));
         
-        // Table header
-        TableRow headerRow = new TableRow(this);
-        headerRow.setBackgroundColor(Color.parseColor("#F5F5F5"));
+        // Add/Edit Form Card (initially hidden)
+        createReportForm(scrollContent);
         
-        String[] headers = {"Title", "Type", "Period", "Revenue", "Orders", "Actions"};
-        for (String header : headers) {
-            TextView headerText = new TextView(this);
-            headerText.setText(header);
-            headerText.setTextSize(12);
-            headerText.setTextColor(Color.parseColor("#333333"));
-            headerText.setTypeface(null, android.graphics.Typeface.BOLD);
-            headerText.setPadding(8, 10, 8, 10);
-            headerText.setGravity(Gravity.CENTER);
-            headerRow.addView(headerText);
-        }
+        // List Container
+        listContainer = new LinearLayout(this);
+        listContainer.setOrientation(LinearLayout.VERTICAL);
+        scrollContent.addView(listContainer);
         
-        reportsTable.addView(headerRow);
-        
-        // Load reports
         loadReports();
         
-        parent.addView(reportsTable);
+        scrollView.addView(scrollContent);
+        root.addView(scrollView, scrollParams);
+        
+        setContentView(root);
     }
-    
+
     private void loadReports() {
-        // Clear existing rows (except header)
-        if (reportsTable.getChildCount() > 1) {
-            reportsTable.removeViews(1, reportsTable.getChildCount() - 1);
-        }
-        
+        listContainer.removeAllViews();
         List<Report> reports = dataManager.getAllReports();
+        
+        if (reports.isEmpty()) {
+            TextView emptyText = new TextView(this);
+            emptyText.setText("No reports available.\nTap + REPORT to generate one.");
+            emptyText.setTextSize(16);
+            emptyText.setTextColor(COLOR_TEXT_SECONDARY);
+            emptyText.setGravity(Gravity.CENTER);
+            emptyText.setPadding(dpToPx(20), dpToPx(60), dpToPx(20), dpToPx(20));
+            listContainer.addView(emptyText);
+            return;
+        }
+        
         for (Report report : reports) {
-            TableRow row = createReportRow(report);
-            reportsTable.addView(row);
+            listContainer.addView(createReportCard(report));
         }
     }
     
-    private TableRow createReportRow(Report report) {
-        TableRow row = new TableRow(this);
-        row.setBackgroundColor(Color.WHITE);
+    private View createReportCard(Report report) {
+        LinearLayout outerLayout = new LinearLayout(this);
+        outerLayout.setPadding(0, dpToPx(6), 0, dpToPx(6));
         
-        // Title
-        TextView titleText = new TextView(this);
-        titleText.setText(report.getTitle());
-        titleText.setTextSize(12);
-        titleText.setPadding(8, 10, 8, 10);
-        titleText.setGravity(Gravity.CENTER);
-        row.addView(titleText);
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(dpToPx(20), dpToPx(24), dpToPx(20), dpToPx(20));
         
-        // Type
-        TextView typeText = new TextView(this);
-        typeText.setText(report.getReportType());
-        typeText.setTextSize(12);
-        typeText.setPadding(8, 10, 8, 10);
-        typeText.setGravity(Gravity.CENTER);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(COLOR_WHITE);
+        bg.setCornerRadius(dpToPx(20));
+        card.setBackground(bg);
+        card.setElevation(dpToPx(6));
         
-        // Color code report type
-        switch (report.getReportType()) {
-            case "Sales":
-                typeText.setTextColor(Color.parseColor("#4CAF50"));
-                break;
-            case "Financial":
-                typeText.setTextColor(Color.parseColor("#2196F3"));
-                break;
-            case "Inventory":
-                typeText.setTextColor(Color.parseColor("#FF9800"));
-                break;
-            default:
-                typeText.setTextColor(Color.parseColor("#666666"));
-        }
-        row.addView(typeText);
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        card.setLayoutParams(cardParams);
         
-        // Period
-        TextView periodText = new TextView(this);
-        periodText.setText(report.getPeriod());
-        periodText.setTextSize(12);
-        periodText.setPadding(8, 10, 8, 10);
-        periodText.setGravity(Gravity.CENTER);
-        row.addView(periodText);
-        
-        // Revenue
-        TextView revenueText = new TextView(this);
-        revenueText.setText("$" + String.format("%.2f", report.getTotalRevenue()));
-        revenueText.setTextSize(12);
-        revenueText.setPadding(8, 10, 8, 10);
-        revenueText.setGravity(Gravity.CENTER);
-        revenueText.setTextColor(Color.parseColor("#4CAF50"));
-        row.addView(revenueText);
-        
-        // Orders
-        TextView ordersText = new TextView(this);
-        ordersText.setText(String.valueOf(report.getTotalOrders()));
-        ordersText.setTextSize(12);
-        ordersText.setPadding(8, 10, 8, 10);
-        ordersText.setGravity(Gravity.CENTER);
-        row.addView(ordersText);
-        
-        // Actions
-        LinearLayout actionsLayout = new LinearLayout(this);
-        actionsLayout.setOrientation(LinearLayout.HORIZONTAL);
-        actionsLayout.setGravity(Gravity.CENTER);
-        
-        Button viewBtn = new Button(this);
-        viewBtn.setText("View");
-        viewBtn.setBackgroundColor(Color.parseColor("#2196F3"));
-        viewBtn.setTextColor(Color.WHITE);
-        viewBtn.setTextSize(10);
-        viewBtn.setPadding(8, 5, 8, 5);
-        viewBtn.setOnClickListener(v -> viewReport(report));
-        actionsLayout.addView(viewBtn);
-        
-        Button editBtn = new Button(this);
-        editBtn.setText("Edit");
-        editBtn.setBackgroundColor(Color.parseColor("#FF9800"));
-        editBtn.setTextColor(Color.WHITE);
-        editBtn.setTextSize(10);
-        editBtn.setPadding(8, 5, 8, 5);
-        editBtn.setOnClickListener(v -> editReport(report));
-        actionsLayout.addView(editBtn);
-        
-        Button deleteBtn = new Button(this);
-        deleteBtn.setText("Delete");
-        deleteBtn.setBackgroundColor(Color.parseColor("#F44336"));
-        deleteBtn.setTextColor(Color.WHITE);
-        deleteBtn.setTextSize(10);
-        deleteBtn.setPadding(8, 5, 8, 5);
-        deleteBtn.setOnClickListener(v -> deleteReport(report));
-        actionsLayout.addView(deleteBtn);
-        
-        row.addView(actionsLayout);
-        
-        return row;
-    }
-    
-    private void createReportForm(LinearLayout parent) {
-        formLayout = new LinearLayout(this);
-        formLayout.setOrientation(LinearLayout.VERTICAL);
-        formLayout.setBackgroundColor(Color.WHITE);
-        formLayout.setPadding(20, 20, 20, 20);
-        formLayout.setElevation(4);
-        
-        LinearLayout.LayoutParams formParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        formParams.setMargins(0, 20, 0, 0);
-        formLayout.setLayoutParams(formParams);
-        
-        // Form title
-        TextView formTitle = new TextView(this);
-        formTitle.setText("Report Details");
-        formTitle.setTextSize(18);
-        formTitle.setTextColor(Color.parseColor("#333333"));
-        formTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-        formTitle.setPadding(0, 0, 0, 20);
-        formLayout.addView(formTitle);
-        
-        // Title
-        addFormField(formLayout, "Report Title:", "title");
-        
-        // Report Type
-        addFormField(formLayout, "Report Type:", "reportType");
-        
-        // Period
-        addFormField(formLayout, "Period:", "period");
-        
-        // Total Revenue
-        addFormField(formLayout, "Total Revenue:", "totalRevenue");
-        
-        // Total Orders
-        addFormField(formLayout, "Total Orders:", "totalOrders");
-        
-        // Top Product
-        addFormField(formLayout, "Top Product:", "topProduct");
-        
-        // Summary
-        addFormField(formLayout, "Summary:", "summary");
-        
-        // Details
-        addFormField(formLayout, "Details:", "details");
-        
-        // Buttons
-        LinearLayout buttonLayout = new LinearLayout(this);
-        buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
-        buttonLayout.setPadding(0, 20, 0, 0);
-        
-        Button saveBtn = new Button(this);
-        saveBtn.setText("Save Report");
-        saveBtn.setBackgroundColor(Color.parseColor("#FF9800"));
-        saveBtn.setTextColor(Color.WHITE);
-        saveBtn.setPadding(30, 15, 30, 15);
-        saveBtn.setOnClickListener(v -> saveReport());
-        buttonLayout.addView(saveBtn);
-        
-        Button cancelBtn = new Button(this);
-        cancelBtn.setText("Cancel");
-        cancelBtn.setBackgroundColor(Color.parseColor("#666666"));
-        cancelBtn.setTextColor(Color.WHITE);
-        cancelBtn.setPadding(30, 15, 30, 15);
-        cancelBtn.setOnClickListener(v -> hideReportForm());
-        buttonLayout.addView(cancelBtn);
-        
-        formLayout.addView(buttonLayout);
-        
-        parent.addView(formLayout);
-        
-        // Initially hidden
-        formLayout.setVisibility(View.GONE);
-    }
-    
-    private void addFormField(LinearLayout parent, String label, String hint) {
-        TextView labelView = new TextView(this);
-        labelView.setText(label);
-        labelView.setTextSize(14);
-        labelView.setTextColor(Color.parseColor("#333333"));
-        labelView.setPadding(0, 10, 0, 5);
-        parent.addView(labelView);
-        
-        EditText editText = new EditText(this);
-        editText.setHint(hint);
-        editText.setTextSize(14);
-        editText.setPadding(15, 10, 15, 10);
-        editText.setBackgroundColor(Color.parseColor("#F5F5F5"));
-        editText.setTag(hint);
-        parent.addView(editText);
-    }
-    
-    private void showReportForm() {
-        editingReport = null;
-        clearForm();
-        formLayout.setVisibility(View.VISIBLE);
-        isFormVisible = true;
-    }
-    
-    private void hideReportForm() {
-        formLayout.setVisibility(View.GONE);
-        isFormVisible = false;
-        editingReport = null;
-    }
-    
-    private void viewReport(Report report) {
-        // Create a simple dialog to show report details
-        LinearLayout dialogLayout = new LinearLayout(this);
-        dialogLayout.setOrientation(LinearLayout.VERTICAL);
-        dialogLayout.setPadding(30, 30, 30, 30);
-        dialogLayout.setBackgroundColor(Color.WHITE);
+        // Header Row (Title & Type Chip)
+        LinearLayout headerRow = new LinearLayout(this);
+        headerRow.setOrientation(LinearLayout.HORIZONTAL);
+        headerRow.setGravity(Gravity.CENTER_VERTICAL);
         
         TextView titleText = new TextView(this);
         titleText.setText(report.getTitle());
         titleText.setTextSize(18);
-        titleText.setTypeface(null, android.graphics.Typeface.BOLD);
-        titleText.setPadding(0, 0, 0, 20);
-        dialogLayout.addView(titleText);
+        titleText.setTypeface(null, Typeface.BOLD);
+        titleText.setTextColor(COLOR_TEXT_PRIMARY);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        titleText.setLayoutParams(titleParams);
         
-        TextView summaryText = new TextView(this);
-        summaryText.setText(report.getSummary());
-        summaryText.setTextSize(14);
-        summaryText.setPadding(0, 0, 0, 20);
-        dialogLayout.addView(summaryText);
+        TextView typeChip = new TextView(this);
+        typeChip.setText(report.getReportType());
+        typeChip.setTextSize(12);
+        typeChip.setTypeface(null, Typeface.BOLD);
+        typeChip.setPadding(dpToPx(12), dpToPx(4), dpToPx(12), dpToPx(4));
         
-        TextView detailsText = new TextView(this);
-        detailsText.setText(report.getDetails());
-        detailsText.setTextSize(12);
-        dialogLayout.addView(detailsText);
+        GradientDrawable typeBg = new GradientDrawable();
+        typeBg.setCornerRadius(dpToPx(12));
         
-        Button closeBtn = new Button(this);
-        closeBtn.setText("Close");
-        closeBtn.setBackgroundColor(Color.parseColor("#FF9800"));
-        closeBtn.setTextColor(Color.WHITE);
-        closeBtn.setPadding(20, 10, 20, 10);
-        closeBtn.setOnClickListener(v -> {
-            // Remove dialog (simplified approach)
-            if (dialogLayout.getParent() != null) {
-                ((LinearLayout) dialogLayout.getParent()).removeView(dialogLayout);
-            }
-        });
-        dialogLayout.addView(closeBtn);
-        
-        // Add dialog to main layout (simplified approach)
-        LinearLayout mainLayout = (LinearLayout) findViewById(android.R.id.content).getRootView();
-        if (mainLayout != null) {
-            mainLayout.addView(dialogLayout);
+        switch (report.getReportType()) {
+            case "Sales":
+                typeBg.setColor(Color.parseColor("#D1FAE5")); // Green
+                typeChip.setTextColor(Color.parseColor("#059669"));
+                break;
+            case "Financial":
+                typeBg.setColor(Color.parseColor("#DBEAFE")); // Blue
+                typeChip.setTextColor(Color.parseColor("#2563EB"));
+                break;
+            case "Inventory":
+                typeBg.setColor(Color.parseColor("#FEF3C7")); // Amber
+                typeChip.setTextColor(Color.parseColor("#D97706"));
+                break;
+            default:
+                typeBg.setColor(Color.parseColor("#F3F4F6"));
+                typeChip.setTextColor(COLOR_TEXT_SECONDARY);
         }
+        typeChip.setBackground(typeBg);
+        
+        headerRow.addView(titleText);
+        headerRow.addView(typeChip);
+        
+        // Revenue + Orders Row
+        LinearLayout statsRow = new LinearLayout(this);
+        statsRow.setOrientation(LinearLayout.HORIZONTAL);
+        statsRow.setPadding(0, dpToPx(16), 0, dpToPx(12));
+        statsRow.setWeightSum(2f);
+        
+        statsRow.addView(createMiniStat("Revenue", "$" + String.format("%.2f", report.getTotalRevenue()), Color.parseColor("#059669")));
+        statsRow.addView(createMiniStat("Orders", String.valueOf(report.getTotalOrders()), COLOR_TEXT_PRIMARY));
+        
+        TextView periodText = new TextView(this);
+        periodText.setText("Period: " + report.getPeriod());
+        periodText.setTextSize(14);
+        periodText.setTextColor(COLOR_TEXT_SECONDARY);
+        
+        // Action Buttons Row
+        LinearLayout actionsRow = new LinearLayout(this);
+        actionsRow.setOrientation(LinearLayout.HORIZONTAL);
+        actionsRow.setGravity(Gravity.END);
+        actionsRow.setPadding(0, dpToPx(12), 0, 0);
+        
+        TextView editBtn = createActionButton("Edit", Color.parseColor("#F97316"));
+        editBtn.setOnClickListener(v -> editReport(report));
+        
+        TextView deleteBtn = createActionButton("Delete", Color.parseColor("#EF4444")); 
+        deleteBtn.setOnClickListener(v -> deleteReport(report));
+        
+        actionsRow.addView(editBtn);
+        actionsRow.addView(deleteBtn);
+        
+        card.addView(headerRow);
+        card.addView(statsRow);
+        card.addView(periodText);
+        card.addView(actionsRow);
+        
+        outerLayout.addView(card);
+        return outerLayout;
+    }
+
+    private View createMiniStat(String label, String value, int valueColor) {
+        LinearLayout col = new LinearLayout(this);
+        col.setOrientation(LinearLayout.VERTICAL);
+        col.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        
+        TextView lbl = new TextView(this);
+        lbl.setText(label);
+        lbl.setTextSize(12);
+        lbl.setTextColor(COLOR_TEXT_SECONDARY);
+        
+        TextView val = new TextView(this);
+        val.setText(value);
+        val.setTextSize(20);
+        val.setTypeface(null, Typeface.BOLD);
+        val.setTextColor(valueColor);
+        
+        col.addView(lbl);
+        col.addView(val);
+        return col;
+    }
+
+    private TextView createActionButton(String text, int color) {
+        TextView btn = new TextView(this);
+        btn.setText(text);
+        btn.setTextColor(color);
+        btn.setTextSize(14);
+        btn.setTypeface(null, Typeface.BOLD);
+        btn.setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8));
+        TypedValue outValue = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        btn.setBackgroundResource(outValue.resourceId);
+        btn.setClickable(true);
+        return btn;
+    }
+
+    private void createReportForm(LinearLayout parent) {
+        formLayout = new LinearLayout(this);
+        formLayout.setOrientation(LinearLayout.VERTICAL);
+        formLayout.setPadding(dpToPx(24), dpToPx(24), dpToPx(24), dpToPx(24));
+        
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(COLOR_WHITE);
+        bg.setCornerRadius(dpToPx(24));
+        formLayout.setBackground(bg);
+        formLayout.setElevation(dpToPx(12));
+        
+        LinearLayout.LayoutParams formParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        formParams.setMargins(0, 0, 0, dpToPx(20));
+        formLayout.setLayoutParams(formParams);
+        
+        TextView formTitle = new TextView(this);
+        formTitle.setText("Report Rules");
+        formTitle.setTextSize(20);
+        formTitle.setTextColor(COLOR_TEXT_PRIMARY);
+        formTitle.setTypeface(null, Typeface.BOLD);
+        formTitle.setPadding(0, 0, 0, dpToPx(20));
+        formLayout.addView(formTitle);
+        
+        addFormField(formLayout, "Report Title", "title");
+        
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setWeightSum(2f);
+        
+        LinearLayout col1 = new LinearLayout(this);
+        col1.setOrientation(LinearLayout.VERTICAL);
+        col1.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        col1.setPadding(0, 0, dpToPx(10), 0);
+        addFormField(col1, "Type (Sales/Inv)", "reportType");
+        
+        LinearLayout col2 = new LinearLayout(this);
+        col2.setOrientation(LinearLayout.VERTICAL);
+        col2.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        col2.setPadding(dpToPx(10), 0, 0, 0);
+        addFormField(col2, "Period", "period");
+        
+        row.addView(col1);
+        row.addView(col2);
+        formLayout.addView(row);
+        
+        LinearLayout row2 = new LinearLayout(this);
+        row2.setOrientation(LinearLayout.HORIZONTAL);
+        row2.setWeightSum(2f);
+        
+        LinearLayout col3 = new LinearLayout(this);
+        col3.setOrientation(LinearLayout.VERTICAL);
+        col3.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        col3.setPadding(0, 0, dpToPx(10), 0);
+        addFormField(col3, "Total Revenue", "totalRevenue");
+        
+        LinearLayout col4 = new LinearLayout(this);
+        col4.setOrientation(LinearLayout.VERTICAL);
+        col4.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        col4.setPadding(dpToPx(10), 0, 0, 0);
+        addFormField(col4, "Total Orders", "totalOrders");
+        
+        row2.addView(col3);
+        row2.addView(col4);
+        formLayout.addView(row2);
+        
+        addFormField(formLayout, "Top Product", "topProduct");
+        addFormField(formLayout, "Summary", "summary");
+        addFormField(formLayout, "Details", "details");
+        
+        // Buttons
+        LinearLayout buttonLayout = new LinearLayout(this);
+        buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+        buttonLayout.setPadding(0, dpToPx(10), 0, 0);
+        
+        Button cancelBtn = new Button(this);
+        cancelBtn.setText("Cancel");
+        cancelBtn.setBackgroundColor(Color.TRANSPARENT);
+        cancelBtn.setTextColor(COLOR_TEXT_SECONDARY);
+        cancelBtn.setPadding(dpToPx(20), dpToPx(12), dpToPx(20), dpToPx(12));
+        LinearLayout.LayoutParams cancelParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        cancelParams.setMargins(0, 0, dpToPx(10), 0);
+        cancelBtn.setLayoutParams(cancelParams);
+        cancelBtn.setOnClickListener(v -> hideReportForm());
+        buttonLayout.addView(cancelBtn);
+
+        Button saveBtn = new Button(this);
+        saveBtn.setText("Generate");
+        GradientDrawable saveBg = new GradientDrawable();
+        saveBg.setColor(COLOR_PRIMARY); // Orange
+        saveBg.setCornerRadius(dpToPx(12));
+        saveBtn.setBackground(saveBg);
+        saveBtn.setTextColor(COLOR_WHITE);
+        saveBtn.setPadding(dpToPx(20), dpToPx(12), dpToPx(20), dpToPx(12));
+        LinearLayout.LayoutParams saveParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        saveBtn.setLayoutParams(saveParams);
+        saveBtn.setOnClickListener(v -> saveReport());
+        buttonLayout.addView(saveBtn);
+        
+        formLayout.addView(buttonLayout);
+        parent.addView(formLayout);
+        formLayout.setVisibility(View.GONE);
     }
     
+    private void addFormField(LinearLayout parent, String hint, String tag) {
+        EditText editText = new EditText(this);
+        editText.setHint(hint);
+        editText.setTextSize(14);
+        editText.setTextColor(COLOR_TEXT_PRIMARY);
+        editText.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
+        editText.setTag(tag);
+        
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(COLOR_BG);
+        bg.setCornerRadius(dpToPx(12));
+        editText.setBackground(bg);
+        
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, 0, 0, dpToPx(16));
+        editText.setLayoutParams(params);
+        parent.addView(editText);
+    }
+
+    private void showReportForm() {
+        editingReport = null;
+        clearForm();
+        formLayout.setVisibility(View.VISIBLE);
+        ((ScrollView)formLayout.getParent().getParent()).smoothScrollTo(0, 0);
+    }
+
+    private void hideReportForm() {
+        formLayout.setVisibility(View.GONE);
+        editingReport = null;
+    }
+
     private void editReport(Report report) {
         editingReport = report;
         
-        // Populate form with report data
         EditText titleField = formLayout.findViewWithTag("title");
         EditText typeField = formLayout.findViewWithTag("reportType");
         EditText periodField = formLayout.findViewWithTag("period");
@@ -505,9 +458,9 @@ public class ReportsActivity extends Activity {
         detailsField.setText(report.getDetails());
         
         formLayout.setVisibility(View.VISIBLE);
-        isFormVisible = true;
+        ((ScrollView)formLayout.getParent().getParent()).smoothScrollTo(0, 0);
     }
-    
+
     private void clearForm() {
         EditText titleField = formLayout.findViewWithTag("title");
         EditText typeField = formLayout.findViewWithTag("reportType");
@@ -527,7 +480,7 @@ public class ReportsActivity extends Activity {
         summaryField.setText("");
         detailsField.setText("");
     }
-    
+
     private void saveReport() {
         try {
             EditText titleField = formLayout.findViewWithTag("title");
@@ -549,7 +502,7 @@ public class ReportsActivity extends Activity {
             String details = detailsField.getText().toString().trim();
             
             if (title.isEmpty() || type.isEmpty() || period.isEmpty()) {
-                Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please fill required fields", Toast.LENGTH_SHORT).show();
                 return;
             }
             
@@ -557,7 +510,6 @@ public class ReportsActivity extends Activity {
             int orders = ordersStr.isEmpty() ? 0 : Integer.parseInt(ordersStr);
             
             if (editingReport != null) {
-                // Update existing report
                 editingReport.setTitle(title);
                 editingReport.setReportType(type);
                 editingReport.setPeriod(period);
@@ -566,29 +518,33 @@ public class ReportsActivity extends Activity {
                 editingReport.setTopProduct(topProduct);
                 editingReport.setSummary(summary);
                 editingReport.setDetails(details);
-                
                 dataManager.updateReport(editingReport);
-                Toast.makeText(this, "Report updated successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Report updated", Toast.LENGTH_SHORT).show();
             } else {
-                // Create new report
                 Report newReport = new Report(title, type, period, revenue, orders, topProduct, summary, details);
                 dataManager.addReport(newReport);
-                Toast.makeText(this, "Report generated successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Report generated", Toast.LENGTH_SHORT).show();
             }
             
             hideReportForm();
             loadReports();
             
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "Please enter valid numbers for revenue and orders", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Enter valid numbers", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            Toast.makeText(this, "Error saving report: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
-    
+
     private void deleteReport(Report report) {
         dataManager.deleteReport(report.getId());
-        Toast.makeText(this, "Report deleted successfully", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Report deleted", Toast.LENGTH_SHORT).show();
         loadReports();
+    }
+
+    private int dpToPx(int dp) {
+        return (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics()
+        );
     }
 }
