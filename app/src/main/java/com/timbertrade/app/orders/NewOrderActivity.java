@@ -2,24 +2,30 @@ package com.timbertrade.app.orders;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.timbertrade.app.dashboard.RealDashboardActivity;
 import com.timbertrade.app.inventory.InventoryActivity;
+import com.timbertrade.app.marketplace.MarketplaceActivity;
+import com.timbertrade.app.dashboard.ProfileActivity;
 import com.timbertrade.app.models.Order;
-import com.timbertrade.app.reports.ReportsActivity;
 import com.timbertrade.app.utils.DataManager;
 
 import java.util.List;
@@ -28,383 +34,369 @@ public class NewOrderActivity extends Activity {
     
     private static final String TAG = "NewOrderActivity";
     private DataManager dataManager;
-    private TableLayout ordersTable;
+    private LinearLayout ordersListContainer;
     private LinearLayout formLayout;
-    private boolean isFormVisible = false;
     private Order editingOrder = null;
+    
+    // Modern Color Palette
+    private final int COLOR_PRIMARY = Color.parseColor("#059669"); 
+    private final int COLOR_PRIMARY_DARK = Color.parseColor("#047857");
+    private final int COLOR_ACCENT = Color.parseColor("#D97706"); 
+    private final int COLOR_BG = Color.parseColor("#F3F4F6"); 
+    private final int COLOR_TEXT_PRIMARY = Color.parseColor("#1F2937");
+    private final int COLOR_TEXT_SECONDARY = Color.parseColor("#6B7280");
+    private final int COLOR_WHITE = Color.WHITE;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate: Starting NewOrderActivity");
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate: Starting Advanced NewOrderActivity");
         
         try {
-            super.onCreate(savedInstanceState);
             dataManager = DataManager.getInstance();
-            
-            // Create main layout
-            createMainLayout();
-            
+            createAdvancedMainLayout();
         } catch (Exception e) {
             Log.e(TAG, "Error in NewOrderActivity: " + e.getMessage(), e);
         }
     }
     
-    private void createMainLayout() {
-        // Main container
-        LinearLayout mainLayout = new LinearLayout(this);
-        mainLayout.setOrientation(LinearLayout.VERTICAL);
-        mainLayout.setBackgroundColor(Color.parseColor("#F5F5F5"));
+    private void createAdvancedMainLayout() {
+        RelativeLayout root = new RelativeLayout(this);
+        root.setBackgroundColor(COLOR_BG);
         
-        // Header
-        createHeader(mainLayout);
-        
-        // Navigation bar
-        createNavigationBar(mainLayout);
-        
-        // Content area with scroll
-        ScrollView scrollView = new ScrollView(this);
-        LinearLayout contentLayout = new LinearLayout(this);
-        contentLayout.setOrientation(LinearLayout.VERTICAL);
-        contentLayout.setPadding(20, 20, 20, 20);
-        
-        // Orders table
-        createOrdersTable(contentLayout);
-        
-        // Add/Edit form (initially hidden)
-        createOrderForm(contentLayout);
-        
-        scrollView.addView(contentLayout);
-        mainLayout.addView(scrollView);
-        
-        setContentView(mainLayout);
-    }
-    
-    private void createHeader(LinearLayout parent) {
-        LinearLayout headerLayout = new LinearLayout(this);
-        headerLayout.setOrientation(LinearLayout.VERTICAL);
-        
-        // Gradient background
-        android.graphics.drawable.GradientDrawable gradientDrawable = new android.graphics.drawable.GradientDrawable(
-                android.graphics.drawable.GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{Color.parseColor("#4CAF50"), Color.parseColor("#388E3C")}
+        // 1. Decorative Header Background
+        View headerBg = new View(this);
+        GradientDrawable gradientBg = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[]{COLOR_PRIMARY, COLOR_PRIMARY_DARK}
         );
-        gradientDrawable.setCornerRadius(0);
-        headerLayout.setBackground(gradientDrawable);
-        headerLayout.setPadding(30, 40, 30, 40);
+        headerBg.setBackground(gradientBg);
         
-        // Title
+        RelativeLayout.LayoutParams headerBgParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(200)
+        );
+        headerBgParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        root.addView(headerBg, headerBgParams);
+
+        // Custom App Bar Toolbar
+        int toolbarId = View.generateViewId();
+        LinearLayout toolbar = new LinearLayout(this);
+        toolbar.setId(toolbarId);
+        toolbar.setOrientation(LinearLayout.HORIZONTAL);
+        toolbar.setPadding(dpToPx(20), dpToPx(40), dpToPx(20), dpToPx(20));
+        toolbar.setGravity(Gravity.CENTER_VERTICAL);
+        
         TextView titleText = new TextView(this);
         titleText.setText("Order Management");
         titleText.setTextSize(24);
-        titleText.setTextColor(Color.WHITE);
-        titleText.setGravity(Gravity.CENTER);
-        titleText.setShadowLayer(2, 1, 1, Color.parseColor("#000000"));
-        headerLayout.addView(titleText);
+        titleText.setTextColor(COLOR_WHITE);
+        titleText.setTypeface(null, Typeface.BOLD);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        titleText.setLayoutParams(titleParams);
+        toolbar.addView(titleText);
         
-        // Subtitle
-        TextView subtitleText = new TextView(this);
-        subtitleText.setText("Create and Manage Timber Orders");
-        subtitleText.setTextSize(14);
-        subtitleText.setTextColor(Color.parseColor("#E8F5E8"));
-        subtitleText.setGravity(Gravity.CENTER);
-        subtitleText.setPadding(0, 10, 0, 0);
-        headerLayout.addView(subtitleText);
-        
-        parent.addView(headerLayout);
-    }
-    
-    private void createNavigationBar(LinearLayout parent) {
-        LinearLayout navLayout = new LinearLayout(this);
-        navLayout.setOrientation(LinearLayout.HORIZONTAL);
-        navLayout.setBackgroundColor(Color.WHITE);
-        navLayout.setPadding(10, 15, 10, 15);
-        navLayout.setElevation(4);
-        
-        // Dashboard button
-        Button dashboardBtn = createNavButton("Dashboard", Color.parseColor("#2E7D32"));
-        dashboardBtn.setOnClickListener(v -> {
-            startActivity(new Intent(this, RealDashboardActivity.class));
-        });
-        navLayout.addView(dashboardBtn);
-        
-        // Orders button (active)
-        Button ordersBtn = createNavButton("Orders", Color.parseColor("#4CAF50"));
-        ordersBtn.setOnClickListener(v -> {
-            Toast.makeText(this, "Already on Orders page", Toast.LENGTH_SHORT).show();
-        });
-        navLayout.addView(ordersBtn);
-        
-        // Inventory button
-        Button inventoryBtn = createNavButton("Inventory", Color.parseColor("#666666"));
-        inventoryBtn.setOnClickListener(v -> {
-            startActivity(new Intent(this, InventoryActivity.class));
-        });
-        navLayout.addView(inventoryBtn);
-        
-        // Reports button
-        Button reportsBtn = createNavButton("Reports", Color.parseColor("#666666"));
-        reportsBtn.setOnClickListener(v -> {
-            startActivity(new Intent(this, ReportsActivity.class));
-        });
-        navLayout.addView(reportsBtn);
-        
-        parent.addView(navLayout);
-    }
-    
-    private Button createNavButton(String text, int color) {
-        Button button = new Button(this);
-        button.setText(text);
-        button.setBackgroundColor(Color.TRANSPARENT);
-        button.setTextColor(color);
-        button.setTextSize(12);
-        button.setPadding(0, 5, 0, 5);
-        
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f
-        );
-        button.setLayoutParams(params);
-        
-        return button;
-    }
-    
-    private void createOrdersTable(LinearLayout parent) {
-        // Section title with add button
-        LinearLayout titleLayout = new LinearLayout(this);
-        titleLayout.setOrientation(LinearLayout.HORIZONTAL);
-        titleLayout.setGravity(Gravity.CENTER_VERTICAL);
-        
-        TextView titleText = new TextView(this);
-        titleText.setText("Orders List");
-        titleText.setTextSize(20);
-        titleText.setTextColor(Color.parseColor("#333333"));
-        titleText.setTypeface(null, android.graphics.Typeface.BOLD);
-        titleText.setLayoutParams(new LinearLayout.LayoutParams(
-                0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f
-        ));
-        titleLayout.addView(titleText);
-        
-        Button addBtn = new Button(this);
-        addBtn.setText("Add New Order");
-        addBtn.setBackgroundColor(Color.parseColor("#4CAF50"));
-        addBtn.setTextColor(Color.WHITE);
-        addBtn.setPadding(20, 10, 20, 10);
+        // Add Button inside Toolbar
+        TextView addBtn = new TextView(this);
+        addBtn.setText("+ NEW");
+        addBtn.setTextColor(Color.parseColor("#D1FAE5"));
+        addBtn.setTextSize(14);
+        addBtn.setTypeface(null, Typeface.BOLD);
+        addBtn.setPadding(dpToPx(20), dpToPx(10), dpToPx(20), dpToPx(10));
+        GradientDrawable addBtnBg = new GradientDrawable();
+        addBtnBg.setColor(Color.parseColor("#047857")); // Darker green
+        addBtnBg.setCornerRadius(dpToPx(100));
+        addBtn.setBackground(addBtnBg);
         addBtn.setOnClickListener(v -> showOrderForm());
-        titleLayout.addView(addBtn);
+        toolbar.addView(addBtn);
         
-        parent.addView(titleLayout);
+        RelativeLayout.LayoutParams toolbarParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        toolbarParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        root.addView(toolbar, toolbarParams);
+
+        // 2. Bottom Navigation
+        int bottomNavId = View.generateViewId();
+        View bottomNav = createModernBottomNav();
+        bottomNav.setId(bottomNavId);
+
+        RelativeLayout.LayoutParams navParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        navParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        root.addView(bottomNav, navParams);
         
-        // Table
-        ordersTable = new TableLayout(this);
-        ordersTable.setBackgroundColor(Color.WHITE);
-        ordersTable.setPadding(10, 10, 10, 10);
+        // 3. Scrollable Foreground Content
+        ScrollView scrollView = new ScrollView(this);
+        scrollView.setVerticalScrollBarEnabled(false);
+        RelativeLayout.LayoutParams scrollParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        scrollParams.addRule(RelativeLayout.BELOW, toolbarId);
+        scrollParams.addRule(RelativeLayout.ABOVE, bottomNavId);
         
-        // Table header
-        TableRow headerRow = new TableRow(this);
-        headerRow.setBackgroundColor(Color.parseColor("#F5F5F5"));
+        LinearLayout scrollContent = new LinearLayout(this);
+        scrollContent.setOrientation(LinearLayout.VERTICAL);
+        scrollContent.setPadding(dpToPx(20), dpToPx(10), dpToPx(20), dpToPx(40));
         
-        String[] headers = {"Customer", "Wood Type", "Qty", "Price", "Status", "Actions"};
-        for (String header : headers) {
-            TextView headerText = new TextView(this);
-            headerText.setText(header);
-            headerText.setTextSize(12);
-            headerText.setTextColor(Color.parseColor("#333333"));
-            headerText.setTypeface(null, android.graphics.Typeface.BOLD);
-            headerText.setPadding(10, 10, 10, 10);
-            headerText.setGravity(Gravity.CENTER);
-            headerRow.addView(headerText);
-        }
+        // Add/Edit Form Card (initially hidden)
+        createOrderForm(scrollContent);
         
-        ordersTable.addView(headerRow);
+        // Orders List Container
+        ordersListContainer = new LinearLayout(this);
+        ordersListContainer.setOrientation(LinearLayout.VERTICAL);
+        scrollContent.addView(ordersListContainer);
         
-        // Load orders
         loadOrders();
         
-        parent.addView(ordersTable);
+        scrollView.addView(scrollContent);
+        root.addView(scrollView, scrollParams);
+        
+        setContentView(root);
     }
     
     private void loadOrders() {
-        // Clear existing rows (except header)
-        if (ordersTable.getChildCount() > 1) {
-            ordersTable.removeViews(1, ordersTable.getChildCount() - 1);
-        }
+        ordersListContainer.removeAllViews();
         
         List<Order> orders = dataManager.getAllOrders();
+        
+        if (orders.isEmpty()) {
+            TextView emptyText = new TextView(this);
+            emptyText.setText("No orders found.\nTap + NEW to create one.");
+            emptyText.setTextSize(16);
+            emptyText.setTextColor(COLOR_TEXT_SECONDARY);
+            emptyText.setGravity(Gravity.CENTER);
+            emptyText.setPadding(dpToPx(20), dpToPx(60), dpToPx(20), dpToPx(20));
+            ordersListContainer.addView(emptyText);
+            return;
+        }
+        
         for (Order order : orders) {
-            TableRow row = createOrderRow(order);
-            ordersTable.addView(row);
+            ordersListContainer.addView(createOrderCard(order));
         }
     }
     
-    private TableRow createOrderRow(Order order) {
-        TableRow row = new TableRow(this);
-        row.setBackgroundColor(Color.WHITE);
+    private View createOrderCard(Order order) {
+        LinearLayout outerLayout = new LinearLayout(this);
+        outerLayout.setPadding(0, dpToPx(6), 0, dpToPx(6));
         
-        // Customer
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(dpToPx(20), dpToPx(20), dpToPx(20), dpToPx(20));
+        
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(COLOR_WHITE);
+        bg.setCornerRadius(dpToPx(20));
+        card.setBackground(bg);
+        card.setElevation(dpToPx(6));
+        
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        card.setLayoutParams(cardParams);
+        
+        // Header Row (Customer & Status)
+        LinearLayout headerRow = new LinearLayout(this);
+        headerRow.setOrientation(LinearLayout.HORIZONTAL);
+        headerRow.setGravity(Gravity.CENTER_VERTICAL);
+        
         TextView customerText = new TextView(this);
         customerText.setText(order.getCustomerName());
-        customerText.setTextSize(12);
-        customerText.setPadding(10, 10, 10, 10);
-        customerText.setGravity(Gravity.CENTER);
-        row.addView(customerText);
+        customerText.setTextSize(18);
+        customerText.setTypeface(null, Typeface.BOLD);
+        customerText.setTextColor(COLOR_TEXT_PRIMARY);
+        LinearLayout.LayoutParams custParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        customerText.setLayoutParams(custParams);
         
-        // Wood Type
-        TextView woodText = new TextView(this);
-        woodText.setText(order.getWoodType());
-        woodText.setTextSize(12);
-        woodText.setPadding(10, 10, 10, 10);
-        woodText.setGravity(Gravity.CENTER);
-        row.addView(woodText);
+        TextView statusChip = new TextView(this);
+        statusChip.setText(order.getStatus());
+        statusChip.setTextSize(12);
+        statusChip.setTypeface(null, Typeface.BOLD);
+        statusChip.setPadding(dpToPx(12), dpToPx(4), dpToPx(12), dpToPx(4));
         
-        // Quantity
-        TextView qtyText = new TextView(this);
-        qtyText.setText(String.valueOf(order.getQuantity()));
-        qtyText.setTextSize(12);
-        qtyText.setPadding(10, 10, 10, 10);
-        qtyText.setGravity(Gravity.CENTER);
-        row.addView(qtyText);
+        GradientDrawable statusBg = new GradientDrawable();
+        statusBg.setCornerRadius(dpToPx(12));
         
-        // Price
-        TextView priceText = new TextView(this);
-        priceText.setText("$" + String.format("%.2f", order.getPrice()));
-        priceText.setTextSize(12);
-        priceText.setPadding(10, 10, 10, 10);
-        priceText.setGravity(Gravity.CENTER);
-        row.addView(priceText);
-        
-        // Status
-        TextView statusText = new TextView(this);
-        statusText.setText(order.getStatus());
-        statusText.setTextSize(12);
-        statusText.setPadding(10, 10, 10, 10);
-        statusText.setGravity(Gravity.CENTER);
-        
-        // Color code status
         switch (order.getStatus()) {
             case "Pending":
-                statusText.setTextColor(Color.parseColor("#FF9800"));
+                statusBg.setColor(Color.parseColor("#FEF3C7")); // Amber Light
+                statusChip.setTextColor(Color.parseColor("#D97706"));
                 break;
             case "Confirmed":
-                statusText.setTextColor(Color.parseColor("#4CAF50"));
+                statusBg.setColor(Color.parseColor("#D1FAE5")); // Green Light
+                statusChip.setTextColor(COLOR_PRIMARY);
                 break;
             case "Delivered":
-                statusText.setTextColor(Color.parseColor("#2196F3"));
+                statusBg.setColor(Color.parseColor("#DBEAFE")); // Blue Light
+                statusChip.setTextColor(Color.parseColor("#2563EB"));
                 break;
             default:
-                statusText.setTextColor(Color.parseColor("#666666"));
+                statusBg.setColor(Color.parseColor("#F3F4F6"));
+                statusChip.setTextColor(COLOR_TEXT_SECONDARY);
         }
-        row.addView(statusText);
+        statusChip.setBackground(statusBg);
         
-        // Actions
-        LinearLayout actionsLayout = new LinearLayout(this);
-        actionsLayout.setOrientation(LinearLayout.HORIZONTAL);
-        actionsLayout.setGravity(Gravity.CENTER);
+        headerRow.addView(customerText);
+        headerRow.addView(statusChip);
         
-        Button editBtn = new Button(this);
-        editBtn.setText("Edit");
-        editBtn.setBackgroundColor(Color.parseColor("#2196F3"));
-        editBtn.setTextColor(Color.WHITE);
-        editBtn.setTextSize(10);
-        editBtn.setPadding(10, 5, 10, 5);
+        // Details Row
+        TextView detailsText = new TextView(this);
+        detailsText.setText(order.getQuantity() + " units of " + order.getWoodType());
+        detailsText.setTextSize(14);
+        detailsText.setTextColor(COLOR_TEXT_SECONDARY);
+        detailsText.setPadding(0, dpToPx(8), 0, dpToPx(8));
+        
+        TextView priceAndDateText = new TextView(this);
+        priceAndDateText.setText(String.format("$%.2f • Delivery: %s", order.getPrice(), order.getDeliveryDate()));
+        priceAndDateText.setTextSize(14);
+        priceAndDateText.setTextColor(COLOR_TEXT_SECONDARY);
+        
+        // Action Buttons Row
+        LinearLayout actionsRow = new LinearLayout(this);
+        actionsRow.setOrientation(LinearLayout.HORIZONTAL);
+        actionsRow.setGravity(Gravity.END);
+        actionsRow.setPadding(0, dpToPx(12), 0, 0);
+        
+        TextView editBtn = createActionButton("Edit", COLOR_PRIMARY);
         editBtn.setOnClickListener(v -> editOrder(order));
-        actionsLayout.addView(editBtn);
         
-        Button deleteBtn = new Button(this);
-        deleteBtn.setText("Delete");
-        deleteBtn.setBackgroundColor(Color.parseColor("#F44336"));
-        deleteBtn.setTextColor(Color.WHITE);
-        deleteBtn.setTextSize(10);
-        deleteBtn.setPadding(10, 5, 10, 5);
+        TextView deleteBtn = createActionButton("Delete", Color.parseColor("#EF4444")); // Red
         deleteBtn.setOnClickListener(v -> deleteOrder(order));
-        actionsLayout.addView(deleteBtn);
         
-        row.addView(actionsLayout);
+        actionsRow.addView(editBtn);
+        actionsRow.addView(deleteBtn);
         
-        return row;
+        card.addView(headerRow);
+        card.addView(detailsText);
+        card.addView(priceAndDateText);
+        card.addView(actionsRow);
+        
+        outerLayout.addView(card);
+        return outerLayout;
+    }
+    
+    private TextView createActionButton(String text, int color) {
+        TextView btn = new TextView(this);
+        btn.setText(text);
+        btn.setTextColor(color);
+        btn.setTextSize(14);
+        btn.setTypeface(null, Typeface.BOLD);
+        btn.setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8));
+        
+        TypedValue outValue = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        btn.setBackgroundResource(outValue.resourceId);
+        btn.setClickable(true);
+        
+        return btn;
     }
     
     private void createOrderForm(LinearLayout parent) {
         formLayout = new LinearLayout(this);
         formLayout.setOrientation(LinearLayout.VERTICAL);
-        formLayout.setBackgroundColor(Color.WHITE);
-        formLayout.setPadding(20, 20, 20, 20);
-        formLayout.setElevation(4);
+        formLayout.setPadding(dpToPx(24), dpToPx(24), dpToPx(24), dpToPx(24));
+        
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(COLOR_WHITE);
+        bg.setCornerRadius(dpToPx(24));
+        formLayout.setBackground(bg);
+        formLayout.setElevation(dpToPx(12));
         
         LinearLayout.LayoutParams formParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        formParams.setMargins(0, 20, 0, 0);
+        formParams.setMargins(0, 0, 0, dpToPx(20));
         formLayout.setLayoutParams(formParams);
         
         // Form title
         TextView formTitle = new TextView(this);
         formTitle.setText("Order Details");
-        formTitle.setTextSize(18);
-        formTitle.setTextColor(Color.parseColor("#333333"));
-        formTitle.setTypeface(null, android.graphics.Typeface.BOLD);
-        formTitle.setPadding(0, 0, 0, 20);
+        formTitle.setTextSize(20);
+        formTitle.setTextColor(COLOR_TEXT_PRIMARY);
+        formTitle.setTypeface(null, Typeface.BOLD);
+        formTitle.setPadding(0, 0, 0, dpToPx(20));
         formLayout.addView(formTitle);
         
-        // Customer Name
-        addFormField(formLayout, "Customer Name:", "customerName");
+        addFormField(formLayout, "Customer Name", "customerName");
+        addFormField(formLayout, "Wood Type", "woodType");
         
-        // Wood Type
-        addFormField(formLayout, "Wood Type:", "woodType");
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setWeightSum(2f);
         
-        // Quantity
-        addFormField(formLayout, "Quantity:", "quantity");
+        LinearLayout col1 = new LinearLayout(this);
+        col1.setOrientation(LinearLayout.VERTICAL);
+        col1.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        col1.setPadding(0, 0, dpToPx(10), 0);
+        addFormField(col1, "Quantity", "quantity");
         
-        // Price
-        addFormField(formLayout, "Price per Unit:", "price");
+        LinearLayout col2 = new LinearLayout(this);
+        col2.setOrientation(LinearLayout.VERTICAL);
+        col2.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        col2.setPadding(dpToPx(10), 0, 0, 0);
+        addFormField(col2, "Price per Unit", "price");
         
-        // Delivery Date
-        addFormField(formLayout, "Delivery Date:", "deliveryDate");
+        row.addView(col1);
+        row.addView(col2);
+        formLayout.addView(row);
         
-        // Notes
-        addFormField(formLayout, "Notes:", "notes");
+        addFormField(formLayout, "Delivery Date", "deliveryDate");
+        addFormField(formLayout, "Notes", "notes");
         
         // Buttons
         LinearLayout buttonLayout = new LinearLayout(this);
         buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
-        buttonLayout.setPadding(0, 20, 0, 0);
-        
-        Button saveBtn = new Button(this);
-        saveBtn.setText("Save Order");
-        saveBtn.setBackgroundColor(Color.parseColor("#4CAF50"));
-        saveBtn.setTextColor(Color.WHITE);
-        saveBtn.setPadding(30, 15, 30, 15);
-        saveBtn.setOnClickListener(v -> saveOrder());
-        buttonLayout.addView(saveBtn);
+        buttonLayout.setPadding(0, dpToPx(20), 0, 0);
         
         Button cancelBtn = new Button(this);
         cancelBtn.setText("Cancel");
-        cancelBtn.setBackgroundColor(Color.parseColor("#666666"));
-        cancelBtn.setTextColor(Color.WHITE);
-        cancelBtn.setPadding(30, 15, 30, 15);
+        cancelBtn.setBackgroundColor(Color.TRANSPARENT);
+        cancelBtn.setTextColor(COLOR_TEXT_SECONDARY);
+        cancelBtn.setPadding(dpToPx(20), dpToPx(12), dpToPx(20), dpToPx(12));
+        LinearLayout.LayoutParams cancelParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        cancelParams.setMargins(0, 0, dpToPx(10), 0);
+        cancelBtn.setLayoutParams(cancelParams);
         cancelBtn.setOnClickListener(v -> hideOrderForm());
         buttonLayout.addView(cancelBtn);
+
+        Button saveBtn = new Button(this);
+        saveBtn.setText("Save Update");
+        
+        GradientDrawable saveBg = new GradientDrawable();
+        saveBg.setColor(COLOR_PRIMARY);
+        saveBg.setCornerRadius(dpToPx(12));
+        saveBtn.setBackground(saveBg);
+        
+        saveBtn.setTextColor(COLOR_WHITE);
+        saveBtn.setPadding(dpToPx(20), dpToPx(12), dpToPx(20), dpToPx(12));
+        LinearLayout.LayoutParams saveParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        saveBtn.setLayoutParams(saveParams);
+        saveBtn.setOnClickListener(v -> saveOrder());
+        buttonLayout.addView(saveBtn);
         
         formLayout.addView(buttonLayout);
         
         parent.addView(formLayout);
-        
-        // Initially hidden
         formLayout.setVisibility(View.GONE);
     }
     
-    private void addFormField(LinearLayout parent, String label, String hint) {
-        TextView labelView = new TextView(this);
-        labelView.setText(label);
-        labelView.setTextSize(14);
-        labelView.setTextColor(Color.parseColor("#333333"));
-        labelView.setPadding(0, 10, 0, 5);
-        parent.addView(labelView);
-        
+    private void addFormField(LinearLayout parent, String hint, String tag) {
         EditText editText = new EditText(this);
         editText.setHint(hint);
         editText.setTextSize(14);
-        editText.setPadding(15, 10, 15, 10);
-        editText.setBackgroundColor(Color.parseColor("#F5F5F5"));
-        editText.setTag(hint);
+        editText.setTextColor(COLOR_TEXT_PRIMARY);
+        editText.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
+        editText.setTag(tag);
+        
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(COLOR_BG);
+        bg.setCornerRadius(dpToPx(12));
+        editText.setBackground(bg);
+        
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(0, 0, 0, dpToPx(16));
+        editText.setLayoutParams(params);
+        
         parent.addView(editText);
     }
     
@@ -412,19 +404,18 @@ public class NewOrderActivity extends Activity {
         editingOrder = null;
         clearForm();
         formLayout.setVisibility(View.VISIBLE);
-        isFormVisible = true;
+        // Ensure user can see form at top
+        ((ScrollView)formLayout.getParent().getParent()).smoothScrollTo(0, 0);
     }
     
     private void hideOrderForm() {
         formLayout.setVisibility(View.GONE);
-        isFormVisible = false;
         editingOrder = null;
     }
     
     private void editOrder(Order order) {
         editingOrder = order;
         
-        // Populate form with order data
         EditText customerNameField = formLayout.findViewWithTag("customerName");
         EditText woodTypeField = formLayout.findViewWithTag("woodType");
         EditText quantityField = formLayout.findViewWithTag("quantity");
@@ -440,7 +431,7 @@ public class NewOrderActivity extends Activity {
         notesField.setText(order.getNotes());
         
         formLayout.setVisibility(View.VISIBLE);
-        isFormVisible = true;
+        ((ScrollView)formLayout.getParent().getParent()).smoothScrollTo(0, 0);
     }
     
     private void clearForm() {
@@ -484,18 +475,15 @@ public class NewOrderActivity extends Activity {
             double price = Double.parseDouble(priceStr);
             
             if (editingOrder != null) {
-                // Update existing order
                 editingOrder.setCustomerName(customerName);
                 editingOrder.setWoodType(woodType);
                 editingOrder.setQuantity(quantity);
                 editingOrder.setPrice(price);
                 editingOrder.setDeliveryDate(deliveryDate);
                 editingOrder.setNotes(notes);
-                
                 dataManager.updateOrder(editingOrder);
                 Toast.makeText(this, "Order updated successfully", Toast.LENGTH_SHORT).show();
             } else {
-                // Create new order
                 Order newOrder = new Order(customerName, woodType, quantity, price, deliveryDate, notes);
                 dataManager.addOrder(newOrder);
                 Toast.makeText(this, "Order created successfully", Toast.LENGTH_SHORT).show();
@@ -515,5 +503,95 @@ public class NewOrderActivity extends Activity {
         dataManager.deleteOrder(order.getId());
         Toast.makeText(this, "Order deleted successfully", Toast.LENGTH_SHORT).show();
         loadOrders();
+    }
+
+    private View createModernBottomNav() {
+        LinearLayout navBar = new LinearLayout(this);
+        navBar.setOrientation(LinearLayout.HORIZONTAL);
+        navBar.setBackgroundColor(COLOR_WHITE);
+        navBar.setElevation(dpToPx(16)); 
+        navBar.setPadding(0, dpToPx(10), 0, dpToPx(10));
+        navBar.setWeightSum(4f);
+        
+        GradientDrawable topBorderBg = new GradientDrawable();
+        topBorderBg.setColor(COLOR_WHITE);
+        navBar.setBackground(topBorderBg);
+        
+        navBar.addView(createModernNavTab("Home", "H", false));
+        navBar.addView(createModernNavTab("Market", "M", false));
+        navBar.addView(createModernNavTab("Orders", "O", true));
+        navBar.addView(createModernNavTab("Profile", "P", false));
+
+        return navBar;
+    }
+
+    private View createModernNavTab(String text, String letterIcon, boolean isActive) {
+        LinearLayout tab = new LinearLayout(this);
+        tab.setOrientation(LinearLayout.VERTICAL);
+        tab.setGravity(Gravity.CENTER);
+        
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        tab.setLayoutParams(params);
+        tab.setPadding(dpToPx(6), dpToPx(8), dpToPx(6), dpToPx(8));
+        
+        int color = isActive ? COLOR_PRIMARY : Color.parseColor("#9CA3AF");
+
+        TextView icon = new TextView(this);
+        icon.setText(letterIcon);
+        icon.setTextSize(20);
+        icon.setTypeface(null, Typeface.BOLD);
+        icon.setTextColor(color);
+
+        if (isActive) {
+            GradientDrawable activeBg = new GradientDrawable();
+            activeBg.setColor(Color.parseColor("#D1FAE5")); 
+            activeBg.setCornerRadius(dpToPx(16));
+            icon.setBackground(activeBg);
+            icon.setPadding(dpToPx(20), dpToPx(4), dpToPx(20), dpToPx(4));
+        } else {
+            icon.setPadding(dpToPx(20), dpToPx(4), dpToPx(20), dpToPx(4));
+        }
+
+        TextView label = new TextView(this);
+        label.setText(text);
+        label.setTextSize(11);
+        label.setTextColor(color);
+        label.setPadding(0, dpToPx(4), 0, 0);
+
+        if (isActive) {
+            label.setTypeface(null, Typeface.BOLD);
+        }
+
+        tab.addView(icon);
+        tab.addView(label);
+
+        TypedValue outValue = new TypedValue();
+        getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true);
+        tab.setBackgroundResource(outValue.resourceId);
+        tab.setClickable(true);
+
+        if (text.equals("Home") && !isActive) {
+            tab.setOnClickListener(v -> {
+                startActivity(new Intent(NewOrderActivity.this, RealDashboardActivity.class));
+            });
+        } else if (text.equals("Market") && !isActive) {
+            tab.setOnClickListener(v -> {
+                startActivity(new Intent(NewOrderActivity.this, MarketplaceActivity.class));
+            });
+        } else if (text.equals("Profile") && !isActive) {
+            tab.setOnClickListener(v -> {
+                startActivity(new Intent(NewOrderActivity.this, ProfileActivity.class));
+            });
+        }
+
+        return tab;
+    }
+
+    private int dpToPx(int dp) {
+        return (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                dp,
+                getResources().getDisplayMetrics()
+        );
     }
 }
