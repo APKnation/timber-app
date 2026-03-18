@@ -40,12 +40,12 @@ public class ProfileFragment extends Fragment {
     private final int COLOR_WHITE = Color.WHITE;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         try {
-            createAdvancedProfileLayout();
+            return createAdvancedLayout();
         } catch (Exception e) {
             Log.e(TAG, "Error rendering advanced profile layout", e);
+            return new FrameLayout(getContext());
         }
     }
 
@@ -100,7 +100,6 @@ public class ProfileFragment extends Fragment {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         );
         scrollParams.addRule(RelativeLayout.BELOW, toolbarId);
-        scrollParams.addRule(RelativeLayout.ABOVE, bottomNavId);
 
         LinearLayout scrollContent = new LinearLayout(getContext());
         scrollContent.setOrientation(LinearLayout.VERTICAL);
@@ -358,7 +357,7 @@ public class ProfileFragment extends Fragment {
         logoutBtn.setLayoutParams(params);
         
         logoutBtn.setClickable(true);
-        logoutBtn.setOnClickListener(v -> finishAffinity());
+        logoutBtn.setOnClickListener(v -> requireActivity().finishAffinity());
         
         return logoutBtn;
     }

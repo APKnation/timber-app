@@ -32,12 +32,12 @@ public class MarketplaceFragment extends Fragment {
     private final int COLOR_WHITE = Color.WHITE;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         try {
-            createAdvancedMarketplaceLayout();
+            return createAdvancedLayout();
         } catch (Exception e) {
             Log.e(TAG, "Error rendering marketplace", e);
+            return new FrameLayout(getContext());
         }
     }
     
@@ -79,7 +79,9 @@ public class MarketplaceFragment extends Fragment {
         requireContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true);
         backBtn.setBackgroundResource(outValue.resourceId);
         backBtn.setClickable(true);
-        backBtn.setOnClickListener(v -> if(getActivity() != null) getActivity().onBackPressed());
+        backBtn.setOnClickListener(v -> {
+            if(getActivity() != null) getActivity().onBackPressed();
+        });
         
         TextView titleText = new TextView(getContext());
         titleText.setText("Marketplace");

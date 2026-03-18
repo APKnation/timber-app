@@ -52,15 +52,13 @@ public class NewOrderFragment extends Fragment {
     private final int COLOR_WHITE = Color.WHITE;
     
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate: Starting Advanced NewOrderActivity");
-        
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         try {
             dataManager = DataManager.getInstance();
-            createAdvancedMainLayout();
+            return createAdvancedLayout();
         } catch (Exception e) {
             Log.e(TAG, "Error in NewOrderActivity: " + e.getMessage(), e);
+            return new FrameLayout(getContext());
         }
     }
     
@@ -127,7 +125,6 @@ public class NewOrderFragment extends Fragment {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         );
         scrollParams.addRule(RelativeLayout.BELOW, toolbarId);
-        scrollParams.addRule(RelativeLayout.ABOVE, bottomNavId);
         
         LinearLayout scrollContent = new LinearLayout(getContext());
         scrollContent.setOrientation(LinearLayout.VERTICAL);
