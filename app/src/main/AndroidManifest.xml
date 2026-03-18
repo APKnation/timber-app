@@ -64,6 +64,12 @@
             android:name=".dashboard.DashboardActivity"
             android:exported="false"
             android:theme="@style/Theme.TimberTrade" />
+            
+        <!-- Profile Activity -->
+        <activity
+            android:name=".dashboard.ProfileActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Light.NoTitleBar" />
         
         <!-- Authentication Activities (Disabled) -->
         <activity

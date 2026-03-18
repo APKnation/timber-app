@@ -510,12 +510,25 @@ public class RealDashboardActivity extends Activity {
         tab.setBackgroundResource(outValue.resourceId);
         tab.setClickable(true);
 
-        if (!isClickable && !isActive) {
-            tab.setOnClickListener(v -> Toast.makeText(this, text + " coming soon!", Toast.LENGTH_SHORT).show());
-        } else if (text.equals("Market")) {
+        if (text.equals("Home") && !isActive) {
+            tab.setOnClickListener(v -> {
+                startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.dashboard.RealDashboardActivity.class));
+                finish();
+            });
+        } else if (text.equals("Market") && !isActive) {
             tab.setOnClickListener(v -> {
                 startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.marketplace.MarketplaceActivity.class));
             });
+        } else if (text.equals("Orders") && !isActive) {
+            tab.setOnClickListener(v -> {
+                startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.orders.NewOrderActivity.class));
+            });
+        } else if (text.equals("Profile") && !isActive) {
+            tab.setOnClickListener(v -> {
+                startActivity(new Intent(RealDashboardActivity.this, com.timbertrade.app.dashboard.ProfileActivity.class));
+            });
+        } else if (isActive) {
+            // Already on this page
         }
 
         return tab;
