@@ -281,7 +281,7 @@ public class MarketplaceFragment extends Fragment {
         params.setMargins(0, 0, dpToPx(12), 0);
         chip.setPadding(dpToPx(20), dpToPx(12), dpToPx(20), dpToPx(12));
         chip.setLayoutParams(params);
-        chip.setElevation(dpToPx(active ? 4 : 2));
+        chip.setElevation(dpToPx(isActive ? 4 : 2));
         
         chip.setClickable(true);
         chip.setOnClickListener(v -> {
