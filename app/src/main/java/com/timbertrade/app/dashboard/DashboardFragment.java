@@ -25,6 +25,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.widget.PopupMenu;
 import android.view.Menu;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 
 public class DashboardFragment extends Fragment {
 
@@ -390,23 +392,68 @@ public class DashboardFragment extends Fragment {
     }
 
     private void showLogoutMenu(View anchor) {
-        PopupMenu popup = new PopupMenu(requireContext(), anchor);
-        popup.getMenu().add(Menu.NONE, 1, Menu.NONE, "Sign Out");
+        BottomSheetDialog logoutSheet = new BottomSheetDialog(requireContext());
         
-        popup.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == 1) {
-                SharedPreferences prefs = requireContext().getSharedPreferences("TimberTradePrefs", Context.MODE_PRIVATE);
-                prefs.edit().clear().apply();
-                
-                Intent intent = new Intent(requireContext(), LoginActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                requireActivity().finish();
-                return true;
-            }
-            return false;
+        LinearLayout sheetView = new LinearLayout(requireContext());
+        sheetView.setOrientation(LinearLayout.VERTICAL);
+        sheetView.setPadding(dpToPx(24), dpToPx(32), dpToPx(24), dpToPx(32));
+        sheetView.setBackgroundColor(Color.WHITE);
+        
+        // Handle for visual cue
+        View handle = new View(requireContext());
+        handle.setBackgroundColor(Color.LTGRAY);
+        LinearLayout.LayoutParams handleParams = new LinearLayout.LayoutParams(dpToPx(40), dpToPx(4));
+        handleParams.gravity = Gravity.CENTER_HORIZONTAL;
+        handleParams.bottomMargin = dpToPx(24);
+        sheetView.addView(handle, handleParams);
+
+        TextView title = new TextView(requireContext());
+        title.setText("Sign Out");
+        title.setTextSize(20);
+        title.setTypeface(null, Typeface.BOLD);
+        title.setTextColor(COLOR_TEXT_PRIMARY);
+        title.setGravity(Gravity.CENTER);
+        sheetView.addView(title);
+
+        TextView message = new TextView(requireContext());
+        message.setText("Are you sure you want to sign out of your account?");
+        message.setTextSize(14);
+        message.setTextColor(COLOR_TEXT_SECONDARY);
+        message.setGravity(Gravity.CENTER);
+        message.setPadding(0, dpToPx(12), 0, dpToPx(32));
+        sheetView.addView(message);
+
+        MaterialButton btnConfirm = new MaterialButton(requireContext());
+        btnConfirm.setText("Sign Out");
+        btnConfirm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#EF4444")));
+        btnConfirm.setTextColor(Color.WHITE);
+        btnConfirm.setCornerRadius(dpToPx(16));
+        btnConfirm.setPadding(0, dpToPx(16), 0, dpToPx(16));
+        sheetView.addView(btnConfirm);
+
+        btnConfirm.setOnClickListener(v -> {
+            logoutSheet.dismiss();
+            SharedPreferences prefs = requireContext().getSharedPreferences("TimberTradePrefs", Context.MODE_PRIVATE);
+            prefs.edit().clear().apply();
+            
+            Intent intent = new Intent(requireContext(), LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            requireActivity().finish();
         });
-        popup.show();
+
+        TextView btnCancel = new TextView(requireContext());
+        btnCancel.setText("Nevermind, stay logged in");
+        btnCancel.setTextSize(14);
+        btnCancel.setGravity(Gravity.CENTER);
+        btnCancel.setTextColor(COLOR_TEXT_SECONDARY);
+        btnCancel.setPadding(0, dpToPx(20), 0, 0);
+        btnCancel.setClickable(true);
+        btnCancel.setOnClickListener(v -> logoutSheet.dismiss());
+        sheetView.addView(btnCancel);
+
+        logoutSheet.setContentView(sheetView);
+        logoutSheet.show();
     }
 
     private int dpToPx(int dp) { return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics()); }
