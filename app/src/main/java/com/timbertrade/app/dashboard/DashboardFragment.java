@@ -130,9 +130,9 @@ public class DashboardFragment extends Fragment {
 
         // Avatar button
         TextView avatar = new TextView(requireContext());
-        avatar.setText("TT");
+        avatar.setText("APK");
         avatar.setTextColor(COLOR_PRIMARY);
-        avatar.setTextSize(15);
+        avatar.setTextSize(13);
         avatar.setTypeface(null, Typeface.BOLD);
         avatar.setGravity(Gravity.CENTER);
 
