@@ -51,6 +51,17 @@ public class ProfileFragment extends Fragment {
     private TextView profileNameTv;
     private TextView profileEmailTv;
 
+    // In-memory payment methods list
+    private static class PaymentMethod {
+        String brand, number, detail, colorTop, colorBot;
+        PaymentMethod(String brand, String number, String detail, String colorTop, String colorBot) {
+            this.brand = brand; this.number = number; this.detail = detail;
+            this.colorTop = colorTop; this.colorBot = colorBot;
+        }
+    }
+    private final java.util.ArrayList<PaymentMethod> paymentMethods = new java.util.ArrayList<>();
+    private LinearLayout paymentCardsContainer;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         try {
@@ -435,24 +446,29 @@ public class ProfileFragment extends Fragment {
     // 2. PAYMENT METHODS
     // ──────────────────────────────────────────────────────────────────────────
     private void showPaymentMethodsSheet() {
+        // Seed defaults on first open
+        if (paymentMethods.isEmpty()) {
+            paymentMethods.add(new PaymentMethod("Visa",       "•••• •••• •••• 4242", "Expires 12/27", "#1A56DB", "#1E40AF"));
+            paymentMethods.add(new PaymentMethod("Mastercard", "•••• •••• •••• 8891", "Expires 08/26", "#D97706", "#92400E"));
+            paymentMethods.add(new PaymentMethod("M-Pesa",     "+255 712 345 678",    "Mobile Money",  "#059669", "#065F46"));
+        }
+
         BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
+
+        ScrollView sv = new ScrollView(requireContext());
+        sv.setVerticalScrollBarEnabled(false);
+
         LinearLayout root = sheetRoot();
         sheetHandle(root);
         sheetTitle(root, "Payment Methods");
 
-        root.addView(paymentCard("Visa", "•••• •••• •••• 4242", "Expires 12/27", "#1A56DB", "#1E40AF"));
-        root.addView(paymentCard("Mastercard", "•••• •••• •••• 8891", "Expires 08/26", "#D97706", "#92400E"));
-        root.addView(paymentCard("M-Pesa", "+255 712 345 678", "Mobile Money", "#059669", "#065F46"));
+        // Dynamic container for cards
+        paymentCardsContainer = new LinearLayout(requireContext());
+        paymentCardsContainer.setOrientation(LinearLayout.VERTICAL);
+        rebuildPaymentCards(paymentCardsContainer, sheet);
+        root.addView(paymentCardsContainer);
 
-        // Add new button
-        LinearLayout addRow = new LinearLayout(requireContext());
-        addRow.setOrientation(LinearLayout.HORIZONTAL);
-        addRow.setGravity(Gravity.CENTER_VERTICAL);
-        LinearLayout.LayoutParams addRowParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        addRowParams.topMargin = dpToPx(16);
-        addRow.setLayoutParams(addRowParams);
-
+        // Add button
         MaterialButton addBtn = new MaterialButton(requireContext());
         addBtn.setText("+ Add Payment Method");
         addBtn.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F0FDF4")));
@@ -460,25 +476,275 @@ public class ProfileFragment extends Fragment {
         addBtn.setStrokeColor(ColorStateList.valueOf(COLOR_PRIMARY));
         addBtn.setStrokeWidth(dpToPx(1));
         addBtn.setCornerRadius(dpToPx(14));
-        addBtn.setLayoutParams(new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        addBtn.setOnClickListener(v ->
-            Toast.makeText(getContext(), "Add card flow coming next update", Toast.LENGTH_SHORT).show());
-        addRow.addView(addBtn);
-        root.addView(addRow);
+        LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        btnLp.topMargin = dpToPx(8);
+        addBtn.setLayoutParams(btnLp);
+        addBtn.setOnClickListener(v -> addPaymentSubSheet(sheet));
+        root.addView(addBtn);
+
+        sv.addView(root);
+        sheet.setContentView(sv);
+        sheet.show();
+    }
+
+    private void rebuildPaymentCards(LinearLayout container, BottomSheetDialog parentSheet) {
+        container.removeAllViews();
+        for (int i = 0; i < paymentMethods.size(); i++) {
+            PaymentMethod pm = paymentMethods.get(i);
+            final int idx = i;
+            container.addView(paymentCard(pm, () -> {
+                paymentMethods.remove(idx);
+                rebuildPaymentCards(container, parentSheet);
+                Toast.makeText(getContext(), pm.brand + " removed", Toast.LENGTH_SHORT).show();
+            }));
+        }
+    }
+
+    /** Step 1 — choose type: Card or M-Pesa */
+    private void addPaymentSubSheet(BottomSheetDialog parentSheet) {
+        BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
+        LinearLayout root = sheetRoot();
+        sheetHandle(root);
+        sheetTitle(root, "Select Payment Type");
+
+        root.addView(typeOptionRow("💳  Credit / Debit Card", "Visa, Mastercard, etc.", "#1A56DB", "#EEF2FF", v -> {
+            sheet.dismiss();
+            showAddCardForm(parentSheet);
+        }));
+        root.addView(sheetDivider());
+        root.addView(typeOptionRow("📱  Mobile Money", "M-Pesa, Airtel Money, etc.", "#059669", "#F0FDF4", v -> {
+            sheet.dismiss();
+            showAddMpesaForm(parentSheet);
+        }));
 
         sheet.setContentView(root);
         sheet.show();
     }
 
-    private View paymentCard(String brand, String number, String detail,
-                              String colorTop, String colorBot) {
+    private View typeOptionRow(String title, String subtitle, String iconColor,
+                               String iconBg, View.OnClickListener listener) {
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(dpToPx(4), dpToPx(16), dpToPx(4), dpToPx(16));
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setClickable(true);
+        row.setOnClickListener(listener);
+        TypedValue tv = new TypedValue();
+        requireContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, tv, true);
+        row.setBackgroundResource(tv.resourceId);
+
+        LinearLayout textCol = new LinearLayout(requireContext());
+        textCol.setOrientation(LinearLayout.VERTICAL);
+        textCol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView t1 = new TextView(requireContext());
+        t1.setText(title); t1.setTextSize(15); t1.setTypeface(null, Typeface.BOLD);
+        t1.setTextColor(COLOR_TEXT_PRIMARY);
+        TextView t2 = new TextView(requireContext());
+        t2.setText(subtitle); t2.setTextSize(12); t2.setTextColor(COLOR_TEXT_SECONDARY);
+        textCol.addView(t1); textCol.addView(t2);
+
+        TextView chevron = new TextView(requireContext());
+        chevron.setText("›"); chevron.setTextSize(22);
+        chevron.setTextColor(Color.parseColor("#D1D5DB"));
+        chevron.setTypeface(null, Typeface.BOLD);
+
+        row.addView(textCol);
+        row.addView(chevron);
+        return row;
+    }
+
+    /** Step 2a — Card form */
+    private void showAddCardForm(BottomSheetDialog parentSheet) {
+        BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
+        LinearLayout root = sheetRoot();
+        sheetHandle(root);
+        sheetTitle(root, "Add Card");
+
+        TextInputLayout tilName   = materialField(root, "Cardholder Name", "");
+        TextInputLayout tilNumber = materialField(root, "Card Number (16 digits)", "");
+        tilNumber.getEditText().setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        tilNumber.getEditText().setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(16)});
+
+        // Expiry + CVV row
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams rowLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        rowLp.bottomMargin = dpToPx(14);
+        row.setLayoutParams(rowLp);
+
+        TextInputLayout tilExpiry = buildInlineField("MM/YY");
+        tilExpiry.getEditText().setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        tilExpiry.getEditText().setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(5)});
+        LinearLayout.LayoutParams exLp = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        exLp.rightMargin = dpToPx(8);
+        tilExpiry.setLayoutParams(exLp);
+
+        TextInputLayout tilCvv = buildInlineField("CVV");
+        tilCvv.getEditText().setInputType(
+                android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        tilCvv.getEditText().setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(4)});
+        tilCvv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        row.addView(tilExpiry);
+        row.addView(tilCvv);
+        root.addView(row);
+
+        MaterialButton btn = saveButton("Add Card");
+        btn.setOnClickListener(v -> {
+            String nameVal   = text(tilName);
+            String numVal    = text(tilNumber);
+            String expiryVal = text(tilExpiry);
+            String cvvVal    = text(tilCvv);
+
+            if (nameVal.isEmpty() || numVal.length() < 16 || expiryVal.length() < 5 || cvvVal.length() < 3) {
+                Toast.makeText(getContext(), "Please fill all fields correctly", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String masked = "•••• •••• •••• " + numVal.substring(12);
+            String brand  = detectCardBrand(numVal);
+            String[] colors = cardColors(brand);
+
+            paymentMethods.add(new PaymentMethod(brand, masked, "Expires " + expiryVal, colors[0], colors[1]));
+            rebuildPaymentCards(paymentCardsContainer, parentSheet);
+
+            sheet.dismiss();
+            Toast.makeText(getContext(), brand + " card added ✓", Toast.LENGTH_SHORT).show();
+        });
+        root.addView(btn);
+        sheet.setContentView(root);
+        sheet.show();
+    }
+
+    /** Step 2b — M-Pesa / Mobile Money form */
+    private void showAddMpesaForm(BottomSheetDialog parentSheet) {
+        BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
+        LinearLayout root = sheetRoot();
+        sheetHandle(root);
+        sheetTitle(root, "Add Mobile Money");
+
+        TextInputLayout tilPhone  = materialField(root, "Phone Number", "+255 ");
+        tilPhone.getEditText().setInputType(android.text.InputType.TYPE_CLASS_PHONE);
+        TextInputLayout tilAlias  = materialField(root, "Account Nickname (optional)", "");
+
+        // Provider selector label
+        TextView provLabel = new TextView(requireContext());
+        provLabel.setText("Provider");
+        provLabel.setTextSize(13);
+        provLabel.setTypeface(null, Typeface.BOLD);
+        provLabel.setTextColor(COLOR_TEXT_SECONDARY);
+        LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        plp.bottomMargin = dpToPx(8);
+        provLabel.setLayoutParams(plp);
+        root.addView(provLabel);
+
+        // Provider chips row
+        LinearLayout chipsRow = new LinearLayout(requireContext());
+        chipsRow.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams crLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        crLp.bottomMargin = dpToPx(16);
+        chipsRow.setLayoutParams(crLp);
+
+        final String[] selectedProvider = {"M-Pesa"};
+        String[] providers = {"M-Pesa", "Airtel", "Tigo", "Halotel"};
+        final TextView[] chips = new TextView[providers.length];
+        for (int i = 0; i < providers.length; i++) {
+            final String prov = providers[i];
+            TextView chip = new TextView(requireContext());
+            chip.setText(prov);
+            chip.setTextSize(12);
+            chip.setTypeface(null, Typeface.BOLD);
+            chip.setPadding(dpToPx(14), dpToPx(8), dpToPx(14), dpToPx(8));
+            chip.setTextColor(i == 0 ? COLOR_WHITE : COLOR_TEXT_SECONDARY);
+            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            cp.rightMargin = dpToPx(8);
+            chip.setLayoutParams(cp);
+            updateChipStyle(chip, i == 0);
+            chips[i] = chip;
+            final int idx = i;
+            chip.setClickable(true);
+            chip.setOnClickListener(cv -> {
+                selectedProvider[0] = prov;
+                for (int j = 0; j < chips.length; j++)
+                    updateChipStyle(chips[j], j == idx);
+            });
+            chipsRow.addView(chip);
+        }
+        root.addView(chipsRow);
+
+        MaterialButton btn = saveButton("Add Mobile Money");
+        btn.setOnClickListener(v -> {
+            String phone = text(tilPhone);
+            String alias = text(tilAlias);
+            if (phone.length() < 8) {
+                Toast.makeText(getContext(), "Enter a valid phone number", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            String label = alias.isEmpty() ? selectedProvider[0] : alias;
+            paymentMethods.add(new PaymentMethod(
+                    selectedProvider[0], phone,
+                    "Mobile Money · " + label,
+                    "#059669", "#065F46"));
+            rebuildPaymentCards(paymentCardsContainer, parentSheet);
+            sheet.dismiss();
+            Toast.makeText(getContext(), selectedProvider[0] + " account added ✓", Toast.LENGTH_SHORT).show();
+        });
+        root.addView(btn);
+        sheet.setContentView(root);
+        sheet.show();
+    }
+
+    private void updateChipStyle(TextView chip, boolean active) {
+        GradientDrawable bg = new GradientDrawable();
+        bg.setCornerRadius(dpToPx(100));
+        bg.setColor(active ? COLOR_PRIMARY : Color.parseColor("#F3F4F6"));
+        chip.setBackground(bg);
+        chip.setTextColor(active ? COLOR_WHITE : COLOR_TEXT_SECONDARY);
+    }
+
+    private TextInputLayout buildInlineField(String hint) {
+        TextInputLayout til = new TextInputLayout(requireContext(), null,
+                com.google.android.material.R.style.Widget_Material3_TextInputLayout_OutlinedBox);
+        til.setHint(hint);
+        float r = dpToPx(14);
+        til.setBoxCornerRadii(r, r, r, r);
+        til.setBoxStrokeColor(COLOR_PRIMARY);
+        til.setHintTextColor(ColorStateList.valueOf(COLOR_PRIMARY));
+        TextInputEditText et = new TextInputEditText(til.getContext());
+        et.setTextSize(14);
+        et.setTextColor(COLOR_TEXT_PRIMARY);
+        til.addView(et);
+        return til;
+    }
+
+    private String detectCardBrand(String number) {
+        if (number.startsWith("4"))                          return "Visa";
+        if (number.startsWith("5") || number.startsWith("2")) return "Mastercard";
+        if (number.startsWith("3"))                          return "Amex";
+        return "Card";
+    }
+
+    private String[] cardColors(String brand) {
+        switch (brand) {
+            case "Visa":       return new String[]{"#1A56DB", "#1E40AF"};
+            case "Mastercard": return new String[]{"#D97706", "#92400E"};
+            case "Amex":       return new String[]{"#6D28D9", "#4C1D95"};
+            default:           return new String[]{"#374151", "#1F2937"};
+        }
+    }
+
+    private View paymentCard(PaymentMethod pm, Runnable onRemove) {
         LinearLayout card = new LinearLayout(requireContext());
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(dpToPx(20), dpToPx(18), dpToPx(20), dpToPx(18));
 
         GradientDrawable bg = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                new int[]{Color.parseColor(colorTop), Color.parseColor(colorBot)});
+                new int[]{Color.parseColor(pm.colorTop), Color.parseColor(pm.colorBot)});
         bg.setCornerRadius(dpToPx(18));
         card.setBackground(bg);
         card.setElevation(dpToPx(4));
@@ -489,13 +755,13 @@ public class ProfileFragment extends Fragment {
         card.setLayoutParams(p);
 
         TextView brandTv = new TextView(requireContext());
-        brandTv.setText(brand);
+        brandTv.setText(pm.brand);
         brandTv.setTextSize(14);
         brandTv.setTypeface(null, Typeface.BOLD);
         brandTv.setTextColor(Color.argb(180, 255, 255, 255));
 
         TextView numTv = new TextView(requireContext());
-        numTv.setText(number);
+        numTv.setText(pm.number);
         numTv.setTextSize(18);
         numTv.setTypeface(null, Typeface.BOLD);
         numTv.setTextColor(COLOR_WHITE);
@@ -513,7 +779,7 @@ public class ProfileFragment extends Fragment {
         bottom.setLayoutParams(blp);
 
         TextView detailTv = new TextView(requireContext());
-        detailTv.setText(detail);
+        detailTv.setText(pm.detail);
         detailTv.setTextSize(12);
         detailTv.setTextColor(Color.argb(180, 255, 255, 255));
         detailTv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
@@ -521,10 +787,10 @@ public class ProfileFragment extends Fragment {
         TextView removeTv = new TextView(requireContext());
         removeTv.setText("Remove");
         removeTv.setTextSize(12);
-        removeTv.setTextColor(Color.argb(200, 255, 200, 200));
+        removeTv.setTextColor(Color.argb(220, 255, 180, 180));
+        removeTv.setTypeface(null, Typeface.BOLD);
         removeTv.setClickable(true);
-        removeTv.setOnClickListener(v ->
-            Toast.makeText(getContext(), brand + " removed", Toast.LENGTH_SHORT).show());
+        removeTv.setOnClickListener(v -> onRemove.run());
 
         bottom.addView(detailTv);
         bottom.addView(removeTv);
