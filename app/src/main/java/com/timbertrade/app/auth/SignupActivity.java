@@ -15,8 +15,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.timbertrade.app.R;
-import com.timbertrade.app.dashboard.DashboardActivity;
+import com.timbertrade.app.dashboard.RealDashboardActivity;
 import com.timbertrade.app.models.User;
+import android.os.Handler;
+import android.os.Looper;
 
 import java.util.UUID;
 
@@ -39,7 +41,7 @@ public class SignupActivity extends AppCompatActivity {
         
         // Check if user is already logged in (demo mode)
         if (sharedPreferences.getBoolean("isLoggedIn", false)) {
-            startActivity(new Intent(SignupActivity.this, DashboardActivity.class));
+            startActivity(new Intent(SignupActivity.this, RealDashboardActivity.class));
             finish();
             return;
         }
@@ -127,7 +129,7 @@ public class SignupActivity extends AppCompatActivity {
         btnSignUp.setEnabled(false);
         
         // Simulate signup process (demo mode)
-        new android.os.Handler().postDelayed(() -> {
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
             progressBar.setVisibility(View.GONE);
             btnSignUp.setEnabled(true);
             
@@ -150,7 +152,9 @@ public class SignupActivity extends AppCompatActivity {
             editor.apply();
             
             Toast.makeText(SignupActivity.this, "Account created successfully", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(SignupActivity.this, DashboardActivity.class));
+            Intent intent = new Intent(SignupActivity.this, RealDashboardActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
             finish();
             
         }, 1500); // Simulate network delay

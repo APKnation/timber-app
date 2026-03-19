@@ -3,6 +3,8 @@ package com.timbertrade.app.auth;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -48,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> attemptLogin());
         
         registerLink.setOnClickListener(v -> {
-            Toast.makeText(LoginActivity.this, "Registration Coming Soon", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(LoginActivity.this, SignupActivity.class));
         });
     }
     
@@ -72,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setText("Authenticating...");
         
         // Demo authentication delay
-        new android.os.Handler().postDelayed(() -> {
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
             btnLogin.setEnabled(true);
             btnLogin.setText("Authenticate");
             
