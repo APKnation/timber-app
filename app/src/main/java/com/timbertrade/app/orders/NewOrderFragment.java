@@ -33,6 +33,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textfield.TextInputEditText;
 
+import com.timbertrade.app.R;
 import com.timbertrade.app.dashboard.RealDashboardActivity;
 import com.timbertrade.app.inventory.InventoryActivity;
 import com.timbertrade.app.marketplace.MarketplaceActivity;
