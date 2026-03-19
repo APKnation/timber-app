@@ -1,77 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     android:background="@color/timber_background">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <!-- Hero Section -->
+    <View
+        android:id="@+id/heroBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#047857"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Background Header -->
-        <View
-            android:id="@+id/headerBackground"
-            android:layout_width="0dp"
-            android:layout_height="220dp"
-            android:background="@color/timber_primary"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.25" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/formContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/tvHeaderTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:text="Join TimberTrade"
+            android:text="Create Account"
             android:textColor="@color/white"
             android:textSize="28sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tvHeaderSub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Create your professional business account"
-            android:textColor="#E0F2F1"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvHeaderTitle" />
+            android:text="Join our global timber network"
+            android:textColor="#A7F3D0"
+            android:textSize="14sp" />
+    </LinearLayout>
 
-        <!-- Signup Form Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/signupCard"
-            style="@style/Widget.Material3.CardView.Elevated"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="24dp"
-            app:cardCornerRadius="28dp"
-            app:cardElevation="8dp"
-            app:contentPadding="24dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvHeaderSub">
+    <!-- Main Container Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/formContainer"
+        style="@style/Widget.Material3.CardView.Elevated"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:cardCornerRadius="40dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guideline"
+        android:layout_marginTop="-30dp">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="44dp"
+                android:paddingBottom="40dp">
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilFullName"
                     style="@style/TimberTextInputLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Full Name"
+                    android:hint="Your Full Name"
                     app:startIconDrawable="@drawable/ic_profile"
                     app:startIconTint="@color/timber_primary">
 
@@ -88,7 +99,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:hint="Email Address"
+                    android:hint="Work Email"
                     app:startIconDrawable="@drawable/ic_search"
                     app:startIconTint="@color/timber_primary">
 
@@ -105,7 +116,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:hint="Phone Number"
+                    android:hint="Contact Number"
                     app:startIconDrawable="@drawable/ic_location"
                     app:startIconTint="@color/timber_primary">
 
@@ -116,13 +127,13 @@
                         android:inputType="phone" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Role Selection Chip Style -->
+                <!-- Business Persona Chips -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="Choose Your Business Role"
+                    android:layout_marginBottom="12dp"
+                    android:text="Choose Your Role"
                     android:textColor="@color/timber_text_primary"
                     android:textSize="14sp"
                     android:textStyle="bold" />
@@ -136,26 +147,28 @@
                     <RadioButton
                         android:id="@+id/rbBuyer"
                         android:layout_width="0dp"
-                        android:layout_height="48dp"
+                        android:layout_height="54dp"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
                         android:background="@drawable/status_badge_background"
                         android:button="@null"
                         android:gravity="center"
-                        android:text="Buyer"
-                        android:textColor="@color/timber_primary" />
+                        android:text="BUYER"
+                        android:textColor="@color/timber_primary"
+                        android:textStyle="bold" />
 
                     <RadioButton
                         android:id="@+id/rbSeller"
                         android:layout_width="0dp"
-                        android:layout_height="48dp"
+                        android:layout_height="54dp"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
                         android:background="@drawable/status_badge_background"
                         android:button="@null"
                         android:gravity="center"
-                        android:text="Seller"
-                        android:textColor="@color/timber_primary" />
+                        android:text="SELLER"
+                        android:textColor="@color/timber_primary"
+                        android:textStyle="bold" />
                 </RadioGroup>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -164,7 +177,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:hint="Password"
+                    android:hint="Create Password"
                     app:endIconMode="password_toggle"
                     app:startIconDrawable="@drawable/ic_verified"
                     app:startIconTint="@color/timber_primary">
@@ -182,7 +195,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:hint="Confirm Password"
+                    android:hint="Repeat Password"
                     app:endIconMode="password_toggle"
                     app:startIconDrawable="@drawable/ic_verified"
                     app:startIconTint="@color/timber_primary">
@@ -199,10 +212,11 @@
                     style="@style/PrimaryButton"
                     android:layout_width="match_parent"
                     android:layout_height="64dp"
-                    android:layout_marginTop="28dp"
+                    android:layout_marginTop="32dp"
                     android:text="Create Account"
                     android:textSize="16sp"
-                    app:cornerRadius="16dp" />
+                    app:cornerRadius="20dp"
+                    app:elevation="8dp" />
 
                 <ProgressBar
                     android:id="@+id/progressBar"
@@ -213,39 +227,37 @@
                     android:visibility="gone"
                     android:indeterminateTint="@color/timber_primary" />
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Already a partner?"
+                        android:textColor="@color/timber_text_secondary"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tvLogin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="8dp"
+                        android:text="Sign In"
+                        android:textColor="@color/timber_primary"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp" /> <!-- Bottom Spacing -->
+
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </androidx.core.widget.NestedScrollView>
+    </com.google.android.material.card.MaterialCardView>
 
-        <!-- Login Link -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="40dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/signupCard">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Already have an account?"
-                android:textColor="@color/timber_text_secondary"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/tvLogin"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="8dp"
-                android:text="Sign In"
-                android:textColor="@color/timber_primary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
