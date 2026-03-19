@@ -393,7 +393,11 @@ public class NewOrderFragment extends Fragment {
     private TextInputLayout createMaterialField(String hint, String value) {
         TextInputLayout til = new TextInputLayout(requireContext(), null, com.google.android.material.R.style.Widget_Material3_TextInputLayout_OutlinedBox);
         til.setHint(hint);
-        til.setBoxCornerRadiusAround(dpToPx(16));
+        float radius = dpToPx(16);
+        til.setBoxCornerRadiusTopStart(radius);
+        til.setBoxCornerRadiusTopEnd(radius);
+        til.setBoxCornerRadiusBottomStart(radius);
+        til.setBoxCornerRadiusBottomEnd(radius);
         til.setBoxStrokeColor(COLOR_PRIMARY);
         til.setHintTextColor(ColorStateList.valueOf(COLOR_PRIMARY));
         
