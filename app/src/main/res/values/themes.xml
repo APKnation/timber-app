@@ -93,4 +93,14 @@
     <style name="CaptionText" parent="TextAppearance.Material3.BodySmall">
         <item name="android:textColor">@color/timber_text_hint</item>
     </style>
+    
+    <!-- Date Picker Theme: Always Light so calendar is clearly readable -->
+    <style name="TimberDatePickerTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#1E293B</item>
+        <item name="colorPrimary">#059669</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="android:windowBackground">#FFFFFF</item>
+    </style>
+
 </resources>
