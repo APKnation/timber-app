@@ -19,6 +19,12 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 
 import com.timbertrade.app.dashboard.RealDashboardActivity;
+import com.timbertrade.app.auth.LoginActivity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.widget.PopupMenu;
+import android.view.Menu;
 
 public class DashboardFragment extends Fragment {
 
@@ -108,6 +114,10 @@ public class DashboardFragment extends Fragment {
         LinearLayout.LayoutParams avatarParams = new LinearLayout.LayoutParams(dpToPx(50), dpToPx(50));
         avatar.setLayoutParams(avatarParams);
         avatar.setElevation(dpToPx(4));
+
+        // Add Logout feature here
+        avatar.setClickable(true);
+        avatar.setOnClickListener(v -> showLogoutMenu(v));
 
         headerLayout.addView(textLayout);
         headerLayout.addView(avatar);
@@ -377,6 +387,26 @@ public class DashboardFragment extends Fragment {
         item.addView(contentLayout);
         
         return item;
+    }
+
+    private void showLogoutMenu(View anchor) {
+        PopupMenu popup = new PopupMenu(requireContext(), anchor);
+        popup.getMenu().add(Menu.NONE, 1, Menu.NONE, "Sign Out");
+        
+        popup.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == 1) {
+                SharedPreferences prefs = requireContext().getSharedPreferences("TimberTradePrefs", Context.MODE_PRIVATE);
+                prefs.edit().clear().apply();
+                
+                Intent intent = new Intent(requireContext(), LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                requireActivity().finish();
+                return true;
+            }
+            return false;
+        });
+        popup.show();
     }
 
     private int dpToPx(int dp) { return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics()); }
