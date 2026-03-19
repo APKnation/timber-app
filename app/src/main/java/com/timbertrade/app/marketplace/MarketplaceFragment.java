@@ -93,7 +93,7 @@ public class MarketplaceFragment extends Fragment {
         headerBg.setBackground(gradientBg);
         
         RelativeLayout.LayoutParams headerBgParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(240)
+                ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(260)
         );
         headerBgParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         root.addView(headerBg, headerBgParams);
@@ -127,13 +127,27 @@ public class MarketplaceFragment extends Fragment {
         backBtn.setOnClickListener(v -> switchTab(0));
         
         TextView titleText = new TextView(getContext());
-        titleText.setText("Marketplace");
+        titleText.setText("Timber Market");
         titleText.setTextSize(26);
         titleText.setTextColor(COLOR_WHITE);
         titleText.setTypeface(null, Typeface.BOLD);
+        titleText.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView addItem = new TextView(getContext());
+        addItem.setText("+ Sell");
+        addItem.setTextColor(Color.WHITE);
+        addItem.setTypeface(null, Typeface.BOLD);
+        addItem.setPadding(dpToPx(12), dpToPx(6), dpToPx(12), dpToPx(6));
+        GradientDrawable itemBg = new GradientDrawable();
+        itemBg.setColor(Color.argb(50, 255, 255, 255));
+        itemBg.setCornerRadius(dpToPx(100));
+        addItem.setBackground(itemBg);
+        addItem.setClickable(true);
+        addItem.setOnClickListener(v -> Toast.makeText(getContext(), "Listing form coming soon!", Toast.LENGTH_SHORT).show());
         
         toolbar.addView(backBtn);
         toolbar.addView(titleText);
+        toolbar.addView(addItem);
         
         RelativeLayout.LayoutParams toolbarParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -150,9 +164,13 @@ public class MarketplaceFragment extends Fragment {
         LinearLayout scrollContent = new LinearLayout(getContext());
         scrollContent.setOrientation(LinearLayout.VERTICAL);
         scrollContent.setPadding(dpToPx(20), dpToPx(10), dpToPx(20), dpToPx(40));
+        scrollContent.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         
         scrollContent.addView(createPromotionBanner());
         
+        // Search Bar
+        scrollContent.addView(createSearchBar());
+
         // Categories Row
         scrollContent.addView(createSectionTitle("Product Categories"));
         HorizontalScrollView hScroll = new HorizontalScrollView(getContext());
@@ -168,9 +186,10 @@ public class MarketplaceFragment extends Fragment {
         scrollContent.addView(hScroll);
         
         // Products List
-        scrollContent.addView(createSectionTitle("Premium Timber Catalog"));
+        scrollContent.addView(createSectionTitle("Available Inventory"));
         productsContainer = new LinearLayout(getContext());
         productsContainer.setOrientation(LinearLayout.VERTICAL);
+        productsContainer.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         refreshProductsList();
         scrollContent.addView(productsContainer);
         
@@ -178,6 +197,36 @@ public class MarketplaceFragment extends Fragment {
         root.addView(scrollView, scrollParams);
         
         return root;
+    }
+
+    private View createSearchBar() {
+        LinearLayout row = new LinearLayout(getContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dpToPx(20), dpToPx(12), dpToPx(20), dpToPx(12));
+        
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(COLOR_WHITE);
+        bg.setCornerRadius(dpToPx(16));
+        row.setBackground(bg);
+        row.setElevation(dpToPx(4));
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 0, 0, dpToPx(24));
+        row.setLayoutParams(lp);
+
+        TextView icon = new TextView(getContext());
+        icon.setText("🔍");
+        icon.setPadding(0, 0, dpToPx(12), 0);
+        
+        TextView hint = new TextView(getContext());
+        hint.setText("Search Timber, Grade, or Category...");
+        hint.setTextColor(COLOR_TEXT_SECONDARY);
+        hint.setTextSize(14);
+        
+        row.addView(icon);
+        row.addView(hint);
+        return row;
     }
 
     private void updateCategoryRow() {
@@ -201,67 +250,46 @@ public class MarketplaceFragment extends Fragment {
     private View createPromotionBanner() {
         LinearLayout card = new LinearLayout(getContext());
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(dpToPx(28), dpToPx(32), dpToPx(28), dpToPx(32));
+        card.setPadding(dpToPx(28), dpToPx(24), dpToPx(28), dpToPx(24));
         
         GradientDrawable bg = new GradientDrawable(
                 GradientDrawable.Orientation.BL_TR,
-                new int[]{Color.parseColor("#064E3B"), Color.parseColor("#059669"), Color.parseColor("#10B981")}
+                new int[]{Color.parseColor("#064E3B"), Color.parseColor("#10B981")}
         );
-        bg.setCornerRadius(dpToPx(28));
+        bg.setCornerRadius(dpToPx(24));
         card.setBackground(bg);
-        card.setElevation(dpToPx(16));
+        card.setElevation(dpToPx(8));
         
         LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         cardParams.setMargins(0, 0, 0, dpToPx(24));
         card.setLayoutParams(cardParams);
         
-        TextView tagText = new TextView(getContext());
-        tagText.setText("✦  LIMITED TIME OFFER");
-        tagText.setTextSize(11);
-        tagText.setTypeface(null, Typeface.BOLD);
-        tagText.setTextColor(Color.parseColor("#6EE7B7"));
-        tagText.setLetterSpacing(0.08f);
-        tagText.setPadding(0, 0, 0, dpToPx(12));
-        
         TextView titleText = new TextView(getContext());
-        titleText.setText("20% Off Bulk Orders");
-        titleText.setTextSize(26);
+        titleText.setText("20% Wholesale Discount");
+        titleText.setTextSize(22);
         titleText.setTypeface(null, Typeface.BOLD);
         titleText.setTextColor(Color.WHITE);
-        titleText.setPadding(0, 0, 0, dpToPx(8));
+        titleText.setPadding(0, 0, 0, dpToPx(4));
         
         TextView descText = new TextView(getContext());
-        descText.setText("Valid on orders above 500 units.");
+        descText.setText("Applicable to all bulk orders this week.");
         descText.setTextSize(13);
         descText.setTextColor(Color.parseColor("#A7F3D0"));
-        descText.setPadding(0, 0, 0, dpToPx(20));
-
-        TextView ctaBtn = new TextView(getContext());
-        ctaBtn.setText("Explore Deals  →");
-        ctaBtn.setTextSize(14);
-        ctaBtn.setTypeface(null, Typeface.BOLD);
-        ctaBtn.setTextColor(Color.parseColor("#064E3B"));
-        ctaBtn.setPadding(dpToPx(24), dpToPx(12), dpToPx(24), dpToPx(12));
-        GradientDrawable ctaBg = new GradientDrawable();
-        ctaBg.setColor(Color.WHITE);
-        ctaBg.setCornerRadius(dpToPx(100));
-        ctaBtn.setBackground(ctaBg);
         
-        card.addView(tagText);
         card.addView(titleText);
         card.addView(descText);
-        card.addView(ctaBtn);
         return card;
     }
 
     private View createSectionTitle(String title) {
         TextView textView = new TextView(getContext());
         textView.setText(title);
-        textView.setTextSize(18);
+        textView.setTextSize(16);
+        textView.setLetterSpacing(0.02f);
         textView.setTypeface(null, Typeface.BOLD);
         textView.setTextColor(COLOR_TEXT_PRIMARY);
-        textView.setPadding(0, dpToPx(10), 0, dpToPx(12));
+        textView.setPadding(0, dpToPx(8), 0, dpToPx(12));
         return textView;
     }
     
@@ -269,7 +297,7 @@ public class MarketplaceFragment extends Fragment {
         TextView chip = new TextView(getContext());
         chip.setText(title);
         chip.setTextColor(isActive ? COLOR_WHITE : COLOR_TEXT_PRIMARY);
-        chip.setTextSize(14);
+        chip.setTextSize(13);
         chip.setTypeface(null, Typeface.BOLD);
         chip.setGravity(Gravity.CENTER);
         
@@ -280,8 +308,8 @@ public class MarketplaceFragment extends Fragment {
         
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 0, dpToPx(12), 0);
-        chip.setPadding(dpToPx(20), dpToPx(12), dpToPx(20), dpToPx(12));
+        params.setMargins(0, 0, dpToPx(10), 0);
+        chip.setPadding(dpToPx(18), dpToPx(10), dpToPx(18), dpToPx(10));
         chip.setLayoutParams(params);
         chip.setElevation(dpToPx(isActive ? 4 : 2));
         
@@ -300,7 +328,7 @@ public class MarketplaceFragment extends Fragment {
         outerLayout.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams outerParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        outerParams.setMargins(0, 0, 0, dpToPx(20));
+        outerParams.setMargins(0, 0, 0, dpToPx(24));
         outerLayout.setLayoutParams(outerParams);
 
         LinearLayout card = new LinearLayout(getContext());
@@ -309,24 +337,39 @@ public class MarketplaceFragment extends Fragment {
         cardBg.setColor(COLOR_WHITE);
         cardBg.setCornerRadius(dpToPx(24));
         card.setBackground(cardBg);
-        card.setElevation(dpToPx(8));
+        card.setElevation(dpToPx(10));
         card.setClipToOutline(true);
 
         // 1. Product Image Section
+        FrameLayout imageFrame = new FrameLayout(getContext());
+        
         android.widget.ImageView productImage = new android.widget.ImageView(getContext());
         productImage.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
-        
-        // Simulating image content with a textured gradient for now
         GradientDrawable imageTexture = new GradientDrawable(
                 GradientDrawable.Orientation.TL_BR,
-                new int[]{timberColor, adjustAlpha(timberColor, 0.7f)}
+                new int[]{timberColor, adjustAlpha(timberColor, 0.4f)}
         );
         productImage.setBackground(imageTexture);
+        imageFrame.addView(productImage, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(180)));
         
-        LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(160));
-        productImage.setLayoutParams(imgParams);
-        card.addView(productImage);
+        // Overlay label on image to prevent it from looking empty
+        TextView surfaceLabel = new TextView(getContext());
+        surfaceLabel.setText(title.toUpperCase());
+        surfaceLabel.setTextColor(Color.WHITE);
+        surfaceLabel.setTextSize(10);
+        surfaceLabel.setLetterSpacing(0.2f);
+        surfaceLabel.setTypeface(null, Typeface.BOLD);
+        surfaceLabel.setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8));
+        GradientDrawable labelBg = new GradientDrawable();
+        labelBg.setColor(Color.argb(100, 0, 0, 0));
+        labelBg.setCornerRadii(new float[]{0, 0, 0, 0, 0, 0, dpToPx(16), dpToPx(16)});
+        surfaceLabel.setBackground(labelBg);
+        
+        FrameLayout.LayoutParams labelLp = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        labelLp.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        imageFrame.addView(surfaceLabel, labelLp);
+        
+        card.addView(imageFrame);
 
         // 2. Info Section
         LinearLayout infoSection = new LinearLayout(getContext());
@@ -340,13 +383,13 @@ public class MarketplaceFragment extends Fragment {
 
         TextView titleText = new TextView(getContext());
         titleText.setText(title);
-        titleText.setTextSize(18);
+        titleText.setTextSize(20);
         titleText.setTypeface(null, Typeface.BOLD);
         titleText.setTextColor(COLOR_TEXT_PRIMARY);
         titleText.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         TextView inStockBadge = new TextView(getContext());
-        inStockBadge.setText("✓ Ready");
+        inStockBadge.setText("✓ In Stock");
         inStockBadge.setTextSize(11);
         inStockBadge.setTypeface(null, Typeface.BOLD);
         inStockBadge.setTextColor(COLOR_PRIMARY);
@@ -354,7 +397,7 @@ public class MarketplaceFragment extends Fragment {
         stockBg.setColor(Color.parseColor("#ECFDF5"));
         stockBg.setCornerRadius(dpToPx(100));
         inStockBadge.setBackground(stockBg);
-        inStockBadge.setPadding(dpToPx(10), dpToPx(4), dpToPx(10), dpToPx(4));
+        inStockBadge.setPadding(dpToPx(12), dpToPx(4), dpToPx(12), dpToPx(4));
 
         titleRow.addView(titleText);
         titleRow.addView(inStockBadge);
@@ -364,8 +407,9 @@ public class MarketplaceFragment extends Fragment {
         TextView descText = new TextView(getContext());
         descText.setText(desc);
         descText.setTextSize(14);
+        descText.setLineSpacing(dpToPx(2), 1f);
         descText.setTextColor(COLOR_TEXT_SECONDARY);
-        descText.setPadding(0, dpToPx(8), 0, dpToPx(16));
+        descText.setPadding(0, dpToPx(8), 0, dpToPx(20));
         infoSection.addView(descText);
 
         // Bottom Row: Price + Order Button
@@ -375,18 +419,18 @@ public class MarketplaceFragment extends Fragment {
 
         TextView priceText = new TextView(getContext());
         priceText.setText(price);
-        priceText.setTextSize(20);
+        priceText.setTextSize(22);
         priceText.setTypeface(null, Typeface.BOLD);
-        priceText.setTextColor(COLOR_PRIMARY);
+        priceText.setTextColor(Color.BLACK);
         priceText.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         MaterialButton orderBtn = new MaterialButton(getContext());
-        orderBtn.setText("Order Now");
+        orderBtn.setText("View Details");
         orderBtn.setAllCaps(false);
         orderBtn.setBackgroundTintList(android.content.res.ColorStateList.valueOf(COLOR_PRIMARY));
         orderBtn.setTextColor(Color.WHITE);
         orderBtn.setCornerRadius(dpToPx(12));
-        orderBtn.setPadding(dpToPx(16), dpToPx(10), dpToPx(16), dpToPx(10));
+        orderBtn.setPadding(dpToPx(16), dpToPx(12), dpToPx(16), dpToPx(12));
         orderBtn.setOnClickListener(v -> {
             try {
                 double priceVal = Double.parseDouble(price.replaceAll("[^0-9.]", ""));
@@ -404,6 +448,7 @@ public class MarketplaceFragment extends Fragment {
         outerLayout.addView(card);
         return outerLayout;
     }
+
 
     private int adjustAlpha(int color, float factor) {
         int alpha = Math.min(255, Math.round(Color.alpha(color) * factor + 80));
