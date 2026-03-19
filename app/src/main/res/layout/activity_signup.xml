@@ -162,11 +162,11 @@
                             android:layout_height="52dp"
                             android:layout_marginEnd="8dp"
                             android:layout_weight="1"
-                            android:background="@drawable/status_badge_background"
+                            android:background="@drawable/role_background_selector"
                             android:button="@null"
                             android:gravity="center"
                             android:text="BUYER"
-                            android:textColor="#059669"
+                            android:textColor="@color/role_text_selector"
                             android:textStyle="bold" />
 
                         <RadioButton
@@ -175,11 +175,11 @@
                             android:layout_height="52dp"
                             android:layout_marginStart="8dp"
                             android:layout_weight="1"
-                            android:background="@drawable/status_badge_background"
+                            android:background="@drawable/role_background_selector"
                             android:button="@null"
                             android:gravity="center"
                             android:text="SELLER"
-                            android:textColor="#059669"
+                            android:textColor="@color/role_text_selector"
                             android:textStyle="bold" />
                     </RadioGroup>
 
