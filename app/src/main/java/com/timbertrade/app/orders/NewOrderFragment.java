@@ -24,6 +24,10 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.textfield.TextInputEditText;
 
 import com.timbertrade.app.dashboard.RealDashboardActivity;
 import com.timbertrade.app.inventory.InventoryActivity;
@@ -280,95 +284,131 @@ public class NewOrderFragment extends Fragment {
         
         return btn;
     }
-    
-    private void createOrderForm(LinearLayout parent) {
-        formLayout = new LinearLayout(getContext());
-        formLayout.setOrientation(LinearLayout.VERTICAL);
-        formLayout.setPadding(dpToPx(24), dpToPx(24), dpToPx(24), dpToPx(24));
-        
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(COLOR_WHITE);
-        bg.setCornerRadius(dpToPx(24));
-        formLayout.setBackground(bg);
-        formLayout.setElevation(dpToPx(12));
-        
-        LinearLayout.LayoutParams formParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        formParams.setMargins(0, 0, 0, dpToPx(20));
-        formLayout.setLayoutParams(formParams);
-        
-        // Form title
-        TextView formTitle = new TextView(getContext());
-        formTitle.setText("Order Details");
-        formTitle.setTextSize(20);
-        formTitle.setTextColor(COLOR_TEXT_PRIMARY);
-        formTitle.setTypeface(null, Typeface.BOLD);
-        formTitle.setPadding(0, 0, 0, dpToPx(20));
-        formLayout.addView(formTitle);
-        
-        addFormField(formLayout, "Customer Name", "customerName");
-        addFormField(formLayout, "Wood Type", "woodType");
-        
-        LinearLayout row = new LinearLayout(getContext());
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setWeightSum(2f);
-        
-        LinearLayout col1 = new LinearLayout(getContext());
-        col1.setOrientation(LinearLayout.VERTICAL);
-        col1.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        col1.setPadding(0, 0, dpToPx(10), 0);
-        addFormField(col1, "Quantity", "quantity");
-        
-        LinearLayout col2 = new LinearLayout(getContext());
-        col2.setOrientation(LinearLayout.VERTICAL);
-        col2.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-        col2.setPadding(dpToPx(10), 0, 0, 0);
-        addFormField(col2, "Price per Unit", "price");
-        
-        row.addView(col1);
-        row.addView(col2);
-        formLayout.addView(row);
-        
-        addFormField(formLayout, "Delivery Date", "deliveryDate");
-        addFormField(formLayout, "Notes", "notes");
-        
-        // Buttons
-        LinearLayout buttonLayout = new LinearLayout(getContext());
-        buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
-        buttonLayout.setPadding(0, dpToPx(20), 0, 0);
-        
-        Button cancelBtn = new Button(getContext());
-        cancelBtn.setText("Cancel");
-        cancelBtn.setBackgroundColor(Color.TRANSPARENT);
-        cancelBtn.setTextColor(COLOR_TEXT_SECONDARY);
-        cancelBtn.setPadding(dpToPx(20), dpToPx(12), dpToPx(20), dpToPx(12));
-        LinearLayout.LayoutParams cancelParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        cancelParams.setMargins(0, 0, dpToPx(10), 0);
-        cancelBtn.setLayoutParams(cancelParams);
-        cancelBtn.setOnClickListener(v -> hideOrderForm());
-        buttonLayout.addView(cancelBtn);
-
-        Button saveBtn = new Button(getContext());
-        saveBtn.setText("Save Update");
-        
-        GradientDrawable saveBg = new GradientDrawable();
-        saveBg.setColor(COLOR_PRIMARY);
-        saveBg.setCornerRadius(dpToPx(12));
-        saveBtn.setBackground(saveBg);
-        
-        saveBtn.setTextColor(COLOR_WHITE);
-        saveBtn.setPadding(dpToPx(20), dpToPx(12), dpToPx(20), dpToPx(12));
-        LinearLayout.LayoutParams saveParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        saveBtn.setLayoutParams(saveParams);
-        saveBtn.setOnClickListener(v -> saveOrder());
-        buttonLayout.addView(saveBtn);
-        
-        formLayout.addView(buttonLayout);
-        
-        parent.addView(formLayout);
+       private void createOrderForm(LinearLayout parent) {
+        // Form is now managed via BottomSheetDialog in showOrderForm and editOrder
+        formLayout = new LinearLayout(getContext()); // Keep reference but it will be inside dialog
         formLayout.setVisibility(View.GONE);
     }
+    
+    private void showOrderBottomSheet(Order orderToEdit) {
+        final BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        
+        LinearLayout sheetView = new LinearLayout(requireContext());
+        sheetView.setOrientation(LinearLayout.VERTICAL);
+        sheetView.setPadding(dpToPx(24), dpToPx(32), dpToPx(24), dpToPx(32));
+        sheetView.setBackgroundColor(COLOR_WHITE);
+        
+        // Handle visual cue
+        View handle = new View(requireContext());
+        handle.setBackgroundColor(Color.LTGRAY);
+        LinearLayout.LayoutParams handleParams = new LinearLayout.LayoutParams(dpToPx(40), dpToPx(4));
+        handleParams.gravity = Gravity.CENTER_HORIZONTAL;
+        handleParams.bottomMargin = dpToPx(24);
+        sheetView.addView(handle, handleParams);
+
+        TextView title = new TextView(requireContext());
+        title.setText(orderToEdit == null ? "New Order" : "Edit Order");
+        title.setTextSize(22);
+        title.setTypeface(null, Typeface.BOLD);
+        title.setTextColor(COLOR_TEXT_PRIMARY);
+        title.setPadding(0, 0, 0, dpToPx(24));
+        sheetView.addView(title);
+
+        ScrollView scrollForm = new ScrollView(requireContext());
+        LinearLayout container = new LinearLayout(requireContext());
+        container.setOrientation(LinearLayout.VERTICAL);
+
+        TextInputLayout tilCustomer = createMaterialField("Customer Name", orderToEdit != null ? orderToEdit.getCustomerName() : "");
+        TextInputLayout tilWood = createMaterialField("Wood Type", orderToEdit != null ? orderToEdit.getWoodType() : "");
+        TextInputLayout tilQuantity = createMaterialField("Quantity", orderToEdit != null ? String.valueOf(orderToEdit.getQuantity()) : "");
+        TextInputLayout tilPrice = createMaterialField("Price ($)", orderToEdit != null ? String.valueOf(orderToEdit.getPrice()) : "");
+        TextInputLayout tilDate = createMaterialField("Delivery Date", orderToEdit != null ? orderToEdit.getDeliveryDate() : "");
+        TextInputLayout tilNotes = createMaterialField("Order Notes", orderToEdit != null ? orderToEdit.getNotes() : "");
+
+        container.addView(tilCustomer);
+        container.addView(tilWood);
+        
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        LinearLayout.LayoutParams rowItemParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        tilQuantity.setLayoutParams(rowItemParams);
+        tilPrice.setLayoutParams(rowItemParams);
+        row.addView(tilQuantity);
+        row.addView(tilPrice);
+        container.addView(row);
+        
+        container.addView(tilDate);
+        container.addView(tilNotes);
+
+        MaterialButton btnSave = new MaterialButton(requireContext());
+        btnSave.setText(orderToEdit == null ? "Create Order" : "Save Changes");
+        btnSave.setBackgroundTintList(ColorStateList.valueOf(COLOR_PRIMARY));
+        btnSave.setTextColor(Color.WHITE);
+        btnSave.setCornerRadius(dpToPx(16));
+        btnSave.setPadding(0, dpToPx(16), 0, dpToPx(16));
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        btnParams.topMargin = dpToPx(24);
+        btnSave.setLayoutParams(btnParams);
+        
+        btnSave.setOnClickListener(v -> {
+            String customer = tilCustomer.getEditText().getText().toString().trim();
+            String wood = tilWood.getEditText().getText().toString().trim();
+            String qty = tilQuantity.getEditText().getText().toString().trim();
+            String price = tilPrice.getEditText().getText().toString().trim();
+            String date = tilDate.getEditText().getText().toString().trim();
+            String notes = tilNotes.getEditText().getText().toString().trim();
+
+            if (customer.isEmpty() || wood.isEmpty() || qty.isEmpty() || price.isEmpty()) {
+                Toast.makeText(getContext(), "Essential fields missing", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try {
+                if (orderToEdit != null) {
+                    orderToEdit.setCustomerName(customer);
+                    orderToEdit.setWoodType(wood);
+                    orderToEdit.setQuantity(Integer.parseInt(qty));
+                    orderToEdit.setPrice(Double.parseDouble(price));
+                    orderToEdit.setDeliveryDate(date);
+                    orderToEdit.setNotes(notes);
+                    dataManager.updateOrder(orderToEdit);
+                } else {
+                    Order newOrder = new Order(customer, wood, Integer.parseInt(qty), Double.parseDouble(price), date, notes);
+                    dataManager.addOrder(newOrder);
+                }
+                dialog.dismiss();
+                loadOrders();
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Invalid numbers entered", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        container.addView(btnSave);
+        scrollForm.addView(container);
+        sheetView.addView(scrollForm);
+        dialog.setContentView(sheetView);
+        dialog.show();
+    }
+
+    private TextInputLayout createMaterialField(String hint, String value) {
+        TextInputLayout til = new TextInputLayout(requireContext(), null, com.google.android.material.R.style.Widget_Material3_TextInputLayout_OutlinedBox);
+        til.setHint(hint);
+        til.setBoxCornerRadiusAround(dpToPx(16));
+        til.setBoxStrokeColor(COLOR_PRIMARY);
+        til.setHintTextColor(ColorStateList.valueOf(COLOR_PRIMARY));
+        
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.bottomMargin = dpToPx(16);
+        til.setLayoutParams(params);
+
+        TextInputEditText et = new TextInputEditText(til.getContext());
+        et.setText(value);
+        et.setTextSize(14);
+        et.setTextColor(COLOR_TEXT_PRIMARY);
+        til.addView(et);
+        
+        return til;
+    } }
     
     private void addFormField(LinearLayout parent, String hint, String tag) {
         EditText editText = new EditText(getContext());
@@ -393,37 +433,15 @@ public class NewOrderFragment extends Fragment {
     }
     
     private void showOrderForm() {
-        editingOrder = null;
-        clearForm();
-        formLayout.setVisibility(View.VISIBLE);
-        // Ensure user can see form at top
-        ((ScrollView)formLayout.getParent().getParent()).smoothScrollTo(0, 0);
+        showOrderBottomSheet(null);
     }
     
     private void hideOrderForm() {
-        formLayout.setVisibility(View.GONE);
-        editingOrder = null;
+        // Form is handled by sheet dismiss
     }
     
     private void editOrder(Order order) {
-        editingOrder = order;
-        
-        EditText customerNameField = formLayout.findViewWithTag("customerName");
-        EditText woodTypeField = formLayout.findViewWithTag("woodType");
-        EditText quantityField = formLayout.findViewWithTag("quantity");
-        EditText priceField = formLayout.findViewWithTag("price");
-        EditText deliveryDateField = formLayout.findViewWithTag("deliveryDate");
-        EditText notesField = formLayout.findViewWithTag("notes");
-        
-        customerNameField.setText(order.getCustomerName());
-        woodTypeField.setText(order.getWoodType());
-        quantityField.setText(String.valueOf(order.getQuantity()));
-        priceField.setText(String.valueOf(order.getPrice()));
-        deliveryDateField.setText(order.getDeliveryDate());
-        notesField.setText(order.getNotes());
-        
-        formLayout.setVisibility(View.VISIBLE);
-        ((ScrollView)formLayout.getParent().getParent()).smoothScrollTo(0, 0);
+        showOrderBottomSheet(order);
     }
     
     private void clearForm() {
