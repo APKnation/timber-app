@@ -351,7 +351,7 @@ public class NewOrderFragment extends Fragment {
             MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
                     .setTitleText("Select Delivery Date")
                     .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-                    .setTheme(com.google.android.material.R.style.ThemeOverlay_Material3_MaterialCalendar)
+                    .setTheme(com.google.android.material.R.style.ThemeOverlay_Material3_Light_MaterialCalendar)
                     .build();
             
             datePicker.addOnPositiveButtonClickListener(selection -> {
