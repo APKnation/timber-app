@@ -22,38 +22,38 @@
         <activity
             android:name=".dashboard.RealDashboardActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.Light.NoTitleBar">
+            android:theme="@style/Theme.TimberTrade">
         </activity>
         
         <!-- Marketplace Activity -->
         <activity
             android:name=".marketplace.MarketplaceActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.Light.NoTitleBar" />
+            android:theme="@style/Theme.TimberTrade" />
         
         <!-- New Order Activity -->
         <activity
             android:name=".orders.NewOrderActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.Light.NoTitleBar" />
+            android:theme="@style/Theme.TimberTrade" />
         
         <!-- Inventory Activity -->
         <activity
             android:name=".inventory.InventoryActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.Light.NoTitleBar" />
+            android:theme="@style/Theme.TimberTrade" />
         
         <!-- Reports Activity -->
         <activity
             android:name=".reports.ReportsActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.Light.NoTitleBar" />
+            android:theme="@style/Theme.TimberTrade" />
         
         <!-- Clean Dashboard Activity -->
         <activity
             android:name=".dashboard.CleanDashboardActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.Light.NoTitleBar" />
+            android:theme="@style/Theme.TimberTrade" />
         
         <!-- Main Dashboard Activity -->
         <activity
@@ -65,13 +65,13 @@
         <activity
             android:name=".dashboard.ProfileActivity"
             android:exported="false"
-            android:theme="@android:style/Theme.Light.NoTitleBar" />
+            android:theme="@style/Theme.TimberTrade" />
         
         <!-- Authentication Activities (Enabled as App Entry) -->
         <activity
             android:name=".auth.LoginActivity"
             android:exported="true"
-            android:theme="@android:style/Theme.Light.NoTitleBar">
+            android:theme="@style/Theme.TimberTrade">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

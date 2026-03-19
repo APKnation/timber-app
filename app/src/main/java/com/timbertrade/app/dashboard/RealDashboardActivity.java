@@ -30,6 +30,7 @@ public class RealDashboardActivity extends AppCompatActivity {
 
     private LinearLayout navBar;
     private int currentTab = 0;
+    private int fragmentContainerId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +60,8 @@ public class RealDashboardActivity extends AppCompatActivity {
 
         // 2. Fragment Container (Fills rest of screen)
         FrameLayout fragmentContainer = new FrameLayout(this);
-        fragmentContainer.setId(android.R.id.content); // Use default content id for Fragment targeting
+        fragmentContainerId = View.generateViewId();
+        fragmentContainer.setId(fragmentContainerId);
         
         RelativeLayout.LayoutParams containerParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
@@ -141,7 +143,7 @@ public class RealDashboardActivity extends AppCompatActivity {
     }
 
     public void switchTab(int index) {
-        if(currentTab == index && getSupportFragmentManager().findFragmentById(android.R.id.content) != null) return;
+        if(currentTab == index && getSupportFragmentManager().findFragmentById(fragmentContainerId) != null) return;
         currentTab = index;
         refreshBottomNav(index);
 
@@ -155,7 +157,7 @@ public class RealDashboardActivity extends AppCompatActivity {
 
         if (selectedFragment != null) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(android.R.id.content, selectedFragment);
+            transaction.replace(fragmentContainerId, selectedFragment);
             transaction.commit();
         }
     }
