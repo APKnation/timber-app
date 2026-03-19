@@ -7,11 +7,21 @@
     android:background="@color/timber_background">
 
     <!-- Hero Section -->
-    <View
+    <ImageView
         android:id="@+id/heroBackground"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="#047857"
+        android:scaleType="centerCrop"
+        android:src="@drawable/login_cover_premium"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#B3047857"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
