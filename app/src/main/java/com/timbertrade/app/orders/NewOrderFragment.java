@@ -24,6 +24,10 @@ import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.textfield.TextInputLayout;
@@ -338,6 +342,26 @@ public class NewOrderFragment extends Fragment {
         container.addView(row);
         
         container.addView(tilDate);
+        
+        // Setup Date Picker
+        TextInputEditText etDate = (TextInputEditText) tilDate.getEditText();
+        etDate.setFocusable(false);
+        etDate.setClickable(true);
+        etDate.setOnClickListener(v -> {
+            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                    .setTitleText("Select Delivery Date")
+                    .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                    .setTheme(com.google.android.material.R.style.ThemeOverlay_Material3_MaterialCalendar)
+                    .build();
+            
+            datePicker.addOnPositiveButtonClickListener(selection -> {
+                SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+                etDate.setText(sdf.format(new Date(selection)));
+            });
+            
+            datePicker.show(getChildFragmentManager(), "DATE_PICKER");
+        });
+
         container.addView(tilNotes);
 
         MaterialButton btnSave = new MaterialButton(requireContext());
