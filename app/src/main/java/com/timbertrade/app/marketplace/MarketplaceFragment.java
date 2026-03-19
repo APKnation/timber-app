@@ -18,6 +18,17 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.textfield.TextInputEditText;
+import com.timbertrade.app.dashboard.RealDashboardActivity;
+import com.timbertrade.app.models.Order;
+import com.timbertrade.app.utils.DataManager;
+
+import java.util.Locale;
 
 public class MarketplaceFragment extends Fragment {
     
@@ -41,6 +52,12 @@ public class MarketplaceFragment extends Fragment {
         }
     }
     
+    private void switchTab(int tabIndex) {
+        if (getActivity() instanceof RealDashboardActivity) {
+            ((RealDashboardActivity) getActivity()).switchTab(tabIndex);
+        }
+    }
+
     private View createAdvancedLayout()  {
         RelativeLayout root = new RelativeLayout(getContext());
         root.setBackgroundColor(COLOR_BG);
@@ -59,33 +76,38 @@ public class MarketplaceFragment extends Fragment {
         headerBgParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         root.addView(headerBg, headerBgParams);
         
-        // Custom App Bar Toolbar (Transparent so it blends with header background)
+        // Custom App Bar Toolbar
         int toolbarId = View.generateViewId();
         LinearLayout toolbar = new LinearLayout(getContext());
         toolbar.setId(toolbarId);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
-        toolbar.setPadding(dpToPx(20), dpToPx(40), dpToPx(20), dpToPx(20));
+        toolbar.setPadding(dpToPx(20), dpToPx(48), dpToPx(20), dpToPx(20));
         toolbar.setGravity(Gravity.CENTER_VERTICAL);
         
-        // Back Button
+        // Premium Back Button
         TextView backBtn = new TextView(getContext());
-        backBtn.setText("< Back");
-        backBtn.setTextColor(Color.parseColor("#D1FAE5")); // Light green
-        backBtn.setTextSize(16);
-        backBtn.setPadding(0, 0, dpToPx(20), 0);
+        backBtn.setText("←");
+        backBtn.setTextColor(COLOR_PRIMARY);
+        backBtn.setTextSize(22);
+        backBtn.setGravity(Gravity.CENTER);
+        backBtn.setTypeface(null, Typeface.BOLD);
         
-        // Add ripple logic for back button
-        TypedValue outValue = new TypedValue();
-        requireContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true);
-        backBtn.setBackgroundResource(outValue.resourceId);
+        GradientDrawable backBg = new GradientDrawable();
+        backBg.setShape(GradientDrawable.OVAL);
+        backBg.setColor(COLOR_WHITE);
+        backBtn.setBackground(backBg);
+        backBtn.setElevation(dpToPx(4));
+        
+        LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(dpToPx(44), dpToPx(44));
+        backParams.setMargins(0, 0, dpToPx(16), 0);
+        backBtn.setLayoutParams(backParams);
+        
         backBtn.setClickable(true);
-        backBtn.setOnClickListener(v -> {
-            if(getActivity() != null) getActivity().onBackPressed();
-        });
+        backBtn.setOnClickListener(v -> switchTab(0));
         
         TextView titleText = new TextView(getContext());
         titleText.setText("Marketplace");
-        titleText.setTextSize(24);
+        titleText.setTextSize(26);
         titleText.setTextColor(COLOR_WHITE);
         titleText.setTypeface(null, Typeface.BOLD);
         
@@ -356,6 +378,14 @@ public class MarketplaceFragment extends Fragment {
         chipBg.setCornerRadius(dpToPx(100));
         orderChip.setBackground(chipBg);
         orderChip.setClickable(true);
+        orderChip.setOnClickListener(v -> {
+            try {
+                double priceVal = Double.parseDouble(price.replaceAll("[^0-9.]", ""));
+                showOrderConfirmationSheet(title, priceVal);
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
 
         bottomSection.addView(textCol);
         bottomSection.addView(orderChip);
@@ -378,7 +408,96 @@ public class MarketplaceFragment extends Fragment {
         );
     }
     
-    // Class inside required to use HorizontalScrollView
+    private void showOrderConfirmationSheet(String woodName, double unitPrice) {
+        final BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        
+        LinearLayout root = new LinearLayout(requireContext());
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dpToPx(24), dpToPx(32), dpToPx(24), dpToPx(32));
+        root.setBackgroundColor(COLOR_WHITE);
+        
+        // Handle visual cue
+        View handle = new View(requireContext());
+        handle.setBackgroundColor(Color.LTGRAY);
+        LinearLayout.LayoutParams handleParams = new LinearLayout.LayoutParams(dpToPx(44), dpToPx(4));
+        handleParams.gravity = Gravity.CENTER_HORIZONTAL;
+        handleParams.bottomMargin = dpToPx(24);
+        root.addView(handle, handleParams);
+
+        TextView title = new TextView(requireContext());
+        title.setText("Confirm Your Order");
+        title.setTextSize(22);
+        title.setTypeface(null, Typeface.BOLD);
+        title.setTextColor(COLOR_TEXT_PRIMARY);
+        title.setPadding(0, 0, 0, dpToPx(4));
+        root.addView(title);
+
+        TextView itemTv = new TextView(requireContext());
+        itemTv.setText(woodName);
+        itemTv.setTextSize(16);
+        itemTv.setTextColor(COLOR_PRIMARY);
+        itemTv.setPadding(0, 0, 0, dpToPx(24));
+        root.addView(itemTv);
+
+        TextInputLayout tilQty = new TextInputLayout(requireContext(), null, com.google.android.material.R.style.Widget_Material3_TextInputLayout_OutlinedBox);
+        tilQty.setHint("Quantity to Order");
+        float r = (float) dpToPx(16);
+        tilQty.setBoxCornerRadii(r, r, r, r);
+        tilQty.setBoxStrokeColor(COLOR_PRIMARY);
+        tilQty.setHintTextColor(android.content.res.ColorStateList.valueOf(COLOR_PRIMARY));
+        
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.bottomMargin = dpToPx(16);
+        tilQty.setLayoutParams(params);
+
+        TextInputEditText etQty = new TextInputEditText(tilQty.getContext());
+        etQty.setText("10"); 
+        etQty.setHint("Qty");
+        etQty.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        etQty.setTextSize(16);
+        etQty.setTextColor(COLOR_TEXT_PRIMARY);
+        tilQty.addView(etQty);
+        root.addView(tilQty);
+
+        MaterialButton btnConfirm = new MaterialButton(requireContext());
+        btnConfirm.setText("Place Order");
+        btnConfirm.setBackgroundTintList(android.content.res.ColorStateList.valueOf(COLOR_PRIMARY));
+        btnConfirm.setTextColor(Color.WHITE);
+        btnConfirm.setCornerRadius(dpToPx(16));
+        btnConfirm.setPadding(0, dpToPx(16), 0, dpToPx(16));
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        btnParams.topMargin = dpToPx(16);
+        btnConfirm.setLayoutParams(btnParams);
+        
+        btnConfirm.setOnClickListener(v -> {
+            String qtyStr = etQty.getText().toString().trim();
+            if (qtyStr.isEmpty()) {
+                Toast.makeText(getContext(), "Please enter a quantity", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try {
+                int quantity = Integer.parseInt(qtyStr);
+                String today = new java.text.SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(new java.util.Date());
+                
+                Order newOrder = new Order("My Account", woodName, quantity, unitPrice, today, "Order from Marketplace");
+                DataManager.getInstance().addOrder(newOrder);
+                
+                dialog.dismiss();
+                Toast.makeText(getContext(), "Order placed successfully! 🎊", Toast.LENGTH_LONG).show();
+                
+                // Redirect to Orders tab
+                switchTab(2); 
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "Order failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        root.addView(btnConfirm);
+        dialog.setContentView(root);
+        dialog.show();
+    }
+
     private class HorizontalScrollView extends android.widget.HorizontalScrollView {
         public HorizontalScrollView(android.content.Context context) {
             super(context);
