@@ -24,8 +24,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.timbertrade.app.auth.LoginActivity;
 import com.timbertrade.app.marketplace.MarketplaceActivity;
 import com.timbertrade.app.orders.NewOrderActivity;
+import android.content.SharedPreferences;
 
 public class ProfileFragment extends Fragment {
 
@@ -357,7 +359,17 @@ public class ProfileFragment extends Fragment {
         logoutBtn.setLayoutParams(params);
         
         logoutBtn.setClickable(true);
-        logoutBtn.setOnClickListener(v -> requireActivity().finishAffinity());
+        logoutBtn.setOnClickListener(v -> {
+            SharedPreferences prefs = requireContext().getSharedPreferences("TimberTradePrefs", Context.MODE_PRIVATE);
+            prefs.edit().clear().apply();
+            
+            Toast.makeText(getContext(), "Logged Out", Toast.LENGTH_SHORT).show();
+            
+            Intent intent = new Intent(getContext(), LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            requireActivity().finish();
+        });
         
         return logoutBtn;
     }
