@@ -332,7 +332,7 @@ public class DashboardFragment extends Fragment {
         LinearLayout row1 = new LinearLayout(requireContext());
         row1.setOrientation(LinearLayout.HORIZONTAL);
         row1.setWeightSum(2f);
-        row1.addView(createServiceCard("Orders",   "Manage Now",  "#4F46E5", "#7C3AED", v -> switchTab(2)));
+        row1.addView(createServiceCard("Orders",   "Manage Now",  "#4F46E5", "#7C3AED", v -> switchTab(3)));
         row1.addView(createServiceCard("Market",   "Trade Now",   "#BE185D", "#E11D48", v -> switchTab(1)));
 
         LinearLayout row2 = new LinearLayout(requireContext());
@@ -342,8 +342,8 @@ public class DashboardFragment extends Fragment {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         row2Params.topMargin = dpToPx(12);
         row2.setLayoutParams(row2Params);
-        row2.addView(createServiceCard("Inventory","Check Stock", "#0369A1", "#0891B2", v -> switchTab(3)));
-        row2.addView(createServiceCard("Profile",  "My Account",  "#065F46", "#059669", v -> switchTab(3)));
+        row2.addView(createServiceCard("Inventory","Check Stock", "#0369A1", "#0891B2", v -> switchTab(2)));
+        row2.addView(createServiceCard("Profile",  "My Account",  "#065F46", "#059669", v -> switchTab(4)));
 
         layout.addView(row1);
         layout.addView(row2);

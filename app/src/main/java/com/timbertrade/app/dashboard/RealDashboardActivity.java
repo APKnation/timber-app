@@ -82,7 +82,7 @@ public class RealDashboardActivity extends AppCompatActivity {
         navBar.setBackground(navBg);
         navBar.setElevation(dpToPx(20));
         navBar.setPadding(dpToPx(8), dpToPx(10), dpToPx(8), dpToPx(10));
-        navBar.setWeightSum(4f);
+        navBar.setWeightSum(5f);
 
         refreshBottomNav(0);
         return navBar;
@@ -90,10 +90,11 @@ public class RealDashboardActivity extends AppCompatActivity {
 
     private void refreshBottomNav(int activeIndex) {
         navBar.removeAllViews();
-        navBar.addView(createModernNavTab("Home",   "H", activeIndex == 0, 0));
-        navBar.addView(createModernNavTab("Market", "M", activeIndex == 1, 1));
-        navBar.addView(createModernNavTab("Orders", "O", activeIndex == 2, 2));
-        navBar.addView(createModernNavTab("Profile","P", activeIndex == 3, 3));
+        navBar.addView(createModernNavTab("Home",      "H", activeIndex == 0, 0));
+        navBar.addView(createModernNavTab("Market",    "M", activeIndex == 1, 1));
+        navBar.addView(createModernNavTab("Inventory", "I", activeIndex == 2, 2));
+        navBar.addView(createModernNavTab("Orders",    "O", activeIndex == 3, 3));
+        navBar.addView(createModernNavTab("Profile",   "P", activeIndex == 4, 4));
     }
 
     private View createModernNavTab(String text, String letterIcon, boolean isActive, int tabIndex) {
@@ -110,7 +111,7 @@ public class RealDashboardActivity extends AppCompatActivity {
 
         TextView icon = new TextView(this);
         icon.setText(letterIcon);
-        icon.setTextSize(18);
+        icon.setTextSize(16); // Reduced slightly for 5 tabs
         icon.setTypeface(null, Typeface.BOLD);
         icon.setTextColor(iconColor);
         icon.setGravity(Gravity.CENTER);
@@ -121,16 +122,16 @@ public class RealDashboardActivity extends AppCompatActivity {
                     GradientDrawable.Orientation.TL_BR,
                     new int[]{Color.parseColor("#059669"), Color.parseColor("#047857")}
             );
-            activeBg.setCornerRadius(dpToPx(14));
+            activeBg.setCornerRadius(dpToPx(12));
             icon.setBackground(activeBg);
-            icon.setPadding(dpToPx(22), dpToPx(6), dpToPx(22), dpToPx(6));
+            icon.setPadding(dpToPx(16), dpToPx(6), dpToPx(16), dpToPx(6));
         } else {
-            icon.setPadding(dpToPx(22), dpToPx(6), dpToPx(22), dpToPx(6));
+            icon.setPadding(dpToPx(16), dpToPx(6), dpToPx(16), dpToPx(6));
         }
 
         TextView label = new TextView(this);
         label.setText(text);
-        label.setTextSize(10);
+        label.setTextSize(9); // Reduced for 5 tabs
         label.setTextColor(labelColor);
         label.setPadding(0, dpToPx(4), 0, 0);
         label.setGravity(Gravity.CENTER);
@@ -158,8 +159,9 @@ public class RealDashboardActivity extends AppCompatActivity {
         switch (index) {
             case 0: selectedFragment = new DashboardFragment(); break;
             case 1: selectedFragment = new MarketplaceFragment(); break;
-            case 2: selectedFragment = new NewOrderFragment(); break;
-            case 3: selectedFragment = new ProfileFragment(); break;
+            case 2: selectedFragment = new InventoryFragment(); break;
+            case 3: selectedFragment = new NewOrderFragment(); break;
+            case 4: selectedFragment = new ProfileFragment(); break;
         }
 
         if (selectedFragment != null) {
