@@ -408,7 +408,7 @@ public class NewOrderFragment extends Fragment {
         til.addView(et);
         
         return til;
-    } }
+    }
     
     private void addFormField(LinearLayout parent, String hint, String tag) {
         EditText editText = new EditText(getContext());
