@@ -32,6 +32,16 @@ import java.util.Locale;
 
 public class MarketplaceFragment extends Fragment {
     
+    private static final String TAG = "MarketplaceFragment";
+    
+    // Modern Color Palette
+    private final int COLOR_PRIMARY = Color.parseColor("#059669"); 
+    private final int COLOR_PRIMARY_DARK = Color.parseColor("#047857");
+    private final int COLOR_BG = Color.parseColor("#F3F4F6"); 
+    private final int COLOR_TEXT_PRIMARY = Color.parseColor("#1F2937");
+    private final int COLOR_TEXT_SECONDARY = Color.parseColor("#6B7280");
+    private final int COLOR_WHITE = Color.WHITE;
+    
     private String selectedCategory = "All Wood";
     private LinearLayout categoryRow;
     private LinearLayout productsContainer;
