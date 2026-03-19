@@ -4,463 +4,872 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.os.Bundle;
 import android.content.Context;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
-import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.timbertrade.app.auth.LoginActivity;
-import com.timbertrade.app.marketplace.MarketplaceActivity;
-import com.timbertrade.app.orders.NewOrderActivity;
 import android.content.SharedPreferences;
 
 public class ProfileFragment extends Fragment {
 
-    private static final String TAG = "ProfileActivity";
+    private static final String TAG = "ProfileFragment";
 
-    // Modern Color Palette
-    private final int COLOR_PRIMARY = Color.parseColor("#059669");
-    private final int COLOR_PRIMARY_DARK = Color.parseColor("#047857");
-    private final int COLOR_BG = Color.parseColor("#F3F4F6");
-    private final int COLOR_TEXT_PRIMARY = Color.parseColor("#1F2937");
+    private final int COLOR_PRIMARY        = Color.parseColor("#059669");
+    private final int COLOR_PRIMARY_DARK   = Color.parseColor("#047857");
+    private final int COLOR_BG             = Color.parseColor("#F0FDF4");
+    private final int COLOR_TEXT_PRIMARY   = Color.parseColor("#1F2937");
     private final int COLOR_TEXT_SECONDARY = Color.parseColor("#6B7280");
-    private final int COLOR_WHITE = Color.WHITE;
+    private final int COLOR_WHITE          = Color.WHITE;
+
+    // Persisted simple user info (in-memory for demo)
+    private String userName  = "Atanasi Kafuka";
+    private String userEmail = "atanasi@timberapp.com";
+    private String userPhone = "+255 712 345 678";
+    private String userBiz   = "Kafuka Timber Ltd.";
+
+    private TextView profileNameTv;
+    private TextView profileEmailTv;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         try {
-            return createAdvancedLayout();
+            return buildLayout();
         } catch (Exception e) {
-            Log.e(TAG, "Error rendering advanced profile layout", e);
+            Log.e(TAG, "Error rendering profile layout", e);
             return new FrameLayout(getContext());
         }
     }
 
-    private View createAdvancedLayout()  {
+    // ─── Root Layout ──────────────────────────────────────────────────────────
+    private View buildLayout() {
         RelativeLayout root = new RelativeLayout(getContext());
         root.setBackgroundColor(COLOR_BG);
 
-        // 1. Decorative Header Background
+        // Hero gradient header
         View headerBg = new View(getContext());
         GradientDrawable gradientBg = new GradientDrawable(
-                GradientDrawable.Orientation.TL_BR,
-                new int[]{COLOR_PRIMARY, COLOR_PRIMARY_DARK}
+                GradientDrawable.Orientation.BR_TL,
+                new int[]{Color.parseColor("#065F46"), Color.parseColor("#059669"), Color.parseColor("#34D399")}
         );
         headerBg.setBackground(gradientBg);
-        
         RelativeLayout.LayoutParams headerBgParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(240)
-        );
+                ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(260));
         headerBgParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         root.addView(headerBg, headerBgParams);
 
-        // Custom App Bar Toolbar
+        // Decorative circle
+        View circle = new View(getContext());
+        GradientDrawable circleBg = new GradientDrawable();
+        circleBg.setShape(GradientDrawable.OVAL);
+        circleBg.setColor(Color.argb(25, 255, 255, 255));
+        circle.setBackground(circleBg);
+        RelativeLayout.LayoutParams cParams = new RelativeLayout.LayoutParams(dpToPx(200), dpToPx(200));
+        cParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+        cParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        cParams.setMargins(0, -dpToPx(50), -dpToPx(50), 0);
+        root.addView(circle, cParams);
+
+        // Toolbar title
         int toolbarId = View.generateViewId();
         LinearLayout toolbar = new LinearLayout(getContext());
         toolbar.setId(toolbarId);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
-        toolbar.setPadding(dpToPx(20), dpToPx(40), dpToPx(20), dpToPx(20));
+        toolbar.setPadding(dpToPx(24), dpToPx(44), dpToPx(24), dpToPx(16));
         toolbar.setGravity(Gravity.CENTER_VERTICAL);
-        
+
         TextView titleText = new TextView(getContext());
         titleText.setText("My Profile");
-        titleText.setTextSize(24);
+        titleText.setTextSize(26);
         titleText.setTextColor(COLOR_WHITE);
         titleText.setTypeface(null, Typeface.BOLD);
-        titleText.setGravity(Gravity.CENTER_HORIZONTAL);
-        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        titleText.setLayoutParams(titleParams);
+        titleText.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         toolbar.addView(titleText);
-        
+
         RelativeLayout.LayoutParams toolbarParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         toolbarParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         root.addView(toolbar, toolbarParams);
 
-        // Bottom Nav handled by Host Activity
-
-        // 3. Scrollable Foreground Content
+        // Scrollable content
         ScrollView scrollView = new ScrollView(getContext());
         scrollView.setVerticalScrollBarEnabled(false);
         RelativeLayout.LayoutParams scrollParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
-        );
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         scrollParams.addRule(RelativeLayout.BELOW, toolbarId);
 
         LinearLayout scrollContent = new LinearLayout(getContext());
         scrollContent.setOrientation(LinearLayout.VERTICAL);
-        scrollContent.setPadding(dpToPx(20), dpToPx(20), dpToPx(20), dpToPx(40));
-        
-        // Profile Info Card (Overlapping header)
+        scrollContent.setPadding(dpToPx(20), dpToPx(16), dpToPx(20), dpToPx(40));
+
         scrollContent.addView(createProfileInfoCard());
-        
-        // Settings Categories
+
         scrollContent.addView(createSectionTitle("Account"));
         scrollContent.addView(createSettingsCard(new String[][]{
-            {"Personal Details", "Update your info", "P"},
-            {"Payment Methods", "Manage cards & accounts", "C"},
-            {"Notifications", "Manage alerts", "N"}
+            {"Personal Details",  "Update name, email & phone", "P", "#4F46E5", "#EEF2FF"},
+            {"Payment Methods",   "Manage cards & accounts",    "C", "#D97706", "#FEF3C7"},
+            {"Notifications",     "Manage alerts & sounds",     "N", "#0891B2", "#E0F2FE"}
         }));
-        
+
         scrollContent.addView(createSectionTitle("App Settings"));
         scrollContent.addView(createSettingsCard(new String[][]{
-            {"Language", "English (US)", "L"},
-            {"Dark Mode", "System Default", "D"},
-            {"Privacy & Security", "Password and PIN", "S"}
+            {"Language",          "English (US)",               "L", "#7C3AED", "#F5F3FF"},
+            {"Dark Mode",         "System Default",             "D", "#1F2937", "#F3F4F6"},
+            {"Privacy & Security","Password and PIN",           "S", "#DC2626", "#FEE2E2"}
         }));
-        
-        // Logout Button
+
         scrollContent.addView(createLogoutButton());
 
         scrollView.addView(scrollContent);
         root.addView(scrollView, scrollParams);
-
         return root;
     }
-    
+
+    // ─── Profile Info Card ────────────────────────────────────────────────────
     private View createProfileInfoCard() {
-        // FrameLayout to let avatar overlap the card nicely
         FrameLayout frame = new FrameLayout(getContext());
         frame.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        
+
         LinearLayout card = new LinearLayout(getContext());
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(dpToPx(20), dpToPx(60), dpToPx(20), dpToPx(20));
-        
+        card.setPadding(dpToPx(20), dpToPx(68), dpToPx(20), dpToPx(24));
+
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(COLOR_WHITE);
-        bg.setCornerRadius(dpToPx(24));
+        bg.setCornerRadius(dpToPx(28));
         card.setBackground(bg);
-        card.setElevation(dpToPx(8));
-        
+        card.setElevation(dpToPx(10));
+
         FrameLayout.LayoutParams cardParams = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        cardParams.setMargins(0, dpToPx(50), 0, 0); // Push card down to make room for avatar
+        cardParams.setMargins(0, dpToPx(56), 0, 0);
         card.setLayoutParams(cardParams);
-        
-        // Texts inside Card
-        TextView name = new TextView(getContext());
-        name.setText("Atanasi Kafuka");
-        name.setTextSize(22);
-        name.setTextColor(COLOR_TEXT_PRIMARY);
-        name.setTypeface(null, Typeface.BOLD);
-        name.setGravity(Gravity.CENTER);
-        
-        TextView email = new TextView(getContext());
-        email.setText("atanasi@timberapp.com");
-        email.setTextSize(14);
-        email.setTextColor(COLOR_TEXT_SECONDARY);
-        email.setGravity(Gravity.CENTER);
-        email.setPadding(0, dpToPx(4), 0, dpToPx(20));
-        
-        // Stats Row
+
+        profileNameTv = new TextView(getContext());
+        profileNameTv.setText(userName);
+        profileNameTv.setTextSize(22);
+        profileNameTv.setTextColor(COLOR_TEXT_PRIMARY);
+        profileNameTv.setTypeface(null, Typeface.BOLD);
+        profileNameTv.setGravity(Gravity.CENTER);
+
+        profileEmailTv = new TextView(getContext());
+        profileEmailTv.setText(userEmail);
+        profileEmailTv.setTextSize(14);
+        profileEmailTv.setTextColor(COLOR_TEXT_SECONDARY);
+        profileEmailTv.setGravity(Gravity.CENTER);
+        profileEmailTv.setPadding(0, dpToPx(4), 0, dpToPx(4));
+
+        // Premium badge
+        TextView badge = new TextView(getContext());
+        badge.setText("  ★ PREMIUM MEMBER  ");
+        badge.setTextSize(11);
+        badge.setTypeface(null, Typeface.BOLD);
+        badge.setTextColor(Color.parseColor("#92400E"));
+        GradientDrawable badgeBg = new GradientDrawable();
+        badgeBg.setColor(Color.parseColor("#FEF3C7"));
+        badgeBg.setCornerRadius(dpToPx(100));
+        badge.setBackground(badgeBg);
+        badge.setPadding(dpToPx(8), dpToPx(5), dpToPx(8), dpToPx(5));
+        LinearLayout.LayoutParams badgeParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        badgeParams.gravity = Gravity.CENTER_HORIZONTAL;
+        badgeParams.topMargin = dpToPx(6);
+        badge.setLayoutParams(badgeParams);
+
+        // Separator
+        View sep = new View(getContext());
+        sep.setBackgroundColor(Color.parseColor("#F3F4F6"));
+        LinearLayout.LayoutParams sepParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(1));
+        sepParams.setMargins(0, dpToPx(20), 0, dpToPx(16));
+        sep.setLayoutParams(sepParams);
+
+        // Stats row
         LinearLayout statsRow = new LinearLayout(getContext());
         statsRow.setOrientation(LinearLayout.HORIZONTAL);
-        statsRow.setWeightSum(2f);
-        
-        statsRow.addView(createStatColumn("12", "Active Orders"));
-        statsRow.addView(createStatColumn("Premium", "Tier Status"));
-        
-        card.addView(name);
-        card.addView(email);
+        statsRow.setWeightSum(3f);
+        statsRow.addView(createStatColumn("12",      "Orders",  "#059669"));
+        statsRow.addView(createStatColDivider());
+        statsRow.addView(createStatColumn("$45K",    "Revenue", "#D97706"));
+        statsRow.addView(createStatColDivider());
+        statsRow.addView(createStatColumn("Premium", "Tier",    "#7C3AED"));
+
+        card.addView(profileNameTv);
+        card.addView(profileEmailTv);
+        card.addView(badge);
+        card.addView(sep);
         card.addView(statsRow);
-        
         frame.addView(card);
-        
-        // Floating Avatar
+
+        // Floating avatar
         TextView avatar = new TextView(getContext());
         avatar.setText("AK");
-        avatar.setTextColor(COLOR_PRIMARY);
-        avatar.setTextSize(32);
+        avatar.setTextColor(COLOR_WHITE);
+        avatar.setTextSize(30);
         avatar.setTypeface(null, Typeface.BOLD);
         avatar.setGravity(Gravity.CENTER);
-        
-        GradientDrawable avatarBg = new GradientDrawable();
+
+        GradientDrawable avatarBg = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[]{Color.parseColor("#059669"), Color.parseColor("#065F46")}
+        );
         avatarBg.setShape(GradientDrawable.OVAL);
-        avatarBg.setColor(COLOR_WHITE);
-        avatarBg.setStroke(dpToPx(4), COLOR_PRIMARY);
+        avatarBg.setStroke(dpToPx(4), COLOR_WHITE);
         avatar.setBackground(avatarBg);
         avatar.setElevation(dpToPx(12));
-        
-        FrameLayout.LayoutParams avatarParams = new FrameLayout.LayoutParams(dpToPx(100), dpToPx(100));
+
+        FrameLayout.LayoutParams avatarParams = new FrameLayout.LayoutParams(dpToPx(110), dpToPx(110));
         avatarParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
         avatar.setLayoutParams(avatarParams);
-        
         frame.addView(avatar);
-        
+
         return frame;
     }
-    
-    private View createStatColumn(String value, String label) {
+
+    private View createStatColumn(String value, String label, String color) {
         LinearLayout col = new LinearLayout(getContext());
         col.setOrientation(LinearLayout.VERTICAL);
         col.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
         col.setGravity(Gravity.CENTER);
-        
-        TextView valText = new TextView(getContext());
-        valText.setText(value);
-        valText.setTextSize(20);
-        valText.setTypeface(null, Typeface.BOLD);
-        valText.setTextColor(COLOR_PRIMARY);
-        
-        TextView labelText = new TextView(getContext());
-        labelText.setText(label);
-        labelText.setTextSize(12);
-        labelText.setTextColor(COLOR_TEXT_SECONDARY);
-        
-        col.addView(valText);
-        col.addView(labelText);
+
+        TextView valTv = new TextView(getContext());
+        valTv.setText(value);
+        valTv.setTextSize(18);
+        valTv.setTypeface(null, Typeface.BOLD);
+        valTv.setTextColor(Color.parseColor(color));
+        valTv.setGravity(Gravity.CENTER);
+
+        TextView lblTv = new TextView(getContext());
+        lblTv.setText(label);
+        lblTv.setTextSize(11);
+        lblTv.setTextColor(COLOR_TEXT_SECONDARY);
+        lblTv.setGravity(Gravity.CENTER);
+
+        col.addView(valTv);
+        col.addView(lblTv);
         return col;
     }
 
-    private View createSectionTitle(String title) {
-        TextView textView = new TextView(getContext());
-        textView.setText(title);
-        textView.setTextSize(16);
-        textView.setTypeface(null, Typeface.BOLD);
-        textView.setTextColor(COLOR_TEXT_PRIMARY);
-        textView.setPadding(dpToPx(10), dpToPx(30), dpToPx(10), dpToPx(10));
-        return textView;
+    private View createStatColDivider() {
+        View div = new View(getContext());
+        div.setBackgroundColor(Color.parseColor("#E5E7EB"));
+        div.setLayoutParams(new LinearLayout.LayoutParams(dpToPx(1), dpToPx(32)));
+        return div;
     }
 
+    // ─── Section Title ────────────────────────────────────────────────────────
+    private View createSectionTitle(String title) {
+        TextView tv = new TextView(getContext());
+        tv.setText(title.toUpperCase());
+        tv.setTextSize(11);
+        tv.setTypeface(null, Typeface.BOLD);
+        tv.setTextColor(COLOR_TEXT_SECONDARY);
+        tv.setLetterSpacing(0.12f);
+        tv.setPadding(dpToPx(4), dpToPx(30), dpToPx(4), dpToPx(10));
+        return tv;
+    }
+
+    // ─── Settings Card ────────────────────────────────────────────────────────
     private View createSettingsCard(String[][] items) {
         LinearLayout card = new LinearLayout(getContext());
         card.setOrientation(LinearLayout.VERTICAL);
-        
+
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(COLOR_WHITE);
         bg.setCornerRadius(dpToPx(20));
         card.setBackground(bg);
-        card.setElevation(dpToPx(4));
-        
+        card.setElevation(dpToPx(5));
+        card.setClipToOutline(true);
+
         for (int i = 0; i < items.length; i++) {
             boolean isLast = (i == items.length - 1);
-            card.addView(createSettingItem(items[i][0], items[i][1], items[i][2], isLast));
+            String[] item = items[i];
+            card.addView(createSettingRow(item[0], item[1], item[2], item[3], item[4], isLast));
         }
-        
         return card;
     }
-    
-    private View createSettingItem(String title, String subtitle, String iconLetter, boolean isLast) {
-        LinearLayout itemLayout = new LinearLayout(getContext());
-        itemLayout.setOrientation(LinearLayout.VERTICAL);
-        
-        // Use ripple effect for rows
+
+    private View createSettingRow(String title, String subtitle, String iconLetter,
+                                  String iconColor, String iconBgColor, boolean isLast) {
+        LinearLayout rowWrapper = new LinearLayout(getContext());
+        rowWrapper.setOrientation(LinearLayout.VERTICAL);
+
         TypedValue outValue = new TypedValue();
         requireContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
-        itemLayout.setBackgroundResource(outValue.resourceId);
-        itemLayout.setClickable(true);
-        itemLayout.setOnClickListener(v -> {
-            Toast.makeText(getContext(), title + " coming soon", Toast.LENGTH_SHORT).show();
-        });
-        
-        LinearLayout contentRow = new LinearLayout(getContext());
-        contentRow.setOrientation(LinearLayout.HORIZONTAL);
-        contentRow.setPadding(dpToPx(20), dpToPx(15), dpToPx(20), dpToPx(15));
-        contentRow.setGravity(Gravity.CENTER_VERTICAL);
-        
-        // Icon
+        rowWrapper.setBackgroundResource(outValue.resourceId);
+        rowWrapper.setClickable(true);
+        rowWrapper.setOnClickListener(v -> openSheet(title));
+
+        LinearLayout row = new LinearLayout(getContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(dpToPx(20), dpToPx(16), dpToPx(20), dpToPx(16));
+        row.setGravity(Gravity.CENTER_VERTICAL);
+
+        // Icon badge
         TextView icon = new TextView(getContext());
         icon.setText(iconLetter);
-        icon.setTextColor(COLOR_PRIMARY);
-        icon.setTextSize(16);
+        icon.setTextColor(Color.parseColor(iconColor));
+        icon.setTextSize(15);
         icon.setTypeface(null, Typeface.BOLD);
         icon.setGravity(Gravity.CENTER);
-        
-        GradientDrawable iconBg = new GradientDrawable();
-        iconBg.setCornerRadius(dpToPx(10));
-        iconBg.setColor(Color.parseColor("#D1FAE5")); // Light Green
-        icon.setBackground(iconBg);
-        
-        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(dpToPx(40), dpToPx(40));
-        iconParams.setMargins(0, 0, dpToPx(15), 0);
+        GradientDrawable icoB = new GradientDrawable();
+        icoB.setCornerRadius(dpToPx(12));
+        icoB.setColor(Color.parseColor(iconBgColor));
+        icon.setBackground(icoB);
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(dpToPx(42), dpToPx(42));
+        iconParams.rightMargin = dpToPx(16);
         icon.setLayoutParams(iconParams);
-        
-        // Text Column
+
+        // Text
         LinearLayout textCol = new LinearLayout(getContext());
         textCol.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        textCol.setLayoutParams(textParams);
-        
-        TextView titleText = new TextView(getContext());
-        titleText.setText(title);
-        titleText.setTextSize(15);
-        titleText.setTextColor(COLOR_TEXT_PRIMARY);
-        titleText.setTypeface(null, Typeface.BOLD);
-        
-        TextView subText = new TextView(getContext());
-        subText.setText(subtitle);
-        subText.setTextSize(12);
-        subText.setTextColor(COLOR_TEXT_SECONDARY);
-        
-        textCol.addView(titleText);
-        textCol.addView(subText);
-        
-        // Right Arrow
-        TextView arrow = new TextView(getContext());
-        arrow.setText(">");
-        arrow.setTextSize(16);
-        arrow.setTextColor(Color.parseColor("#9CA3AF"));
-        arrow.setTypeface(null, Typeface.BOLD);
-        
-        contentRow.addView(icon);
-        contentRow.addView(textCol);
-        contentRow.addView(arrow);
-        
-        itemLayout.addView(contentRow);
-        
+        textCol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView tv1 = new TextView(getContext());
+        tv1.setText(title);
+        tv1.setTextSize(15);
+        tv1.setTextColor(COLOR_TEXT_PRIMARY);
+        tv1.setTypeface(null, Typeface.BOLD);
+
+        TextView tv2 = new TextView(getContext());
+        tv2.setText(subtitle);
+        tv2.setTextSize(12);
+        tv2.setTextColor(COLOR_TEXT_SECONDARY);
+
+        textCol.addView(tv1);
+        textCol.addView(tv2);
+
+        // Chevron
+        TextView chevron = new TextView(getContext());
+        chevron.setText("›");
+        chevron.setTextSize(22);
+        chevron.setTextColor(Color.parseColor("#D1D5DB"));
+        chevron.setTypeface(null, Typeface.BOLD);
+
+        row.addView(icon);
+        row.addView(textCol);
+        row.addView(chevron);
+        rowWrapper.addView(row);
+
         if (!isLast) {
-            View divider = new View(getContext());
-            divider.setBackgroundColor(Color.parseColor("#F3F4F6"));
-            LinearLayout.LayoutParams divParams = new LinearLayout.LayoutParams(
+            View div = new View(getContext());
+            div.setBackgroundColor(Color.parseColor("#F3F4F6"));
+            LinearLayout.LayoutParams dp = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(1));
-            divParams.setMargins(dpToPx(75), 0, dpToPx(20), 0); // Indent to align with text
-            divider.setLayoutParams(divParams);
-            itemLayout.addView(divider);
+            dp.setMargins(dpToPx(78), 0, dpToPx(20), 0);
+            div.setLayoutParams(dp);
+            rowWrapper.addView(div);
         }
-        
-        return itemLayout;
+        return rowWrapper;
     }
-    
+
+    // ─── Sheet Router ─────────────────────────────────────────────────────────
+    private void openSheet(String title) {
+        switch (title) {
+            case "Personal Details":  showPersonalDetailsSheet(); break;
+            case "Payment Methods":   showPaymentMethodsSheet();  break;
+            case "Notifications":     showNotificationsSheet();   break;
+            case "Language":          showLanguageSheet();        break;
+            case "Dark Mode":         showDarkModeSheet();        break;
+            case "Privacy & Security":showSecuritySheet();        break;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 1. PERSONAL DETAILS
+    // ──────────────────────────────────────────────────────────────────────────
+    private void showPersonalDetailsSheet() {
+        BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
+        LinearLayout root = sheetRoot();
+
+        sheetHandle(root);
+        sheetTitle(root, "Personal Details");
+
+        TextInputLayout tilName  = materialField(root, "Full Name",     userName);
+        TextInputLayout tilEmail = materialField(root, "Email Address", userEmail);
+        TextInputLayout tilPhone = materialField(root, "Phone Number",  userPhone);
+        TextInputLayout tilBiz   = materialField(root, "Business Name", userBiz);
+
+        MaterialButton btn = saveButton("Save Changes");
+        btn.setOnClickListener(v -> {
+            String n = text(tilName); String e = text(tilEmail);
+            String p = text(tilPhone); String b = text(tilBiz);
+            if (n.isEmpty() || e.isEmpty()) {
+                Toast.makeText(getContext(), "Name and email are required", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            userName = n; userEmail = e; userPhone = p; userBiz = b;
+            if (profileNameTv  != null) profileNameTv.setText(userName);
+            if (profileEmailTv != null) profileEmailTv.setText(userEmail);
+            sheet.dismiss();
+            Toast.makeText(getContext(), "Profile updated ✓", Toast.LENGTH_SHORT).show();
+        });
+        root.addView(btn);
+        sheet.setContentView(root);
+        sheet.show();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 2. PAYMENT METHODS
+    // ──────────────────────────────────────────────────────────────────────────
+    private void showPaymentMethodsSheet() {
+        BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
+        LinearLayout root = sheetRoot();
+        sheetHandle(root);
+        sheetTitle(root, "Payment Methods");
+
+        root.addView(paymentCard("Visa", "•••• •••• •••• 4242", "Expires 12/27", "#1A56DB", "#1E40AF"));
+        root.addView(paymentCard("Mastercard", "•••• •••• •••• 8891", "Expires 08/26", "#D97706", "#92400E"));
+        root.addView(paymentCard("M-Pesa", "+255 712 345 678", "Mobile Money", "#059669", "#065F46"));
+
+        // Add new button
+        LinearLayout addRow = new LinearLayout(requireContext());
+        addRow.setOrientation(LinearLayout.HORIZONTAL);
+        addRow.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams addRowParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        addRowParams.topMargin = dpToPx(16);
+        addRow.setLayoutParams(addRowParams);
+
+        MaterialButton addBtn = new MaterialButton(requireContext());
+        addBtn.setText("+ Add Payment Method");
+        addBtn.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F0FDF4")));
+        addBtn.setTextColor(COLOR_PRIMARY);
+        addBtn.setStrokeColor(ColorStateList.valueOf(COLOR_PRIMARY));
+        addBtn.setStrokeWidth(dpToPx(1));
+        addBtn.setCornerRadius(dpToPx(14));
+        addBtn.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        addBtn.setOnClickListener(v ->
+            Toast.makeText(getContext(), "Add card flow coming next update", Toast.LENGTH_SHORT).show());
+        addRow.addView(addBtn);
+        root.addView(addRow);
+
+        sheet.setContentView(root);
+        sheet.show();
+    }
+
+    private View paymentCard(String brand, String number, String detail,
+                              String colorTop, String colorBot) {
+        LinearLayout card = new LinearLayout(requireContext());
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(dpToPx(20), dpToPx(18), dpToPx(20), dpToPx(18));
+
+        GradientDrawable bg = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[]{Color.parseColor(colorTop), Color.parseColor(colorBot)});
+        bg.setCornerRadius(dpToPx(18));
+        card.setBackground(bg);
+        card.setElevation(dpToPx(4));
+
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        p.bottomMargin = dpToPx(12);
+        card.setLayoutParams(p);
+
+        TextView brandTv = new TextView(requireContext());
+        brandTv.setText(brand);
+        brandTv.setTextSize(14);
+        brandTv.setTypeface(null, Typeface.BOLD);
+        brandTv.setTextColor(Color.argb(180, 255, 255, 255));
+
+        TextView numTv = new TextView(requireContext());
+        numTv.setText(number);
+        numTv.setTextSize(18);
+        numTv.setTypeface(null, Typeface.BOLD);
+        numTv.setTextColor(COLOR_WHITE);
+        LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        nlp.topMargin = dpToPx(8);
+        numTv.setLayoutParams(nlp);
+
+        LinearLayout bottom = new LinearLayout(requireContext());
+        bottom.setOrientation(LinearLayout.HORIZONTAL);
+        bottom.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        blp.topMargin = dpToPx(10);
+        bottom.setLayoutParams(blp);
+
+        TextView detailTv = new TextView(requireContext());
+        detailTv.setText(detail);
+        detailTv.setTextSize(12);
+        detailTv.setTextColor(Color.argb(180, 255, 255, 255));
+        detailTv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView removeTv = new TextView(requireContext());
+        removeTv.setText("Remove");
+        removeTv.setTextSize(12);
+        removeTv.setTextColor(Color.argb(200, 255, 200, 200));
+        removeTv.setClickable(true);
+        removeTv.setOnClickListener(v ->
+            Toast.makeText(getContext(), brand + " removed", Toast.LENGTH_SHORT).show());
+
+        bottom.addView(detailTv);
+        bottom.addView(removeTv);
+
+        card.addView(brandTv);
+        card.addView(numTv);
+        card.addView(bottom);
+        return card;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 3. NOTIFICATIONS
+    // ──────────────────────────────────────────────────────────────────────────
+    private void showNotificationsSheet() {
+        BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
+        LinearLayout root = sheetRoot();
+        sheetHandle(root);
+        sheetTitle(root, "Notifications");
+
+        root.addView(toggleRow("Order Updates",     "Get notified when orders change",   true));
+        root.addView(sheetDivider());
+        root.addView(toggleRow("Payment Alerts",    "Payments received or pending",      true));
+        root.addView(sheetDivider());
+        root.addView(toggleRow("Market Activity",   "New listings and price changes",    false));
+        root.addView(sheetDivider());
+        root.addView(toggleRow("Promotions & Deals","Special offers and discounts",      false));
+        root.addView(sheetDivider());
+        root.addView(toggleRow("App Sounds",        "Play sounds for notifications",     true));
+
+        MaterialButton done = saveButton("Done");
+        done.setOnClickListener(v -> {
+            sheet.dismiss();
+            Toast.makeText(getContext(), "Notification preferences saved ✓", Toast.LENGTH_SHORT).show();
+        });
+        root.addView(done);
+        sheet.setContentView(root);
+        sheet.show();
+    }
+
+    private View toggleRow(String title, String subtitle, boolean defaultOn) {
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(dpToPx(4), dpToPx(12), dpToPx(4), dpToPx(12));
+        row.setGravity(Gravity.CENTER_VERTICAL);
+
+        LinearLayout textCol = new LinearLayout(requireContext());
+        textCol.setOrientation(LinearLayout.VERTICAL);
+        textCol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView ttv = new TextView(requireContext());
+        ttv.setText(title);
+        ttv.setTextSize(15);
+        ttv.setTextColor(COLOR_TEXT_PRIMARY);
+        ttv.setTypeface(null, Typeface.BOLD);
+
+        TextView stv = new TextView(requireContext());
+        stv.setText(subtitle);
+        stv.setTextSize(12);
+        stv.setTextColor(COLOR_TEXT_SECONDARY);
+
+        textCol.addView(ttv);
+        textCol.addView(stv);
+
+        Switch sw = new Switch(requireContext());
+        sw.setChecked(defaultOn);
+        sw.setThumbTintList(ColorStateList.valueOf(defaultOn ? COLOR_PRIMARY : Color.parseColor("#9CA3AF")));
+        sw.setOnCheckedChangeListener((btn, checked) ->
+            sw.setThumbTintList(ColorStateList.valueOf(checked ? COLOR_PRIMARY : Color.parseColor("#9CA3AF"))));
+
+        row.addView(textCol);
+        row.addView(sw);
+        return row;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 4. LANGUAGE
+    // ──────────────────────────────────────────────────────────────────────────
+    private void showLanguageSheet() {
+        BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
+        LinearLayout root = sheetRoot();
+        sheetHandle(root);
+        sheetTitle(root, "Select Language");
+
+        String[][] langs = {
+            {"English (US)", "en", "true"},
+            {"Swahili", "sw", "false"},
+            {"French", "fr", "false"},
+            {"Arabic", "ar", "false"},
+            {"Portuguese", "pt", "false"}
+        };
+
+        for (String[] lang : langs) {
+            root.addView(langRow(lang[0], lang[2].equals("true"), sheet));
+        }
+        sheet.setContentView(root);
+        sheet.show();
+    }
+
+    private View langRow(String language, boolean selected, BottomSheetDialog sheet) {
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(dpToPx(4), dpToPx(16), dpToPx(4), dpToPx(16));
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setClickable(true);
+        row.setOnClickListener(v -> {
+            sheet.dismiss();
+            Toast.makeText(getContext(), language + " selected ✓", Toast.LENGTH_SHORT).show();
+        });
+
+        TextView langTv = new TextView(requireContext());
+        langTv.setText(language);
+        langTv.setTextSize(15);
+        langTv.setTextColor(COLOR_TEXT_PRIMARY);
+        if (selected) langTv.setTypeface(null, Typeface.BOLD);
+        langTv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        if (selected) {
+            TextView check = new TextView(requireContext());
+            check.setText("✓");
+            check.setTextSize(18);
+            check.setTextColor(COLOR_PRIMARY);
+            check.setTypeface(null, Typeface.BOLD);
+            row.addView(langTv);
+            row.addView(check);
+        } else {
+            row.addView(langTv);
+        }
+        return row;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 5. DARK MODE
+    // ──────────────────────────────────────────────────────────────────────────
+    private void showDarkModeSheet() {
+        BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
+        LinearLayout root = sheetRoot();
+        sheetHandle(root);
+        sheetTitle(root, "Dark Mode");
+
+        String[][] modes = {{"Light", "☀", "false"}, {"Dark", "🌙", "false"}, {"System Default", "⚙", "true"}};
+        for (String[] mode : modes) {
+            root.addView(darkModeRow(mode[0], mode[1], mode[2].equals("true"), sheet));
+            root.addView(sheetDivider());
+        }
+        sheet.setContentView(root);
+        sheet.show();
+    }
+
+    private View darkModeRow(String label, String emoji, boolean selected, BottomSheetDialog sheet) {
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(dpToPx(4), dpToPx(14), dpToPx(4), dpToPx(14));
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setClickable(true);
+        row.setOnClickListener(v -> {
+            sheet.dismiss();
+            Toast.makeText(getContext(), label + " mode selected ✓", Toast.LENGTH_SHORT).show();
+        });
+
+        TextView emojiTv = new TextView(requireContext());
+        emojiTv.setText(emoji);
+        emojiTv.setTextSize(20);
+        LinearLayout.LayoutParams ep = new LinearLayout.LayoutParams(dpToPx(36), ViewGroup.LayoutParams.WRAP_CONTENT);
+        emojiTv.setLayoutParams(ep);
+
+        TextView labelTv = new TextView(requireContext());
+        labelTv.setText(label);
+        labelTv.setTextSize(15);
+        labelTv.setTextColor(COLOR_TEXT_PRIMARY);
+        if (selected) labelTv.setTypeface(null, Typeface.BOLD);
+        labelTv.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        row.addView(emojiTv);
+        row.addView(labelTv);
+        if (selected) {
+            TextView check = new TextView(requireContext());
+            check.setText("✓");
+            check.setTextSize(18);
+            check.setTextColor(COLOR_PRIMARY);
+            check.setTypeface(null, Typeface.BOLD);
+            row.addView(check);
+        }
+        return row;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 6. PRIVACY & SECURITY
+    // ──────────────────────────────────────────────────────────────────────────
+    private void showSecuritySheet() {
+        BottomSheetDialog sheet = new BottomSheetDialog(requireContext());
+        LinearLayout root = sheetRoot();
+        sheetHandle(root);
+        sheetTitle(root, "Privacy & Security");
+
+        TextInputLayout tilCurrent = materialField(root, "Current Password", "");
+        tilCurrent.getEditText().setInputType(
+                android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        tilCurrent.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
+
+        TextInputLayout tilNew = materialField(root, "New Password", "");
+        tilNew.getEditText().setInputType(
+                android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        tilNew.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
+
+        TextInputLayout tilConfirm = materialField(root, "Confirm New Password", "");
+        tilConfirm.getEditText().setInputType(
+                android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        tilConfirm.setEndIconMode(TextInputLayout.END_ICON_PASSWORD_TOGGLE);
+
+        // PIN toggle
+        root.addView(sheetDivider());
+        root.addView(toggleRow("Biometric / PIN Lock",
+                "Require authentication on app open", false));
+
+        MaterialButton btn = saveButton("Update Password");
+        btn.setOnClickListener(v -> {
+            String cur = text(tilCurrent); String nw = text(tilNew); String conf = text(tilConfirm);
+            if (cur.isEmpty() || nw.isEmpty() || conf.isEmpty()) {
+                Toast.makeText(getContext(), "Please fill all fields", Toast.LENGTH_SHORT).show(); return;
+            }
+            if (!nw.equals(conf)) {
+                Toast.makeText(getContext(), "Passwords do not match", Toast.LENGTH_SHORT).show(); return;
+            }
+            if (nw.length() < 6) {
+                Toast.makeText(getContext(), "Password must be at least 6 characters", Toast.LENGTH_SHORT).show(); return;
+            }
+            sheet.dismiss();
+            Toast.makeText(getContext(), "Password updated ✓", Toast.LENGTH_SHORT).show();
+        });
+        root.addView(btn);
+        sheet.setContentView(root);
+        sheet.show();
+    }
+
+    // ─── Logout ───────────────────────────────────────────────────────────────
     private View createLogoutButton() {
-        TextView logoutBtn = new TextView(getContext());
-        logoutBtn.setText("Log Out");
-        logoutBtn.setTextColor(Color.parseColor("#EF4444")); // Red text
-        logoutBtn.setTextSize(16);
-        logoutBtn.setTypeface(null, Typeface.BOLD);
-        logoutBtn.setGravity(Gravity.CENTER);
-        logoutBtn.setPadding(dpToPx(20), dpToPx(16), dpToPx(20), dpToPx(16));
-        
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(Color.parseColor("#FEE2E2")); // Light red bg
-        bg.setCornerRadius(dpToPx(16));
-        logoutBtn.setBackground(bg);
-        
+        MaterialButton logoutBtn = new MaterialButton(requireContext());
+        logoutBtn.setText("Sign Out");
+        logoutBtn.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#FEE2E2")));
+        logoutBtn.setTextColor(Color.parseColor("#DC2626"));
+        logoutBtn.setStrokeColor(ColorStateList.valueOf(Color.parseColor("#FECACA")));
+        logoutBtn.setStrokeWidth(dpToPx(1));
+        logoutBtn.setCornerRadius(dpToPx(16));
+
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, dpToPx(40), 0, dpToPx(20));
+        params.setMargins(0, dpToPx(36), 0, dpToPx(20));
         logoutBtn.setLayoutParams(params);
-        
-        logoutBtn.setClickable(true);
+
         logoutBtn.setOnClickListener(v -> {
             SharedPreferences prefs = requireContext().getSharedPreferences("TimberTradePrefs", Context.MODE_PRIVATE);
             prefs.edit().clear().apply();
-            
-            Toast.makeText(getContext(), "Logged Out", Toast.LENGTH_SHORT).show();
-            
             Intent intent = new Intent(getContext(), LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             requireActivity().finish();
         });
-        
         return logoutBtn;
     }
 
-    private View createModernBottomNav() {
-        LinearLayout navBar = new LinearLayout(getContext());
-        navBar.setOrientation(LinearLayout.HORIZONTAL);
-        navBar.setBackgroundColor(COLOR_WHITE);
-        navBar.setElevation(dpToPx(16));
-        navBar.setPadding(0, dpToPx(10), 0, dpToPx(10));
-        navBar.setWeightSum(4f);
-        
-        GradientDrawable topBorderBg = new GradientDrawable();
-        topBorderBg.setColor(COLOR_WHITE);
-        navBar.setBackground(topBorderBg);
-        
-        navBar.addView(createModernNavTab("Home", "H", false));
-        navBar.addView(createModernNavTab("Market", "M", false));
-        navBar.addView(createModernNavTab("Orders", "O", false));
-        navBar.addView(createModernNavTab("Profile", "P", true)); // Profile is active
-
-        return navBar;
+    // ─── Sheet Helpers ────────────────────────────────────────────────────────
+    private LinearLayout sheetRoot() {
+        LinearLayout root = new LinearLayout(requireContext());
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dpToPx(24), dpToPx(28), dpToPx(24), dpToPx(36));
+        root.setBackgroundColor(COLOR_WHITE);
+        return root;
     }
 
-    private View createModernNavTab(String text, String letterIcon, boolean isActive) {
-        LinearLayout tab = new LinearLayout(getContext());
-        tab.setOrientation(LinearLayout.VERTICAL);
-        tab.setGravity(Gravity.CENTER);
-        
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        tab.setLayoutParams(params);
-        tab.setPadding(dpToPx(6), dpToPx(8), dpToPx(6), dpToPx(8));
-        
-        int color = isActive ? COLOR_PRIMARY : Color.parseColor("#9CA3AF");
+    private void sheetHandle(LinearLayout root) {
+        View handle = new View(requireContext());
+        GradientDrawable hBg = new GradientDrawable();
+        hBg.setColor(Color.parseColor("#D1FAE5"));
+        hBg.setCornerRadius(dpToPx(100));
+        handle.setBackground(hBg);
+        LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(dpToPx(40), dpToPx(4));
+        hp.gravity = Gravity.CENTER_HORIZONTAL;
+        hp.bottomMargin = dpToPx(20);
+        root.addView(handle, hp);
+    }
 
-        TextView icon = new TextView(getContext());
-        icon.setText(letterIcon);
-        icon.setTextSize(20);
-        icon.setTypeface(null, Typeface.BOLD);
-        icon.setTextColor(color);
+    private void sheetTitle(LinearLayout root, String title) {
+        TextView tv = new TextView(requireContext());
+        tv.setText(title);
+        tv.setTextSize(22);
+        tv.setTypeface(null, Typeface.BOLD);
+        tv.setTextColor(COLOR_TEXT_PRIMARY);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = dpToPx(20);
+        tv.setLayoutParams(lp);
+        root.addView(tv);
+    }
 
-        if (isActive) {
-            GradientDrawable activeBg = new GradientDrawable();
-            activeBg.setColor(Color.parseColor("#D1FAE5")); 
-            activeBg.setCornerRadius(dpToPx(16));
-            icon.setBackground(activeBg);
-            icon.setPadding(dpToPx(20), dpToPx(4), dpToPx(20), dpToPx(4));
-        } else {
-            icon.setPadding(dpToPx(20), dpToPx(4), dpToPx(20), dpToPx(4));
-        }
+    private TextInputLayout materialField(LinearLayout root, String hint, String value) {
+        TextInputLayout til = new TextInputLayout(requireContext(), null,
+                com.google.android.material.R.style.Widget_Material3_TextInputLayout_OutlinedBox);
+        til.setHint(hint);
+        float r = dpToPx(14);
+        til.setBoxCornerRadii(r, r, r, r);
+        til.setBoxStrokeColor(COLOR_PRIMARY);
+        til.setHintTextColor(ColorStateList.valueOf(COLOR_PRIMARY));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = dpToPx(14);
+        til.setLayoutParams(lp);
 
-        TextView label = new TextView(getContext());
-        label.setText(text);
-        label.setTextSize(11);
-        label.setTextColor(color);
-        label.setPadding(0, dpToPx(4), 0, 0);
+        TextInputEditText et = new TextInputEditText(til.getContext());
+        et.setText(value);
+        et.setTextSize(14);
+        et.setTextColor(COLOR_TEXT_PRIMARY);
+        til.addView(et);
+        root.addView(til);
+        return til;
+    }
 
-        if (isActive) {
-            label.setTypeface(null, Typeface.BOLD);
-        }
+    private MaterialButton saveButton(String label) {
+        MaterialButton btn = new MaterialButton(requireContext());
+        btn.setText(label);
+        btn.setBackgroundTintList(ColorStateList.valueOf(COLOR_PRIMARY));
+        btn.setTextColor(COLOR_WHITE);
+        btn.setCornerRadius(dpToPx(16));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.topMargin = dpToPx(8);
+        btn.setLayoutParams(lp);
+        return btn;
+    }
 
-        tab.addView(icon);
-        tab.addView(label);
+    private View sheetDivider() {
+        View div = new View(requireContext());
+        div.setBackgroundColor(Color.parseColor("#F3F4F6"));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(1));
+        lp.setMargins(0, dpToPx(4), 0, dpToPx(4));
+        div.setLayoutParams(lp);
+        return div;
+    }
 
-        TypedValue outValue = new TypedValue();
-        requireContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true);
-        tab.setBackgroundResource(outValue.resourceId);
-        tab.setClickable(true);
-
-        if (text.equals("Home") && !isActive) {
-            tab.setOnClickListener(v -> {
-                startActivity(new Intent(getContext(), RealDashboardActivity.class));
-            });
-        } else if (text.equals("Market") && !isActive) {
-            tab.setOnClickListener(v -> {
-                startActivity(new Intent(getContext(), MarketplaceActivity.class));
-            });
-        } else if (text.equals("Orders") && !isActive) {
-            tab.setOnClickListener(v -> {
-                startActivity(new Intent(getContext(), NewOrderActivity.class));
-            });
-        }
-
-        return tab;
+    private String text(TextInputLayout til) {
+        return til.getEditText() != null ? til.getEditText().getText().toString().trim() : "";
     }
 
     private int dpToPx(int dp) {
-        return (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                dp,
-                requireContext().getResources().getDisplayMetrics()
-        );
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
+                requireContext().getResources().getDisplayMetrics());
     }
 }
