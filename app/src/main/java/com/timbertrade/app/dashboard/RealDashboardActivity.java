@@ -75,9 +75,13 @@ public class RealDashboardActivity extends AppCompatActivity {
     private View createModernBottomNav() {
         navBar = new LinearLayout(this);
         navBar.setOrientation(LinearLayout.HORIZONTAL);
-        navBar.setBackgroundColor(COLOR_WHITE);
-        navBar.setElevation(dpToPx(16));
-        navBar.setPadding(0, dpToPx(10), 0, dpToPx(10));
+
+        // Dark premium nav background
+        GradientDrawable navBg = new GradientDrawable();
+        navBg.setColor(Color.parseColor("#1F2937"));
+        navBar.setBackground(navBg);
+        navBar.setElevation(dpToPx(20));
+        navBar.setPadding(dpToPx(8), dpToPx(10), dpToPx(8), dpToPx(10));
         navBar.setWeightSum(4f);
 
         refreshBottomNav(0);
@@ -86,10 +90,10 @@ public class RealDashboardActivity extends AppCompatActivity {
 
     private void refreshBottomNav(int activeIndex) {
         navBar.removeAllViews();
-        navBar.addView(createModernNavTab("Home", "H", activeIndex == 0, 0));
+        navBar.addView(createModernNavTab("Home",   "H", activeIndex == 0, 0));
         navBar.addView(createModernNavTab("Market", "M", activeIndex == 1, 1));
         navBar.addView(createModernNavTab("Orders", "O", activeIndex == 2, 2));
-        navBar.addView(createModernNavTab("Profile", "P", activeIndex == 3, 3));
+        navBar.addView(createModernNavTab("Profile","P", activeIndex == 3, 3));
     }
 
     private View createModernNavTab(String text, String letterIcon, boolean isActive, int tabIndex) {
@@ -99,35 +103,38 @@ public class RealDashboardActivity extends AppCompatActivity {
         
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
         tab.setLayoutParams(params);
-        tab.setPadding(dpToPx(6), dpToPx(8), dpToPx(6), dpToPx(8));
+        tab.setPadding(dpToPx(4), dpToPx(8), dpToPx(4), dpToPx(8));
         
-        int color = isActive ? COLOR_PRIMARY : Color.parseColor("#9CA3AF");
+        int iconColor  = isActive ? Color.parseColor("#ECFDF5") : Color.parseColor("#6B7280");
+        int labelColor = isActive ? Color.parseColor("#34D399") : Color.parseColor("#6B7280");
 
         TextView icon = new TextView(this);
         icon.setText(letterIcon);
-        icon.setTextSize(20);
+        icon.setTextSize(18);
         icon.setTypeface(null, Typeface.BOLD);
-        icon.setTextColor(color);
+        icon.setTextColor(iconColor);
+        icon.setGravity(Gravity.CENTER);
 
         if (isActive) {
-            GradientDrawable activeBg = new GradientDrawable();
-            activeBg.setColor(Color.parseColor("#D1FAE5")); 
-            activeBg.setCornerRadius(dpToPx(16));
+            // Vibrant green-gradient pill for active
+            GradientDrawable activeBg = new GradientDrawable(
+                    GradientDrawable.Orientation.TL_BR,
+                    new int[]{Color.parseColor("#059669"), Color.parseColor("#047857")}
+            );
+            activeBg.setCornerRadius(dpToPx(14));
             icon.setBackground(activeBg);
-            icon.setPadding(dpToPx(20), dpToPx(4), dpToPx(20), dpToPx(4));
+            icon.setPadding(dpToPx(22), dpToPx(6), dpToPx(22), dpToPx(6));
         } else {
-            icon.setPadding(dpToPx(20), dpToPx(4), dpToPx(20), dpToPx(4));
+            icon.setPadding(dpToPx(22), dpToPx(6), dpToPx(22), dpToPx(6));
         }
 
         TextView label = new TextView(this);
         label.setText(text);
-        label.setTextSize(11);
-        label.setTextColor(color);
+        label.setTextSize(10);
+        label.setTextColor(labelColor);
         label.setPadding(0, dpToPx(4), 0, 0);
-
-        if (isActive) {
-            label.setTypeface(null, Typeface.BOLD);
-        }
+        label.setGravity(Gravity.CENTER);
+        if (isActive) label.setTypeface(null, Typeface.BOLD);
 
         tab.addView(icon);
         tab.addView(label);
