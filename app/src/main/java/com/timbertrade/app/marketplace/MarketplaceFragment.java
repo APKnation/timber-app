@@ -143,43 +143,60 @@ public class MarketplaceFragment extends Fragment {
     private View createPromotionBanner() {
         LinearLayout card = new LinearLayout(getContext());
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(dpToPx(24), dpToPx(30), dpToPx(24), dpToPx(30));
+        card.setPadding(dpToPx(28), dpToPx(32), dpToPx(28), dpToPx(32));
         
         GradientDrawable bg = new GradientDrawable(
-                GradientDrawable.Orientation.LEFT_RIGHT,
-                new int[]{Color.parseColor("#10B981"), Color.parseColor("#059669")}
+                GradientDrawable.Orientation.BL_TR,
+                new int[]{Color.parseColor("#064E3B"), Color.parseColor("#059669"), Color.parseColor("#10B981")}
         );
-        bg.setCornerRadius(dpToPx(24));
+        bg.setCornerRadius(dpToPx(28));
         card.setBackground(bg);
-        card.setElevation(dpToPx(12));
+        card.setElevation(dpToPx(16));
         
         LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        cardParams.setMargins(0, 0, 0, dpToPx(15));
+        cardParams.setMargins(0, 0, 0, dpToPx(24));
         card.setLayoutParams(cardParams);
         
+        // Tag line
         TextView tagText = new TextView(getContext());
-        tagText.setText("SPECIAL OFFER");
-        tagText.setTextSize(12);
+        tagText.setText("✦  LIMITED TIME OFFER");
+        tagText.setTextSize(11);
         tagText.setTypeface(null, Typeface.BOLD);
-        tagText.setTextColor(Color.parseColor("#A7F3D0"));
-        tagText.setPadding(0, 0, 0, dpToPx(10));
+        tagText.setTextColor(Color.parseColor("#6EE7B7"));
+        tagText.setLetterSpacing(0.08f);
+        tagText.setPadding(0, 0, 0, dpToPx(12));
         
         TextView titleText = new TextView(getContext());
-        titleText.setText("Get 20% off Bulk Orders");
-        titleText.setTextSize(22);
+        titleText.setText("20% Off Bulk Orders");
+        titleText.setTextSize(26);
         titleText.setTypeface(null, Typeface.BOLD);
-        titleText.setTextColor(COLOR_WHITE);
+        titleText.setTextColor(Color.WHITE);
         titleText.setPadding(0, 0, 0, dpToPx(8));
         
         TextView descText = new TextView(getContext());
-        descText.setText("Valid on orders over 500 units.");
-        descText.setTextSize(14);
-        descText.setTextColor(Color.parseColor("#D1FAE5"));
+        descText.setText("Valid on orders above 500 units of any grade.");
+        descText.setTextSize(13);
+        descText.setTextColor(Color.parseColor("#A7F3D0"));
+        descText.setPadding(0, 0, 0, dpToPx(20));
+
+        // CTA Button
+        TextView ctaBtn = new TextView(getContext());
+        ctaBtn.setText("Explore Deals  →");
+        ctaBtn.setTextSize(14);
+        ctaBtn.setTypeface(null, Typeface.BOLD);
+        ctaBtn.setTextColor(Color.parseColor("#064E3B"));
+        ctaBtn.setPadding(dpToPx(24), dpToPx(12), dpToPx(24), dpToPx(12));
+        GradientDrawable ctaBg = new GradientDrawable();
+        ctaBg.setColor(Color.WHITE);
+        ctaBg.setCornerRadius(dpToPx(100));
+        ctaBtn.setBackground(ctaBg);
+        ctaBtn.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         
         card.addView(tagText);
         card.addView(titleText);
         card.addView(descText);
+        card.addView(ctaBtn);
         
         return card;
     }
@@ -225,96 +242,132 @@ public class MarketplaceFragment extends Fragment {
 
     private View createProductCard(String title, String desc, String price, String iconBgColorStr, String iconTextColorStr) {
         LinearLayout outerLayout = new LinearLayout(getContext());
-        outerLayout.setPadding(0, dpToPx(10), 0, dpToPx(10));
-        
-        LinearLayout card = new LinearLayout(getContext());
-        card.setOrientation(LinearLayout.HORIZONTAL);
-        card.setPadding(dpToPx(20), dpToPx(24), dpToPx(20), dpToPx(24));
-        card.setGravity(Gravity.CENTER_VERTICAL);
-        
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(COLOR_WHITE);
-        bg.setCornerRadius(dpToPx(20));
-        card.setBackground(bg);
-        card.setElevation(dpToPx(6));
-        
-        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+        outerLayout.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams outerParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        card.setLayoutParams(cardParams);
-        
-        // Product Icon Element
+        outerParams.setMargins(0, 0, 0, dpToPx(16));
+        outerLayout.setLayoutParams(outerParams);
+
+        // Outer card
+        LinearLayout card = new LinearLayout(getContext());
+        card.setOrientation(LinearLayout.VERTICAL);
+        GradientDrawable cardBg = new GradientDrawable();
+        cardBg.setColor(COLOR_WHITE);
+        cardBg.setCornerRadius(dpToPx(24));
+        card.setBackground(cardBg);
+        card.setElevation(dpToPx(6));
+        card.setClipToOutline(true);
+        card.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        // Top colored banner
+        LinearLayout topBanner = new LinearLayout(getContext());
+        topBanner.setOrientation(LinearLayout.HORIZONTAL);
+        topBanner.setGravity(Gravity.CENTER_VERTICAL);
+        topBanner.setPadding(dpToPx(20), dpToPx(20), dpToPx(20), dpToPx(20));
+        GradientDrawable bannerBg = new GradientDrawable(
+                GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[]{Color.parseColor(iconBgColorStr), adjustAlpha(Color.parseColor(iconBgColorStr), 0.5f)}
+        );
+        bannerBg.setCornerRadii(new float[]{dpToPx(24), dpToPx(24), 0, 0, 0, 0, 0, 0});
+        topBanner.setBackground(bannerBg);
+
+        // Letter icon
         TextView icon = new TextView(getContext());
         icon.setText(title.substring(0, 1));
         icon.setTextColor(Color.parseColor(iconTextColorStr));
-        icon.setTextSize(26);
+        icon.setTextSize(28);
         icon.setTypeface(null, Typeface.BOLD);
         icon.setGravity(Gravity.CENTER);
-        
         GradientDrawable iconBg = new GradientDrawable();
+        iconBg.setColor(Color.WHITE);
         iconBg.setCornerRadius(dpToPx(16));
-        iconBg.setColor(Color.parseColor(iconBgColorStr));
         icon.setBackground(iconBg);
-        
-        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(dpToPx(70), dpToPx(70));
-        iconParams.setMargins(0, 0, dpToPx(20), 0);
+        LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(dpToPx(56), dpToPx(56));
+        iconParams.setMargins(0, 0, dpToPx(16), 0);
         icon.setLayoutParams(iconParams);
-        
-        // Product Texts
-        LinearLayout textLayout = new LinearLayout(getContext());
-        textLayout.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        textLayout.setLayoutParams(textParams);
-        
+
+        // Title + in stock horizontally arranged
+        LinearLayout bannerTextCol = new LinearLayout(getContext());
+        bannerTextCol.setOrientation(LinearLayout.VERTICAL);
+        bannerTextCol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
         TextView titleText = new TextView(getContext());
         titleText.setText(title);
-        titleText.setTextSize(17);
+        titleText.setTextSize(16);
         titleText.setTypeface(null, Typeface.BOLD);
-        titleText.setTextColor(COLOR_TEXT_PRIMARY);
-        
+        titleText.setTextColor(Color.parseColor(iconTextColorStr));
+
+        TextView inStockBadge = new TextView(getContext());
+        inStockBadge.setText("✓ In Stock");
+        inStockBadge.setTextSize(11);
+        inStockBadge.setTypeface(null, Typeface.BOLD);
+        inStockBadge.setTextColor(COLOR_PRIMARY);
+        LinearLayout.LayoutParams badgeParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        badgeParams.setMargins(0, dpToPx(4), 0, 0);
+        inStockBadge.setLayoutParams(badgeParams);
+        GradientDrawable stockBg = new GradientDrawable();
+        stockBg.setColor(Color.parseColor("#ECFDF5"));
+        stockBg.setCornerRadius(dpToPx(100));
+        inStockBadge.setBackground(stockBg);
+        inStockBadge.setPadding(dpToPx(8), dpToPx(2), dpToPx(8), dpToPx(2));
+
+        bannerTextCol.addView(titleText);
+        bannerTextCol.addView(inStockBadge);
+        topBanner.addView(icon);
+        topBanner.addView(bannerTextCol);
+        card.addView(topBanner);
+
+        // Bottom section: desc + price + CTA
+        LinearLayout bottomSection = new LinearLayout(getContext());
+        bottomSection.setOrientation(LinearLayout.HORIZONTAL);
+        bottomSection.setGravity(Gravity.CENTER_VERTICAL);
+        bottomSection.setPadding(dpToPx(20), dpToPx(16), dpToPx(20), dpToPx(16));
+
+        LinearLayout textCol = new LinearLayout(getContext());
+        textCol.setOrientation(LinearLayout.VERTICAL);
+        textCol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
         TextView descText = new TextView(getContext());
         descText.setText(desc);
         descText.setTextSize(13);
         descText.setTextColor(COLOR_TEXT_SECONDARY);
-        descText.setPadding(0, dpToPx(4), 0, dpToPx(10));
-        
+        LinearLayout.LayoutParams descParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        descParams.setMargins(0, 0, 0, dpToPx(6));
+        descText.setLayoutParams(descParams);
+
         TextView priceText = new TextView(getContext());
         priceText.setText(price);
-        priceText.setTextSize(16);
+        priceText.setTextSize(18);
         priceText.setTypeface(null, Typeface.BOLD);
-        priceText.setTextColor(COLOR_PRIMARY);
-        
-        textLayout.addView(titleText);
-        textLayout.addView(descText);
-        textLayout.addView(priceText);
-        
-        // Navigation Arrow right
-        TextView arrow = new TextView(getContext());
-        arrow.setText(">");
-        arrow.setTextSize(18);
-        arrow.setTextColor(Color.parseColor("#9CA3AF"));
-        arrow.setTypeface(null, Typeface.BOLD);
-        
-        card.addView(icon);
-        card.addView(textLayout);
-        card.addView(arrow);
-        
-        // Ripple
-        TypedValue outValue = new TypedValue();
-        requireContext().getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
-        card.setBackgroundResource(outValue.resourceId);
-        GradientDrawable finalBg = new GradientDrawable();
-        finalBg.setColor(COLOR_WHITE);
-        finalBg.setCornerRadius(dpToPx(20));
-        android.graphics.drawable.RippleDrawable ripple = new android.graphics.drawable.RippleDrawable(
-            android.content.res.ColorStateList.valueOf(Color.parseColor("#1A000000")),
-            finalBg,
-            null
-        );
-        card.setBackground(ripple);
-        card.setClickable(true);
-        
+        priceText.setTextColor(COLOR_TEXT_PRIMARY);
+
+        textCol.addView(descText);
+        textCol.addView(priceText);
+
+        // Order Now chip
+        TextView orderChip = new TextView(getContext());
+        orderChip.setText("Order →");
+        orderChip.setTextSize(13);
+        orderChip.setTypeface(null, Typeface.BOLD);
+        orderChip.setTextColor(COLOR_WHITE);
+        orderChip.setPadding(dpToPx(16), dpToPx(10), dpToPx(16), dpToPx(10));
+        GradientDrawable chipBg = new GradientDrawable();
+        chipBg.setColor(COLOR_PRIMARY);
+        chipBg.setCornerRadius(dpToPx(100));
+        orderChip.setBackground(chipBg);
+        orderChip.setClickable(true);
+
+        bottomSection.addView(textCol);
+        bottomSection.addView(orderChip);
+        card.addView(bottomSection);
+
         outerLayout.addView(card);
         return outerLayout;
+    }
+
+    private int adjustAlpha(int color, float factor) {
+        int alpha = Math.min(255, Math.round(Color.alpha(color) * factor + 80));
+        return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
     }
 
     private int dpToPx(int dp) {

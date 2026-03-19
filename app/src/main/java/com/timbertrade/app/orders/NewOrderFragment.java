@@ -177,100 +177,132 @@ public class NewOrderFragment extends Fragment {
     
     private View createOrderCard(Order order) {
         LinearLayout outerLayout = new LinearLayout(getContext());
-        outerLayout.setPadding(0, dpToPx(6), 0, dpToPx(6));
-        
-        LinearLayout card = new LinearLayout(getContext());
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(dpToPx(20), dpToPx(20), dpToPx(20), dpToPx(20));
-        
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(COLOR_WHITE);
-        bg.setCornerRadius(dpToPx(20));
-        card.setBackground(bg);
-        card.setElevation(dpToPx(6));
-        
-        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+        outerLayout.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams outerParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        card.setLayoutParams(cardParams);
-        
-        // Header Row (Customer & Status)
-        LinearLayout headerRow = new LinearLayout(getContext());
-        headerRow.setOrientation(LinearLayout.HORIZONTAL);
-        headerRow.setGravity(Gravity.CENTER_VERTICAL);
-        
+        outerParams.setMargins(0, 0, 0, dpToPx(16));
+        outerLayout.setLayoutParams(outerParams);
+
+        // Card container with shadow
+        LinearLayout card = new LinearLayout(getContext());
+        card.setOrientation(LinearLayout.HORIZONTAL);
+        GradientDrawable cardBg = new GradientDrawable();
+        cardBg.setColor(COLOR_WHITE);
+        cardBg.setCornerRadius(dpToPx(20));
+        card.setBackground(cardBg);
+        card.setElevation(dpToPx(4));
+        card.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        card.setClipToOutline(true);
+
+        // Determine accent color based on status
+        int accentColor;
+        switch (order.getStatus()) {
+            case "Confirmed": accentColor = Color.parseColor("#059669"); break;
+            case "Delivered": accentColor = Color.parseColor("#2563EB"); break;
+            case "Cancelled": accentColor = Color.parseColor("#EF4444"); break;
+            default: accentColor = Color.parseColor("#D97706"); // Pending = amber
+        }
+
+        // Left Color Accent Strip
+        GradientDrawable stripDrawable = new GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{accentColor, adjustAlpha(accentColor, 0.6f)}
+        );
+        stripDrawable.setCornerRadii(new float[]{dpToPx(20), dpToPx(20), 0, 0, 0, 0, dpToPx(20), dpToPx(20)});
+        View accentStrip = new View(getContext());
+        accentStrip.setBackground(stripDrawable);
+        LinearLayout.LayoutParams stripParams = new LinearLayout.LayoutParams(dpToPx(6), ViewGroup.LayoutParams.MATCH_PARENT);
+        accentStrip.setLayoutParams(stripParams);
+        card.addView(accentStrip);
+
+        // Content area
+        LinearLayout content = new LinearLayout(getContext());
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setPadding(dpToPx(18), dpToPx(18), dpToPx(18), dpToPx(14));
+        content.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        // Top Row: Customer name + Status chip
+        LinearLayout topRow = new LinearLayout(getContext());
+        topRow.setOrientation(LinearLayout.HORIZONTAL);
+        topRow.setGravity(Gravity.CENTER_VERTICAL);
+
         TextView customerText = new TextView(getContext());
         customerText.setText(order.getCustomerName());
-        customerText.setTextSize(18);
+        customerText.setTextSize(17);
         customerText.setTypeface(null, Typeface.BOLD);
         customerText.setTextColor(COLOR_TEXT_PRIMARY);
-        LinearLayout.LayoutParams custParams = new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        customerText.setLayoutParams(custParams);
-        
+        customerText.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        // Premium pill-shaped status chip
         TextView statusChip = new TextView(getContext());
-        statusChip.setText(order.getStatus());
-        statusChip.setTextSize(12);
+        statusChip.setText(order.getStatus().toUpperCase());
+        statusChip.setTextSize(10);
         statusChip.setTypeface(null, Typeface.BOLD);
-        statusChip.setPadding(dpToPx(12), dpToPx(4), dpToPx(12), dpToPx(4));
-        
-        GradientDrawable statusBg = new GradientDrawable();
-        statusBg.setCornerRadius(dpToPx(12));
-        
-        switch (order.getStatus()) {
-            case "Pending":
-                statusBg.setColor(Color.parseColor("#FEF3C7")); // Amber Light
-                statusChip.setTextColor(Color.parseColor("#D97706"));
-                break;
-            case "Confirmed":
-                statusBg.setColor(Color.parseColor("#D1FAE5")); // Green Light
-                statusChip.setTextColor(COLOR_PRIMARY);
-                break;
-            case "Delivered":
-                statusBg.setColor(Color.parseColor("#DBEAFE")); // Blue Light
-                statusChip.setTextColor(Color.parseColor("#2563EB"));
-                break;
-            default:
-                statusBg.setColor(Color.parseColor("#F3F4F6"));
-                statusChip.setTextColor(COLOR_TEXT_SECONDARY);
-        }
-        statusChip.setBackground(statusBg);
-        
-        headerRow.addView(customerText);
-        headerRow.addView(statusChip);
-        
-        // Details Row
-        TextView detailsText = new TextView(getContext());
-        detailsText.setText(order.getQuantity() + " units of " + order.getWoodType());
-        detailsText.setTextSize(14);
-        detailsText.setTextColor(COLOR_TEXT_SECONDARY);
-        detailsText.setPadding(0, dpToPx(8), 0, dpToPx(8));
-        
-        TextView priceAndDateText = new TextView(getContext());
-        priceAndDateText.setText(String.format("$%.2f • Delivery: %s", order.getPrice(), order.getDeliveryDate()));
-        priceAndDateText.setTextSize(14);
-        priceAndDateText.setTextColor(COLOR_TEXT_SECONDARY);
-        
-        // Action Buttons Row
-        LinearLayout actionsRow = new LinearLayout(getContext());
-        actionsRow.setOrientation(LinearLayout.HORIZONTAL);
-        actionsRow.setGravity(Gravity.END);
-        actionsRow.setPadding(0, dpToPx(12), 0, 0);
-        
+        statusChip.setTextColor(accentColor);
+        statusChip.setPadding(dpToPx(12), dpToPx(5), dpToPx(12), dpToPx(5));
+        GradientDrawable chipBg = new GradientDrawable();
+        chipBg.setColor(adjustAlpha(accentColor, 0.12f));
+        chipBg.setCornerRadius(dpToPx(100));
+        statusChip.setBackground(chipBg);
+
+        topRow.addView(customerText);
+        topRow.addView(statusChip);
+        content.addView(topRow);
+
+        // Wood type + quantity detail
+        TextView detailText = new TextView(getContext());
+        detailText.setText(order.getQuantity() + " units  ·  " + order.getWoodType());
+        detailText.setTextSize(13);
+        detailText.setTextColor(COLOR_TEXT_SECONDARY);
+        LinearLayout.LayoutParams detailParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        detailParams.setMargins(0, dpToPx(8), 0, dpToPx(12));
+        detailText.setLayoutParams(detailParams);
+        content.addView(detailText);
+
+        // Divider
+        View divider = new View(getContext());
+        divider.setBackgroundColor(Color.parseColor("#F1F5F9"));
+        divider.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(1)));
+        content.addView(divider);
+
+        // Bottom row: price + actions
+        LinearLayout bottomRow = new LinearLayout(getContext());
+        bottomRow.setOrientation(LinearLayout.HORIZONTAL);
+        bottomRow.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams bottomParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        bottomParams.setMargins(0, dpToPx(10), 0, 0);
+        bottomRow.setLayoutParams(bottomParams);
+
+        // Price badge
+        TextView priceText = new TextView(getContext());
+        priceText.setText(String.format("$%.2f", order.getPrice() * order.getQuantity()));
+        priceText.setTextSize(16);
+        priceText.setTypeface(null, Typeface.BOLD);
+        priceText.setTextColor(COLOR_PRIMARY);
+        priceText.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        bottomRow.addView(priceText);
+
+        // Action buttons
         TextView editBtn = createActionButton("Edit", COLOR_PRIMARY);
         editBtn.setOnClickListener(v -> editOrder(order));
-        
-        TextView deleteBtn = createActionButton("Delete", Color.parseColor("#EF4444")); // Red
+        TextView deleteBtn = createActionButton("Delete", Color.parseColor("#EF4444"));
         deleteBtn.setOnClickListener(v -> deleteOrder(order));
-        
-        actionsRow.addView(editBtn);
-        actionsRow.addView(deleteBtn);
-        
-        card.addView(headerRow);
-        card.addView(detailsText);
-        card.addView(priceAndDateText);
-        card.addView(actionsRow);
-        
+        bottomRow.addView(editBtn);
+        bottomRow.addView(deleteBtn);
+
+        content.addView(bottomRow);
+        card.addView(content);
         outerLayout.addView(card);
         return outerLayout;
+    }
+
+    private int adjustAlpha(int color, float factor) {
+        int alpha = Math.round(Color.alpha(color) * factor);
+        if (alpha < 20) alpha = 20;
+        return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
     }
     
     private TextView createActionButton(String text, int color) {
