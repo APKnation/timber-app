@@ -231,7 +231,7 @@ public class ReportsActivity extends Activity {
         statsRow.setPadding(0, dpToPx(16), 0, dpToPx(12));
         statsRow.setWeightSum(2f);
         
-        statsRow.addView(createMiniStat("Revenue", "$" + String.format("%.2f", report.getTotalRevenue()), Color.parseColor("#059669")));
+        statsRow.addView(createMiniStat("Revenue", "TZS " + String.format("%,.0f", report.getTotalRevenue()), Color.parseColor("#059669")));
         statsRow.addView(createMiniStat("Orders", String.valueOf(report.getTotalOrders()), COLOR_TEXT_PRIMARY));
         
         TextView periodText = new TextView(this);

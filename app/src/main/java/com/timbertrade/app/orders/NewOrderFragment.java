@@ -279,7 +279,7 @@ public class NewOrderFragment extends Fragment {
 
         // Price badge
         TextView priceText = new TextView(getContext());
-        priceText.setText(String.format("$%.2f", order.getPrice() * order.getQuantity()));
+        priceText.setText(String.format("TZS %,.0f", order.getPrice() * order.getQuantity()));
         priceText.setTextSize(16);
         priceText.setTypeface(null, Typeface.BOLD);
         priceText.setTextColor(COLOR_PRIMARY);
@@ -358,7 +358,7 @@ public class NewOrderFragment extends Fragment {
         TextInputLayout tilCustomer = createMaterialField("Customer Name", orderToEdit != null ? orderToEdit.getCustomerName() : "");
         TextInputLayout tilWood = createMaterialField("Wood Type", orderToEdit != null ? orderToEdit.getWoodType() : "");
         TextInputLayout tilQuantity = createMaterialField("Quantity", orderToEdit != null ? String.valueOf(orderToEdit.getQuantity()) : "");
-        TextInputLayout tilPrice = createMaterialField("Price ($)", orderToEdit != null ? String.valueOf(orderToEdit.getPrice()) : "");
+        TextInputLayout tilPrice = createMaterialField("Price (TZS)", orderToEdit != null ? String.valueOf(orderToEdit.getPrice()) : "");
         TextInputLayout tilDate = createMaterialField("Delivery Date", orderToEdit != null ? orderToEdit.getDeliveryDate() : "");
         TextInputLayout tilNotes = createMaterialField("Order Notes", orderToEdit != null ? orderToEdit.getNotes() : "");
 
