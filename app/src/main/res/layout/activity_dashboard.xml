@@ -16,12 +16,13 @@
         android:layout_alignParentTop="true" />
 
     <!-- Main Content -->
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/flContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
-android:layout_above="@id/bottomNavigationContainer" />
+        android:layout_above="@id/bottomNavigationContainer"
+        android:orientation="vertical" />
 
     <!-- Bottom Navigation -->
     <LinearLayout
