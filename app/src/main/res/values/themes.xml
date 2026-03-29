@@ -1,0 +1,106 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.TimberTrade" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <item name="colorPrimary">@color/timber_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/timber_primary_light</item>
+        <item name="colorOnPrimaryContainer">@color/timber_primary_dark</item>
+        
+        <item name="colorSecondary">@color/timber_secondary</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/timber_secondary_light</item>
+        <item name="colorOnSecondaryContainer">@color/timber_secondary_dark</item>
+        
+        <item name="android:colorBackground">@color/timber_background</item>
+        <item name="colorOnBackground">@color/timber_text_primary</item>
+        <item name="colorSurface">@color/timber_surface</item>
+        <item name="colorOnSurface">@color/timber_text_primary</item>
+        
+        <item name="colorError">@color/timber_error</item>
+        <item name="colorOnError">@color/white</item>
+        
+        <!-- Status bar -->
+        <item name="android:statusBarColor">@color/timber_primary_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+        
+        <!-- Navigation bar -->
+        <item name="android:navigationBarColor">@color/timber_primary</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <style name="Theme.TimberTrade" parent="Base.Theme.TimberTrade" />
+    
+    <!-- Button Styles -->
+    <style name="PrimaryButton" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/timber_primary</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+    
+    <style name="SecondaryButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/timber_primary</item>
+        <item name="android:textColor">@color/timber_primary</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+    
+    <!-- Card Styles -->
+    <style name="TimberCard" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">12dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="cardBackgroundColor">@color/timber_card</item>
+    </style>
+    
+    <!-- Text Input Styles -->
+    <style name="TimberTextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/timber_primary</item>
+        <item name="hintTextColor">@color/timber_text_hint</item>
+        <item name="boxCornerRadiusTopStart">8dp</item>
+        <item name="boxCornerRadiusTopEnd">8dp</item>
+        <item name="boxCornerRadiusBottomStart">8dp</item>
+        <item name="boxCornerRadiusBottomEnd">8dp</item>
+    </style>
+    
+    <!-- Toolbar Styles -->
+    <style name="TimberToolbar" parent="Widget.Material3.Toolbar">
+        <item name="titleTextColor">@color/white</item>
+        <item name="android:background">@color/timber_primary</item>
+        <item name="android:elevation">4dp</item>
+    </style>
+    
+    <!-- Bottom Navigation Style -->
+    <style name="TimberBottomNavigation" parent="Widget.Material3.BottomNavigationView">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.TimberBottomNavigation</item>
+    </style>
+    
+    <style name="ThemeOverlay.TimberBottomNavigation" parent="">
+        <item name="colorSurface">@color/timber_surface</item>
+        <item name="colorOnSurface">@color/timber_text_secondary</item>
+        <item name="colorPrimary">@color/timber_primary</item>
+        <item name="colorSecondary">@color/timber_secondary</item>
+    </style>
+    
+    <!-- Text Styles -->
+    <style name="HeadlineText" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textColor">@color/timber_text_primary</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <style name="BodyText" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/timber_text_secondary</item>
+    </style>
+    
+    <style name="CaptionText" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">@color/timber_text_hint</item>
+    </style>
+    
+    <!-- Date Picker Theme: Always Light so calendar is clearly readable -->
+    <style name="TimberDatePickerTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#1E293B</item>
+        <item name="colorPrimary">#059669</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="android:windowBackground">#FFFFFF</item>
+    </style>
+
+</resources>
