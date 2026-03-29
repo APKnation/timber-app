@@ -52,11 +52,7 @@ public class DashboardActivity extends AppCompatActivity {
             try {
                 Log.d(TAG, "Initializing dashboard views");
                 toolbar = findViewById(R.id.toolbar);
-<<<<<<< HEAD
-                bottomNavigation = findViewById(R.id.bottomNavigationContainer);
-=======
-                bottomNavigation = findViewById(R.id.bottomNavigation);
->>>>>>> a28433b8fa61d1e437af1c58f2eacaf6614f2546
+bottomNavigation = findViewById(R.id.bottomNavigationContainer);
                 
                 Log.d(TAG, "Views initialized: toolbar=" + (toolbar != null ? "found" : "null") + 
                         ", bottomNavigation=" + (bottomNavigation != null ? "found" : "null"));

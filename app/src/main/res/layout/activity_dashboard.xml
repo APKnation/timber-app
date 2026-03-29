@@ -21,11 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar"
-<<<<<<< HEAD
-        android:layout_above="@id/bottomNavigationContainer" />
-=======
-        android:layout_above="@id/bottomNavigation" />
->>>>>>> a28433b8fa61d1e437af1c58f2eacaf6614f2546
+android:layout_above="@id/bottomNavigationContainer" />
 
     <!-- Bottom Navigation -->
     <LinearLayout
