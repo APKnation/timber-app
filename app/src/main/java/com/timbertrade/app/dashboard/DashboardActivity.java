@@ -11,8 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.ImageView;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.timbertrade.app.R;
 import com.timbertrade.app.auth.LoginActivity;
 import com.timbertrade.app.models.User;
@@ -25,7 +27,7 @@ public class DashboardActivity extends AppCompatActivity {
     private static final String TAG = "DashboardActivity";
     
     private Toolbar toolbar;
-    private BottomNavigationView bottomNavigation;
+    private LinearLayout bottomNavigation;
     private User currentUser;
     private SharedPreferences sharedPreferences;
     
@@ -212,72 +214,85 @@ bottomNavigation = findViewById(R.id.bottomNavigationContainer);
         Log.d(TAG, "setupBottomNavigation: Setting up navigation");
         try {
             if (bottomNavigation != null) {
-                bottomNavigation.setOnItemSelectedListener(item -> {
-                    try {
-                        Log.d(TAG, "Navigation item selected: " + item.getItemId());
-                        Fragment selectedFragment = null;
-                        
-                        int itemId = item.getItemId();
-                        if (itemId == R.id.navigation_dashboard) {
-                            showDashboardFragment();
-                        } else if (itemId == R.id.navigation_marketplace) {
-                            try {
-                                selectedFragment = new com.timbertrade.app.marketplace.MarketplaceFragment();
-                            } catch (Exception e) {
-                                Log.e(TAG, "Error creating MarketplaceFragment: " + e.getMessage(), e);
-                                createFallbackLayout();
-                                return false;
-                            }
-                        } else if (itemId == R.id.navigation_auctions) {
-                            try {
-                                selectedFragment = new com.timbertrade.app.auction.AuctionsFragment();
-                            } catch (Exception e) {
-                                Log.e(TAG, "Error creating AuctionsFragment: " + e.getMessage(), e);
-                                createFallbackLayout();
-                                return false;
-                            }
-                        } else if (itemId == R.id.navigation_payments) {
-                            try {
-                                selectedFragment = new com.timbertrade.app.payment.PaymentsFragment();
-                            } catch (Exception e) {
-                                Log.e(TAG, "Error creating PaymentsFragment: " + e.getMessage(), e);
-                                createFallbackLayout();
-                                return false;
-                            }
-                        } else if (itemId == R.id.navigation_profile) {
-                            // TODO: Show profile fragment
-                            Log.d(TAG, "Profile feature coming soon");
-                            return true;
-                        }
-                        
-                        if (selectedFragment != null) {
-                            try {
-                                getSupportFragmentManager()
-                                        .beginTransaction()
-                                        .replace(R.id.flContent, selectedFragment)
-                                        .commit();
-                            } catch (Exception e) {
-                                Log.e(TAG, "Error replacing fragment: " + e.getMessage(), e);
-                                createFallbackLayout();
-                                return false;
-                            }
-                        }
-                        
-                        return true;
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error in navigation: " + e.getMessage(), e);
-                        createFallbackLayout();
-                        return false;
-                    }
-                });
+                // Find individual tab views
+                RelativeLayout tabDashboard = bottomNavigation.findViewById(R.id.tabDashboard);
+                RelativeLayout tabMarketplace = bottomNavigation.findViewById(R.id.tabMarketplace);
+                RelativeLayout tabAuctions = bottomNavigation.findViewById(R.id.tabAuctions);
+                RelativeLayout tabPayments = bottomNavigation.findViewById(R.id.tabPayments);
+                RelativeLayout tabProfile = bottomNavigation.findViewById(R.id.tabProfile);
                 
-                // Set default selection
-                try {
-                    bottomNavigation.setSelectedItemId(R.id.navigation_dashboard);
-                    Log.d(TAG, "Bottom navigation setup complete");
-                } catch (Exception e) {
-                    Log.e(TAG, "Error setting default navigation: " + e.getMessage(), e);
+                // Set click listeners for each tab
+                if (tabDashboard != null) {
+                    tabDashboard.setOnClickListener(v -> {
+                        Log.d(TAG, "Dashboard tab clicked");
+                        showDashboardFragment();
+                        updateTabSelection(0);
+                    });
                 }
+                
+                if (tabMarketplace != null) {
+                    tabMarketplace.setOnClickListener(v -> {
+                        Log.d(TAG, "Marketplace tab clicked");
+                        try {
+                            Fragment selectedFragment = new com.timbertrade.app.marketplace.MarketplaceFragment();
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.flContent, selectedFragment)
+                                    .commit();
+                            updateTabSelection(1);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error creating MarketplaceFragment: " + e.getMessage(), e);
+                            createFallbackLayout();
+                        }
+                    });
+                }
+                
+                if (tabAuctions != null) {
+                    tabAuctions.setOnClickListener(v -> {
+                        Log.d(TAG, "Auctions tab clicked");
+                        try {
+                            Fragment selectedFragment = new com.timbertrade.app.auction.AuctionsFragment();
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.flContent, selectedFragment)
+                                    .commit();
+                            updateTabSelection(2);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error creating AuctionsFragment: " + e.getMessage(), e);
+                            createFallbackLayout();
+                        }
+                    });
+                }
+                
+                if (tabPayments != null) {
+                    tabPayments.setOnClickListener(v -> {
+                        Log.d(TAG, "Payments tab clicked");
+                        try {
+                            Fragment selectedFragment = new com.timbertrade.app.payment.PaymentsFragment();
+                            getSupportFragmentManager()
+                                    .beginTransaction()
+                                    .replace(R.id.flContent, selectedFragment)
+                                    .commit();
+                            updateTabSelection(3);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error creating PaymentsFragment: " + e.getMessage(), e);
+                            createFallbackLayout();
+                        }
+                    });
+                }
+                
+                if (tabProfile != null) {
+                    tabProfile.setOnClickListener(v -> {
+                        Log.d(TAG, "Profile tab clicked");
+                        // TODO: Show profile fragment
+                        Log.d(TAG, "Profile feature coming soon");
+                        updateTabSelection(4);
+                    });
+                }
+                
+                // Set default selection (Dashboard)
+                updateTabSelection(0);
+                Log.d(TAG, "Bottom navigation setup complete");
             } else {
                 Log.w(TAG, "Bottom navigation is null");
             }
@@ -333,6 +348,68 @@ bottomNavigation = findViewById(R.id.bottomNavigationContainer);
         } catch (Exception e) {
             Log.e(TAG, "Error in showDashboardFragment: " + e.getMessage(), e);
             createFallbackLayout();
+        }
+    }
+    
+    private void updateTabSelection(int selectedIndex) {
+        try {
+            if (bottomNavigation != null) {
+                // Reset all tabs to default state
+                resetTab(R.id.tabDashboard, R.id.ivDashboard, R.color.timber_text_secondary);
+                resetTab(R.id.tabMarketplace, R.id.ivMarketplace, R.color.timber_text_secondary);
+                resetTab(R.id.tabAuctions, R.id.ivAuctions, R.color.timber_text_secondary);
+                resetTab(R.id.tabPayments, R.id.ivPayments, R.color.timber_text_secondary);
+                resetTab(R.id.tabProfile, R.id.ivProfile, R.color.timber_text_secondary);
+                
+                // Highlight selected tab
+                switch (selectedIndex) {
+                    case 0: // Dashboard
+                        highlightTab(R.id.tabDashboard, R.id.ivDashboard, R.color.timber_primary);
+                        break;
+                    case 1: // Marketplace
+                        highlightTab(R.id.tabMarketplace, R.id.ivMarketplace, R.color.timber_primary);
+                        break;
+                    case 2: // Auctions
+                        highlightTab(R.id.tabAuctions, R.id.ivAuctions, R.color.timber_primary);
+                        break;
+                    case 3: // Payments
+                        highlightTab(R.id.tabPayments, R.id.ivPayments, R.color.timber_primary);
+                        break;
+                    case 4: // Profile
+                        highlightTab(R.id.tabProfile, R.id.ivProfile, R.color.timber_primary);
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating tab selection: " + e.getMessage(), e);
+        }
+    }
+    
+    private void resetTab(int tabId, int iconId, int colorId) {
+        try {
+            RelativeLayout tab = bottomNavigation.findViewById(tabId);
+            if (tab != null) {
+                ImageView icon = tab.findViewById(iconId);
+                if (icon != null) {
+                    icon.setColorFilter(getResources().getColor(colorId, null));
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error resetting tab: " + e.getMessage(), e);
+        }
+    }
+    
+    private void highlightTab(int tabId, int iconId, int colorId) {
+        try {
+            RelativeLayout tab = bottomNavigation.findViewById(tabId);
+            if (tab != null) {
+                ImageView icon = tab.findViewById(iconId);
+                if (icon != null) {
+                    icon.setColorFilter(getResources().getColor(colorId, null));
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error highlighting tab: " + e.getMessage(), e);
         }
     }
     
