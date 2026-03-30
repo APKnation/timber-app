@@ -44,6 +44,7 @@
     
     <!-- UI specific colors -->
     <color name="divider">#E0E0E0</color>
+    <color name="timber_border">#E0E0E0</color>
     <color name="overlay">#80000000</color>
     <color name="shimmer">#E0E0E0</color>
 </resources>
