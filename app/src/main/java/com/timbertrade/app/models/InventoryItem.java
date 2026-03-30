@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @Entity(tableName = "inventory")
 public class InventoryItem implements Serializable {
@@ -67,6 +68,18 @@ public class InventoryItem implements Serializable {
     public String getProductName() { return woodType; }
     
     public void setItemId(String id) { this.id = id; }
+    
+    public double getUnitPrice() { return pricePerUnit; }
+    
+    public void setCreatedAt(Date date) { this.lastUpdated = java.text.DateFormat.getDateTimeInstance().format(date); }
+    
+    public void setUpdatedAt(Date date) { this.lastUpdated = java.text.DateFormat.getDateTimeInstance().format(date); }
+    
+    public String getSellerId() { return supplier; } // Using supplier field as sellerId for compatibility
+    
+    public String getUpdatedAt() { return lastUpdated; }
+    
+    public String getItemId() { return id; }
     
     public double getTotalValue() {
         return quantity * pricePerUnit;

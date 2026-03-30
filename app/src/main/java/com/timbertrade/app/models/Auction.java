@@ -229,10 +229,6 @@ public class Auction implements Serializable {
         this.minBidIncrement = minBidIncrement;
     }
     
-    public void setReservePrice(double reservePrice) {
-        this.reservePrice = reservePrice;
-    }
-    
     public double getCurrentBid() {
         return currentBid;
     }
@@ -311,5 +307,9 @@ public class Auction implements Serializable {
     
     public void setActualEndTime(Date actualEndTime) {
         this.actualEndTime = actualEndTime;
+    }
+    
+    public void setUpdatedAt(Date updatedAt) {
+        // For compatibility - could add updatedAt field if needed
     }
 }

@@ -220,11 +220,11 @@ public class NewOrderActivity extends Activity {
                 statusBg.setColor(Color.parseColor("#FEF3C7")); // Amber Light
                 statusChip.setTextColor(Color.parseColor("#D97706"));
                 break;
-            case "Confirmed":
+            case CONFIRMED:
                 statusBg.setColor(Color.parseColor("#D1FAE5")); // Green Light
                 statusChip.setTextColor(COLOR_PRIMARY);
                 break;
-            case "Delivered":
+            case DELIVERED:
                 statusBg.setColor(Color.parseColor("#DBEAFE")); // Blue Light
                 statusChip.setTextColor(Color.parseColor("#2563EB"));
                 break;
