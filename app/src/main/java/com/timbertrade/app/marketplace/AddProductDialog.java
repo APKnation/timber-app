@@ -25,9 +25,10 @@ import androidx.fragment.app.DialogFragment;
 import com.google.android.material.textfield.TextInputLayout;
 import com.timbertrade.app.R;
 import com.timbertrade.app.models.Product;
-import com.timbertrade.app.models.TimberCategory;
 import com.timbertrade.app.services.FirebaseStorageService;
 import com.timbertrade.app.utils.ImagePicker;
+
+import android.content.Intent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -280,9 +281,9 @@ public class AddProductDialog extends DialogFragment {
             String location = etLocation.getText().toString().trim();
             
             // Get category
-            TimberCategory category = TimberCategory.HARDWOOD; // Default
+            Product.TimberCategory category = Product.TimberCategory.MAHOGANY; // Default
             String selectedCategory = (String) spCategory.getSelectedItem();
-            for (TimberCategory tc : TimberCategory.values()) {
+            for (Product.TimberCategory tc : Product.TimberCategory.values()) {
                 if (tc.toString().equals(selectedCategory)) {
                     category = tc;
                     break;
