@@ -1,15 +1,11 @@
 package com.timbertrade.app.models;
 
-import androidx.room.Entity;
-import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
 
 import java.io.Serializable;
 import java.util.Date;
 
-@Entity(tableName = "orders")
 public class Order implements Serializable {
-    @PrimaryKey
     @NonNull
     private String orderId;
     private String productId;
