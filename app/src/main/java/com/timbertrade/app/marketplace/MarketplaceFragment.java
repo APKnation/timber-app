@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.timbertrade.app.R;
@@ -34,7 +33,6 @@ public class MarketplaceFragment extends Fragment {
     
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private TextView tvNoProducts;
     private FloatingActionButton fabAddProduct;
     private LinearLayout categoryRow;
@@ -75,7 +73,6 @@ public class MarketplaceFragment extends Fragment {
     private void initViews(View view) {
         recyclerView = view.findViewById(R.id.recyclerView);
         progressBar = view.findViewById(R.id.progressBar);
-        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
         tvNoProducts = view.findViewById(R.id.tvNoProducts);
         fabAddProduct = view.findViewById(R.id.fabAddProduct);
         categoryRow = view.findViewById(R.id.categoryRow);
@@ -144,10 +141,6 @@ public class MarketplaceFragment extends Fragment {
     }
     
     private void setupClickListeners() {
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            loadProducts();
-        });
-        
         fabAddProduct.setOnClickListener(v -> {
             // Check if user is logged in and is a seller
             if (authService.isUserLoggedIn()) {
@@ -179,7 +172,6 @@ public class MarketplaceFragment extends Fragment {
             @Override
             public void onSuccess(List<Product> products) {
                 showLoading(false);
-                swipeRefreshLayout.setRefreshing(false);
                 
                 productList.clear();
                 productList.addAll(products);
@@ -191,7 +183,6 @@ public class MarketplaceFragment extends Fragment {
             @Override
             public void onError(String error) {
                 showLoading(false);
-                swipeRefreshLayout.setRefreshing(false);
                 Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
                 updateEmptyState();
             }
