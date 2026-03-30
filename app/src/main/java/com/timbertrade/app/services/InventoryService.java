@@ -217,16 +217,17 @@ public class InventoryService {
     public void addStock(String itemId, int quantity, String reason, OperationCallback callback) {
         db.runTransaction(new Transaction.Function<Void>() {
             @Override
-            public Void apply(Transaction transaction) throws Exception {
-                DocumentSnapshot itemDoc = transaction.get(db.collection("inventory").document(itemId));
-                if (!itemDoc.exists()) {
-                    throw new Exception("Inventory item not found");
-                }
-                
-                InventoryItem item = itemDoc.toObject(InventoryItem.class);
-                if (item == null) {
-                    throw new Exception("Failed to parse inventory item data");
-                }
+            public Void apply(Transaction transaction) {
+                try {
+                    DocumentSnapshot itemDoc = transaction.get(db.collection("inventory").document(itemId));
+                    if (!itemDoc.exists()) {
+                        throw new RuntimeException("Inventory item not found");
+                    }
+                    
+                    InventoryItem item = itemDoc.toObject(InventoryItem.class);
+                    if (item == null) {
+                        throw new RuntimeException("Failed to parse inventory item data");
+                    }
                 
                 // Update quantity
                 Map<String, Object> updates = new HashMap<>();
@@ -248,6 +249,9 @@ public class InventoryService {
                 transaction.set(db.collection("inventory").document(itemId).collection("movements").document(), movement);
                 
                 return null;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }).addOnSuccessListener(aVoid -> {
             Log.d(TAG, "Stock added successfully: " + itemId + " +" + quantity);
@@ -262,21 +266,22 @@ public class InventoryService {
     public void removeStock(String itemId, int quantity, String reason, OperationCallback callback) {
         db.runTransaction(new Transaction.Function<Void>() {
             @Override
-            public Void apply(Transaction transaction) throws Exception {
-                DocumentSnapshot itemDoc = transaction.get(db.collection("inventory").document(itemId));
-                if (!itemDoc.exists()) {
-                    throw new Exception("Inventory item not found");
-                }
-                
-                InventoryItem item = itemDoc.toObject(InventoryItem.class);
-                if (item == null) {
-                    throw new Exception("Failed to parse inventory item data");
-                }
-                
-                // Check if enough stock is available
-                if (item.getQuantity() < quantity) {
-                    throw new Exception("Insufficient stock. Available: " + item.getQuantity());
-                }
+            public Void apply(Transaction transaction) {
+                try {
+                    DocumentSnapshot itemDoc = transaction.get(db.collection("inventory").document(itemId));
+                    if (!itemDoc.exists()) {
+                        throw new RuntimeException("Inventory item not found");
+                    }
+                    
+                    InventoryItem item = itemDoc.toObject(InventoryItem.class);
+                    if (item == null) {
+                        throw new RuntimeException("Failed to parse inventory item data");
+                    }
+                    
+                    // Check if enough stock is available
+                    if (item.getQuantity() < quantity) {
+                        throw new RuntimeException("Insufficient stock. Available: " + item.getQuantity());
+                    }
                 
                 // Update quantity
                 Map<String, Object> updates = new HashMap<>();
@@ -298,6 +303,9 @@ public class InventoryService {
                 transaction.set(db.collection("inventory").document(itemId).collection("movements").document(), movement);
                 
                 return null;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }).addOnSuccessListener(aVoid -> {
             Log.d(TAG, "Stock removed successfully: " + itemId + " -" + quantity);

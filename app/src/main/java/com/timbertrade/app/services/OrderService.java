@@ -79,26 +79,27 @@ public class OrderService {
             // Add to Firestore with transaction to update product quantity
             db.runTransaction(new Transaction.Function<Void>() {
                 @Override
-                public Void apply(Transaction transaction) throws Exception {
-                    // Get product document
-                    DocumentSnapshot productDoc = transaction.get(db.collection("products").document(order.getProductId()));
-                    if (!productDoc.exists()) {
-                        throw new Exception("Product not found");
-                    }
-                    
-                    Product product = productDoc.toObject(Product.class);
-                    if (product == null) {
-                        throw new Exception("Failed to parse product data");
-                    }
+                public Void apply(Transaction transaction) {
+                    try {
+                        // Get product document
+                        DocumentSnapshot productDoc = transaction.get(db.collection("products").document(order.getProductId()));
+                        if (!productDoc.exists()) {
+                            throw new RuntimeException("Product not found");
+                        }
+                        
+                        Product product = productDoc.toObject(Product.class);
+                        if (product == null) {
+                            throw new RuntimeException("Failed to parse product data");
+                        }
                     
                     // Check product availability
                     if (product.getStatus() != Product.ProductStatus.AVAILABLE) {
-                        throw new Exception("Product is not available");
+                        throw new RuntimeException("Product is not available");
                     }
                     
                     // Check if enough quantity is available
                     if (product.getQuantity() < order.getQuantity()) {
-                        throw new Exception("Not enough quantity available. Available: " + product.getQuantity());
+                        throw new RuntimeException("Not enough quantity available. Available: " + product.getQuantity());
                     }
                     
                     // Update product quantity
@@ -117,6 +118,9 @@ public class OrderService {
                     transaction.set(db.collection("orders").document(order.getOrderId()), order);
                     
                     return null;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }).addOnSuccessListener(aVoid -> {
                 Log.d(TAG, "Order created successfully: " + order.getOrderId());
@@ -262,34 +266,35 @@ public class OrderService {
     public void cancelOrder(String orderId, String reason, OperationCallback callback) {
         db.runTransaction(new Transaction.Function<Void>() {
             @Override
-            public Void apply(Transaction transaction) throws Exception {
-                // Get order document
-                DocumentSnapshot orderDoc = transaction.get(db.collection("orders").document(orderId));
-                if (!orderDoc.exists()) {
-                    throw new Exception("Order not found");
-                }
-                
-                Order order = orderDoc.toObject(Order.class);
-                if (order == null) {
-                    throw new Exception("Failed to parse order data");
-                }
-                
-                // Check if order can be cancelled
-                if (order.getStatus() == Order.OrderStatus.DELIVERED || 
-                    order.getStatus() == Order.OrderStatus.CANCELLED) {
-                    throw new Exception("Order cannot be cancelled");
-                }
-                
-                // Get product document
-                DocumentSnapshot productDoc = transaction.get(db.collection("products").document(order.getProductId()));
-                if (!productDoc.exists()) {
-                    throw new Exception("Product not found");
-                }
-                
-                Product product = productDoc.toObject(Product.class);
-                if (product == null) {
-                    throw new Exception("Failed to parse product data");
-                }
+            public Void apply(Transaction transaction) {
+                try {
+                    // Get order document
+                    DocumentSnapshot orderDoc = transaction.get(db.collection("orders").document(orderId));
+                    if (!orderDoc.exists()) {
+                        throw new RuntimeException("Order not found");
+                    }
+                    
+                    Order order = orderDoc.toObject(Order.class);
+                    if (order == null) {
+                        throw new RuntimeException("Failed to parse order data");
+                    }
+                    
+                    // Check if order can be cancelled
+                    if (order.getStatus() == Order.OrderStatus.DELIVERED || 
+                        order.getStatus() == Order.OrderStatus.CANCELLED) {
+                        throw new RuntimeException("Order cannot be cancelled");
+                    }
+                    
+                    // Get product document
+                    DocumentSnapshot productDoc = transaction.get(db.collection("products").document(order.getProductId()));
+                    if (!productDoc.exists()) {
+                        throw new RuntimeException("Product not found");
+                    }
+                    
+                    Product product = productDoc.toObject(Product.class);
+                    if (product == null) {
+                        throw new RuntimeException("Failed to parse product data");
+                    }
                 
                 // Restore product quantity
                 Map<String, Object> productUpdates = new HashMap<>();
@@ -309,6 +314,9 @@ public class OrderService {
                 transaction.update(db.collection("orders").document(orderId), orderUpdates);
                 
                 return null;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }).addOnSuccessListener(aVoid -> {
             Log.d(TAG, "Order cancelled successfully: " + orderId);

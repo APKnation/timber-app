@@ -183,34 +183,35 @@ public class AuctionService {
     public void placeBid(String auctionId, String bidderId, String bidderName, double bidAmount, BidCallback callback) {
         db.runTransaction(new Transaction.Function<Void>() {
             @Override
-            public Void apply(Transaction transaction) throws Exception {
-                // Get auction document
-                DocumentSnapshot auctionDoc = transaction.get(db.collection("auctions").document(auctionId));
-                if (!auctionDoc.exists()) {
-                    throw new Exception("Auction not found");
-                }
-                
-                Auction auction = auctionDoc.toObject(Auction.class);
-                auction.setAuctionId(auctionId);
-                
-                // Validate auction state
-                if (auction.getStatus() != Auction.AuctionStatus.ACTIVE) {
-                    throw new Exception("Auction is not active");
-                }
-                
-                if (new Date().after(auction.getEndTime())) {
-                    throw new Exception("Auction has ended");
-                }
-                
-                // Validate bid amount
-                if (bidAmount <= auction.getCurrentBid() + auction.getMinBidIncrement()) {
-                    throw new Exception("Bid amount too low. Minimum bid: " + 
-                            (auction.getCurrentBid() + auction.getMinBidIncrement()));
-                }
+            public Void apply(Transaction transaction) {
+                try {
+                    // Get auction document
+                    DocumentSnapshot auctionDoc = transaction.get(db.collection("auctions").document(auctionId));
+                    if (!auctionDoc.exists()) {
+                        throw new RuntimeException("Auction not found");
+                    }
+                    
+                    Auction auction = auctionDoc.toObject(Auction.class);
+                    auction.setAuctionId(auctionId);
+                    
+                    // Validate auction state
+                    if (auction.getStatus() != Auction.AuctionStatus.ACTIVE) {
+                        throw new RuntimeException("Auction is not active");
+                    }
+                    
+                    if (new Date().after(auction.getEndTime())) {
+                        throw new RuntimeException("Auction has ended");
+                    }
+                    
+                    // Validate bid amount
+                    if (bidAmount <= auction.getCurrentBid() + auction.getMinBidIncrement()) {
+                        throw new RuntimeException("Bid amount too low. Minimum bid: " + 
+                                (auction.getCurrentBid() + auction.getMinBidIncrement()));
+                    }
                 
                 // Check if bidder is not the seller
                 if (bidderId.equals(auction.getSellerId())) {
-                    throw new Exception("Seller cannot bid on their own auction");
+                    throw new RuntimeException("Seller cannot bid on their own auction");
                 }
                 
                 // Create bid
@@ -236,6 +237,9 @@ public class AuctionService {
                 transaction.set(db.collection("auctions").document(auctionId).collection("bids").document(bid.getBidId()), bid);
                 
                 return null;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
         }).addOnSuccessListener(aVoid -> {
             // Get the created bid to return
@@ -325,28 +329,32 @@ public class AuctionService {
     public void endAuction(String auctionId, OperationCallback callback) {
         db.runTransaction(new Transaction.Function<Void>() {
             @Override
-            public Void apply(Transaction transaction) throws Exception {
-                DocumentSnapshot auctionDoc = transaction.get(db.collection("auctions").document(auctionId));
-                if (!auctionDoc.exists()) {
-                    throw new Exception("Auction not found");
+            public Void apply(Transaction transaction) {
+                try {
+                    DocumentSnapshot auctionDoc = transaction.get(db.collection("auctions").document(auctionId));
+                    if (!auctionDoc.exists()) {
+                        throw new RuntimeException("Auction not found");
+                    }
+                    
+                    Auction auction = auctionDoc.toObject(Auction.class);
+                    auction.setAuctionId(auctionId);
+                    
+                    if (auction.getStatus() != Auction.AuctionStatus.ACTIVE) {
+                        throw new RuntimeException("Auction is not active");
+                    }
+                    
+                    // Update auction status
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("status", Auction.AuctionStatus.ENDED);
+                    updates.put("actualEndTime", new Date());
+                    updates.put("updatedAt", new Date());
+                    
+                    transaction.update(db.collection("auctions").document(auctionId), updates);
+                    
+                    return null;
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-                
-                Auction auction = auctionDoc.toObject(Auction.class);
-                auction.setAuctionId(auctionId);
-                
-                if (auction.getStatus() != Auction.AuctionStatus.ACTIVE) {
-                    throw new Exception("Auction is not active");
-                }
-                
-                // Update auction status
-                Map<String, Object> updates = new HashMap<>();
-                updates.put("status", Auction.AuctionStatus.ENDED);
-                updates.put("actualEndTime", new Date());
-                updates.put("updatedAt", new Date());
-                
-                transaction.update(db.collection("auctions").document(auctionId), updates);
-                
-                return null;
             }
         }).addOnSuccessListener(aVoid -> {
             Log.d(TAG, "Auction ended successfully: " + auctionId);

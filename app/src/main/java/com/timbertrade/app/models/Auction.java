@@ -16,12 +16,19 @@ public class Auction implements Serializable {
     private Product product;
     private String sellerId;
     private String sellerName;
+    private String title;
+    private String description;
+    private String location;
+    private String category;
     private double reservePrice;
+    private double startingPrice;
+    private double minBidIncrement;
     private double currentBid;
     private String currentBidderId;
     private String currentBidderName;
     private Date startTime;
     private Date endTime;
+    private Date actualEndTime;
     private AuctionStatus status;
     private List<Bid> bidHistory;
     private int bidCount;
@@ -166,8 +173,60 @@ public class Auction implements Serializable {
         this.sellerName = sellerName;
     }
     
+    public String getTitle() {
+        return title;
+    }
+    
+    public void setTitle(String title) {
+        this.title = title;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public String getLocation() {
+        return location;
+    }
+    
+    public void setLocation(String location) {
+        this.location = location;
+    }
+    
+    public String getCategory() {
+        return category;
+    }
+    
+    public void setCategory(String category) {
+        this.category = category;
+    }
+    
     public double getReservePrice() {
         return reservePrice;
+    }
+    
+    public void setReservePrice(double reservePrice) {
+        this.reservePrice = reservePrice;
+    }
+    
+    public double getStartingPrice() {
+        return startingPrice;
+    }
+    
+    public void setStartingPrice(double startingPrice) {
+        this.startingPrice = startingPrice;
+    }
+    
+    public double getMinBidIncrement() {
+        return minBidIncrement;
+    }
+    
+    public void setMinBidIncrement(double minBidIncrement) {
+        this.minBidIncrement = minBidIncrement;
     }
     
     public void setReservePrice(double reservePrice) {
@@ -244,5 +303,13 @@ public class Auction implements Serializable {
     
     public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    public Date getActualEndTime() {
+        return actualEndTime;
+    }
+    
+    public void setActualEndTime(Date actualEndTime) {
+        this.actualEndTime = actualEndTime;
     }
 }
