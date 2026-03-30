@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -65,6 +66,15 @@ dependencies {
     // Room Database
     implementation("androidx.room:room-runtime:2.6.1")
     annotationProcessor("androidx.room:room-compiler:2.6.1")
+    
+    // Firebase
+    implementation("com.google.firebase:firebase-bom:32.7.4")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    
+    // Image picker
+    implementation("androidx.activity:activity-result:1.9.0")
     
     // Testing
     testImplementation(libs.junit)
