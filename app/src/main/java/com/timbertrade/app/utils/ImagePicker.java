@@ -19,6 +19,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentActivity;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -113,10 +114,8 @@ public class ImagePicker {
                 
                 if (context instanceof Activity) {
                     ((Activity) context).startActivityForResult(cameraIntent, REQUEST_CODE_CAMERA);
-                } else if (context instanceof Fragment) {
-                    ((Fragment) context).startActivityForResult(cameraIntent, REQUEST_CODE_CAMERA);
-                } else if (context instanceof DialogFragment) {
-                    ((DialogFragment) context).startActivityForResult(cameraIntent, REQUEST_CODE_CAMERA);
+                } else {
+                    callback.onError("Unsupported context type for camera");
                 }
             } else {
                 callback.onError("Camera not available");
@@ -134,10 +133,8 @@ public class ImagePicker {
             
             if (context instanceof Activity) {
                 ((Activity) context).startActivityForResult(galleryIntent, REQUEST_CODE_GALLERY);
-            } else if (context instanceof Fragment) {
-                ((Fragment) context).startActivityForResult(galleryIntent, REQUEST_CODE_GALLERY);
-            } else if (context instanceof DialogFragment) {
-                ((DialogFragment) context).startActivityForResult(galleryIntent, REQUEST_CODE_GALLERY);
+            } else {
+                callback.onError("Unsupported context type for gallery");
             }
         } catch (Exception e) {
             Log.e(TAG, "Error opening gallery", e);
