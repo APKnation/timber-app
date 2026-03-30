@@ -28,7 +28,7 @@ import com.timbertrade.app.services.SearchService;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MarketplaceFragment_new extends Fragment {
+public class MarketplaceFragment extends Fragment {
     
     private static final String TAG = "MarketplaceFragment";
     
