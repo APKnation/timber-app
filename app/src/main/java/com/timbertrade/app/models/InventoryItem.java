@@ -64,6 +64,10 @@ public class InventoryItem implements Serializable {
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
     
+    public String getProductName() { return woodType; }
+    
+    public void setItemId(String id) { this.id = id; }
+    
     public double getTotalValue() {
         return quantity * pricePerUnit;
     }
