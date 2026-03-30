@@ -248,26 +248,6 @@ public class MarketplaceFragment extends Fragment {
         loadProducts();
     }
 }
-        
-        toolbar.addView(backBtn);
-        toolbar.addView(titleText);
-        toolbar.addView(addItem);
-        
-        RelativeLayout.LayoutParams toolbarParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        toolbarParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-        root.addView(toolbar, toolbarParams);
-        
-        // Scroll Content
-        ScrollView scrollView = new ScrollView(getContext());
-        scrollView.setVerticalScrollBarEnabled(false);
-        RelativeLayout.LayoutParams scrollParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        scrollParams.addRule(RelativeLayout.BELOW, toolbarId);
-        
-        LinearLayout scrollContent = new LinearLayout(getContext());
-        scrollContent.setOrientation(LinearLayout.VERTICAL);
-        scrollContent.setPadding(dpToPx(20), dpToPx(10), dpToPx(20), dpToPx(40));
         scrollContent.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         
         scrollContent.addView(createPromotionBanner());
