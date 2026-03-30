@@ -81,4 +81,23 @@
     <string name="network_error">Network error. Please check your connection.</string>
     <string name="invalid_email">Invalid email address</string>
     <string name="password_mismatch">Passwords do not match</string>
+    
+    <!-- Timber Categories -->
+    <string-array name="timber_categories">
+        <item>Hardwood</item>
+        <item>Softwood</item>
+        <item>Exotic</item>
+        <item>Treated</item>
+        <item>Rough Sawn</item>
+        <item>Planed</item>
+    </string-array>
+    
+    <!-- Quantity Units -->
+    <string-array name="quantity_units">
+        <item>Cubic Meters</item>
+        <item>Tons</item>
+        <item>Pieces</item>
+        <item>Linear Meters</item>
+        <item>Square Meters</item>
+    </string-array>
 </resources>
