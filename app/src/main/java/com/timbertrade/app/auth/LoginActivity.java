@@ -59,7 +59,6 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.passwordInput);
         btnLogin = findViewById(R.id.loginBtn);
         registerLink = findViewById(R.id.registerLink);
-        tvForgotPassword = findViewById(R.id.forgotPassword);
         progressBar = findViewById(R.id.progressBar);
         tilEmail = findViewById(R.id.tilEmail);
         tilPassword = findViewById(R.id.tilPassword);
@@ -120,26 +119,6 @@ public class LoginActivity extends AppCompatActivity {
                 } else if (error.toLowerCase().contains("password")) {
                     tilPassword.setError(error);
                 }
-            }
-        });
-    }
-    
-    private void resetPassword(String email) {
-        showProgress(true);
-        
-        authService.resetPassword(email, new FirebaseAuthService.PasswordResetCallback() {
-            @Override
-            public void onSuccess() {
-                showProgress(false);
-                Toast.makeText(LoginActivity.this, 
-                        "Password reset email sent to " + email, 
-                        Toast.LENGTH_LONG).show();
-            }
-            
-            @Override
-            public void onError(String error) {
-                showProgress(false);
-                Toast.makeText(LoginActivity.this, error, Toast.LENGTH_LONG).show();
             }
         });
     }

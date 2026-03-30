@@ -72,7 +72,7 @@ public class AuctionsFragment extends Fragment {
         fabCreateAuction.setOnClickListener(v -> {
             // TODO: Navigate to create auction activity
             // Only show for sellers
-            if (currentUser != null && currentUser.getRole() == User.UserRole.SELLER) {
+            if (currentUser != null && currentUser.getRole().equals("SELLER")) {
                 // startActivity(new Intent(requireContext(), CreateAuctionActivity.class));
             }
         });
@@ -83,7 +83,7 @@ public class AuctionsFragment extends Fragment {
         // Show/hide FAB based on user role
         if (fabCreateAuction != null) {
             fabCreateAuction.setVisibility(
-                    user != null && user.getRole() == User.UserRole.SELLER ? 
+                    user != null && user.getRole().equals("SELLER") ? 
                     View.VISIBLE : View.GONE
             );
         }
