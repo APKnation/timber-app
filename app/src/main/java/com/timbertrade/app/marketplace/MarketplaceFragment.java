@@ -521,68 +521,12 @@ public class MarketplaceFragment extends Fragment {
     }
 
     private void showAddProductSheet() {
-        final BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
-        LinearLayout root = new LinearLayout(requireContext());
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dpToPx(24), dpToPx(32), dpToPx(24), dpToPx(32));
-        root.setBackgroundColor(COLOR_WHITE);
-        
-        View handle = new View(requireContext());
-        handle.setBackgroundColor(Color.LTGRAY);
-        LinearLayout.LayoutParams hp = new LinearLayout.LayoutParams(dpToPx(44), dpToPx(4));
-        hp.gravity = Gravity.CENTER_HORIZONTAL; hp.bottomMargin = dpToPx(24);
-        root.addView(handle, hp);
-
-        TextView title = new TextView(requireContext());
-        title.setText("List New Timber"); title.setTextSize(22);
-        title.setTypeface(null, Typeface.BOLD); title.setTextColor(COLOR_TEXT_PRIMARY);
-        title.setPadding(0, 0, 0, dpToPx(24));
-        root.addView(title);
-
-        // Product Name
-        TextInputLayout tilName = createOutlinedInput("Timber Type (e.g. Teak Wood)");
-        TextInputEditText etName = (TextInputEditText) tilName.getEditText();
-        root.addView(tilName);
-
-        // Category
-        TextInputLayout tilCat = createOutlinedInput("Category (Hardwood/Softwood/Plywood)");
-        TextInputEditText etCat = (TextInputEditText) tilCat.getEditText();
-        root.addView(tilCat);
-
-        // Price
-        TextInputLayout tilPrice = createOutlinedInput("Price per unit ($)");
-        TextInputEditText etPrice = (TextInputEditText) tilPrice.getEditText();
-        etPrice.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        root.addView(tilPrice);
-
-        // Description
-        TextInputLayout tilDesc = createOutlinedInput("Description");
-        TextInputEditText etDesc = (TextInputEditText) tilDesc.getEditText();
-        etDesc.setSingleLine(false); etDesc.setLines(3);
-        root.addView(tilDesc);
-
-        MaterialButton btnPost = new MaterialButton(requireContext());
-        btnPost.setText("Post Listing Everywhere");
-        btnPost.setBackgroundTintList(android.content.res.ColorStateList.valueOf(COLOR_PRIMARY));
-        btnPost.setTextColor(Color.WHITE);
-        btnPost.setCornerRadius(dpToPx(16));
-        btnPost.setPadding(0, dpToPx(16), 0, dpToPx(16));
-        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        bp.topMargin = dpToPx(24);
-        btnPost.setLayoutParams(bp);
-        
-        btnPost.setOnClickListener(v -> {
-            String nameVal = etName.getText().toString().trim();
-            if (nameVal.isEmpty()) { Toast.makeText(getContext(), "Please add a type", Toast.LENGTH_SHORT).show(); return; }
-            
-            Toast.makeText(getContext(), "Listing posted successfully! 🚀", Toast.LENGTH_LONG).show();
-            dialog.dismiss();
-            refreshProductsList(); 
+        AddProductDialog dialog = AddProductDialog.newInstance(null);
+        dialog.setOnProductSavedListener(product -> {
+            Toast.makeText(getContext(), "Product added successfully! 🚀", Toast.LENGTH_LONG).show();
+            refreshProductsList();
         });
-
-        root.addView(btnPost);
-        dialog.setContentView(root);
-        dialog.show();
+        dialog.show(getChildFragmentManager(), "AddProductDialog");
     }
 
     private TextInputLayout createOutlinedInput(String hint) {
