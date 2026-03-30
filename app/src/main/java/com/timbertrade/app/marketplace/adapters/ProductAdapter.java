@@ -1,5 +1,6 @@
 package com.timbertrade.app.marketplace.adapters;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,14 +20,24 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
     
     private List<Product> productList;
     private OnProductClickListener listener;
+    private Context context;
     
     public interface OnProductClickListener {
         void onProductClick(Product product);
     }
     
-    public ProductAdapter(List<Product> productList, OnProductClickListener listener) {
+    public ProductAdapter(List<Product> productList, Context context) {
         this.productList = productList;
+        this.context = context;
+    }
+    
+    public void setOnProductClickListener(OnProductClickListener listener) {
         this.listener = listener;
+    }
+    
+    public void updateList(List<Product> newList) {
+        this.productList = newList;
+        notifyDataSetChanged();
     }
     
     @NonNull
@@ -72,22 +83,28 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         }
         
         public void bind(Product product) {
-            // Set category with color
-            tvCategory.setText(product.getCategory().getDisplayName());
-            tvCategory.getBackground().setTint(
-                    getColorFromString(product.getCategory().getColor())
-            );
+            // Set category
+            if (product.getCategory() != null) {
+                tvCategory.setText(product.getCategory().toString());
+            } else {
+                tvCategory.setText("Other");
+            }
             
             // Set status
-            tvStatus.setText(product.getStatus().getDisplayName());
+            if (product.getStatus() != null) {
+                tvStatus.setText(product.getStatus().toString());
+            } else {
+                tvStatus.setText("Available");
+            }
             
             // Set basic info
-            tvTitle.setText(product.getTitle());
-            tvDescription.setText(product.getDescription());
+            tvTitle.setText(product.getTitle() != null ? product.getTitle() : "Unknown Product");
+            tvDescription.setText(product.getDescription() != null ? product.getDescription() : "No description available");
             tvPrice.setText(String.format("TZS %,.0f", product.getPrice()));
-            tvQuantity.setText(String.format("%d %s", product.getQuantity(), product.getQuantityUnit()));
-            tvLocation.setText(product.getLocation());
-            tvSellerName.setText(product.getSellerName());
+            tvQuantity.setText(String.format("%d %s", product.getQuantity(), 
+                    product.getQuantityUnit() != null ? product.getQuantityUnit() : "units"));
+            tvLocation.setText(product.getLocation() != null ? product.getLocation() : "Unknown Location");
+            tvSellerName.setText(product.getSellerName() != null ? product.getSellerName() : "Unknown Seller");
             
             // Set rating
             tvRating.setText(String.format("%.1f (%d)", product.getRating(), product.getReviewCount()));
@@ -104,11 +121,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                         .centerCrop()
                         .into(ivProductImage);
             } else {
-                // Use demo image
-                String[] demoImages = com.timbertrade.app.utils.DemoDataGenerator.getDemoImages();
-                int imageIndex = Math.abs(product.getTitle().hashCode()) % demoImages.length;
+                // Use placeholder
                 Glide.with(itemView.getContext())
-                        .load(demoImages[imageIndex])
+                        .load(R.drawable.ic_timber_logo)
                         .placeholder(R.drawable.ic_timber_logo)
                         .error(R.drawable.ic_timber_logo)
                         .centerCrop()
