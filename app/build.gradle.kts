@@ -68,13 +68,13 @@ dependencies {
     annotationProcessor("androidx.room:room-compiler:2.6.1")
     
     // Firebase
-    implementation("com.google.firebase:firebase-bom:32.7.4")
+    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
     implementation("com.google.firebase:firebase-storage")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     
     // Image picker
-    implementation("androidx.activity:activity-result:1.9.0")
+    implementation("androidx.activity:activity-ktx:1.9.0")
     
     // Testing
     testImplementation(libs.junit)
