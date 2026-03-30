@@ -313,14 +313,14 @@ bottomNavigation = findViewById(R.id.bottomNavigationContainer);
             Fragment fragment = null;
             
             try {
-                switch (currentUser.getRole()) {
-                    case BUYER:
+                switch (currentUser.getUserRole()) {
+                    case User.UserRole.BUYER:
                         fragment = new BuyerDashboardFragment();
                         break;
-                    case SELLER:
+                    case User.UserRole.SELLER:
                         fragment = new SellerDashboardFragment();
                         break;
-                    case ADMIN:
+                    case User.UserRole.ADMIN:
                         fragment = new AdminDashboardFragment();
                         break;
                     default:

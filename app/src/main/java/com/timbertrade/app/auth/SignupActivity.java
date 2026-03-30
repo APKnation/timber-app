@@ -91,8 +91,6 @@ public class SignupActivity extends AppCompatActivity {
         int selectedRoleId = rgRole.getCheckedRadioButtonId();
         if (selectedRoleId == R.id.rbSeller) {
             role = "SELLER";
-        } else if (selectedRoleId == R.id.rbAdmin) {
-            role = "ADMIN";
         }
         
         // Validate inputs

@@ -24,7 +24,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private EditText etEmail, etPassword;
     private Button btnLogin;
-    private TextView registerLink, tvForgotPassword;
+    private TextView registerLink;
     private ProgressBar progressBar;
     private TextInputLayout tilEmail, tilPassword;
     
@@ -67,16 +67,6 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(v -> attemptLogin());
         registerLink.setOnClickListener(v -> {
             startActivity(new Intent(LoginActivity.this, SignupActivity.class));
-        });
-        
-        tvForgotPassword.setOnClickListener(v -> {
-            String email = etEmail.getText().toString().trim();
-            if (TextUtils.isEmpty(email)) {
-                tilEmail.setError("Please enter your email address");
-                return;
-            }
-            
-            resetPassword(email);
         });
     }
     
