@@ -63,6 +63,14 @@ public class AddProductDialog extends DialogFragment {
     
     private OnProductSavedListener listener;
     
+    public static AddProductDialog newInstance() {
+        AddProductDialog dialog = new AddProductDialog();
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_PRODUCT, (Product) null);
+        dialog.setArguments(args);
+        return dialog;
+    }
+    
     public static AddProductDialog newInstance(Product product) {
         AddProductDialog dialog = new AddProductDialog();
         Bundle args = new Bundle();
@@ -72,6 +80,10 @@ public class AddProductDialog extends DialogFragment {
     }
     
     public void setOnProductSavedListener(OnProductSavedListener listener) {
+        this.listener = listener;
+    }
+    
+    public void setProductSavedListener(OnProductSavedListener listener) {
         this.listener = listener;
     }
     

@@ -132,8 +132,7 @@ public class MarketplaceFragment extends Fragment {
         recyclerView.setAdapter(productAdapter);
         
         // Set item click listener
-        productAdapter.setOnItemClickListener(position -> {
-            Product product = productList.get(position);
+        productAdapter.setOnProductClickListener(product -> {
             // Navigate to product details
             // TODO: Implement product details navigation
             Toast.makeText(getContext(), "Product: " + product.getTitle(), Toast.LENGTH_SHORT).show();
@@ -209,7 +208,7 @@ public class MarketplaceFragment extends Fragment {
     
     private void showAddProductDialog() {
         AddProductDialog dialog = AddProductDialog.newInstance();
-        dialog.setProductSavedListener(product -> {
+        dialog.setOnProductSavedListener(product -> {
             // Refresh the product list
             loadProducts();
         });
