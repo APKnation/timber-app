@@ -313,10 +313,10 @@ public class AddProductDialog extends DialogFragment {
                     price,
                     "per unit", // TODO: Get from spinner
                     quantity,
-                    "units", // TODO: Get from spinner
-                    location,
-                    imageUrls
+                    "units", // TODO: Get from spinner,
+                    location
                 );
+                product.setImageUrls(imageUrls);
             }
             
             // Hide progress

@@ -115,6 +115,8 @@ public class ImagePicker {
                     ((Activity) context).startActivityForResult(cameraIntent, REQUEST_CODE_CAMERA);
                 } else if (context instanceof Fragment) {
                     ((Fragment) context).startActivityForResult(cameraIntent, REQUEST_CODE_CAMERA);
+                } else if (context instanceof DialogFragment) {
+                    ((DialogFragment) context).startActivityForResult(cameraIntent, REQUEST_CODE_CAMERA);
                 }
             } else {
                 callback.onError("Camera not available");
@@ -134,6 +136,8 @@ public class ImagePicker {
                 ((Activity) context).startActivityForResult(galleryIntent, REQUEST_CODE_GALLERY);
             } else if (context instanceof Fragment) {
                 ((Fragment) context).startActivityForResult(galleryIntent, REQUEST_CODE_GALLERY);
+            } else if (context instanceof DialogFragment) {
+                ((DialogFragment) context).startActivityForResult(galleryIntent, REQUEST_CODE_GALLERY);
             }
         } catch (Exception e) {
             Log.e(TAG, "Error opening gallery", e);
