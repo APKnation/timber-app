@@ -199,9 +199,9 @@ public class NewOrderFragment extends Fragment {
         // Determine accent color based on status
         int accentColor;
         switch (order.getStatus()) {
-            case "Confirmed": accentColor = Color.parseColor("#059669"); break;
-            case "Delivered": accentColor = Color.parseColor("#2563EB"); break;
-            case "Cancelled": accentColor = Color.parseColor("#EF4444"); break;
+            case CONFIRMED: accentColor = Color.parseColor("#059669"); break;
+            case DELIVERED: accentColor = Color.parseColor("#2563EB"); break;
+            case CANCELLED: accentColor = Color.parseColor("#EF4444"); break;
             default: accentColor = Color.parseColor("#D97706"); // Pending = amber
         }
 
@@ -237,7 +237,7 @@ public class NewOrderFragment extends Fragment {
 
         // Premium pill-shaped status chip
         TextView statusChip = new TextView(getContext());
-        statusChip.setText(order.getStatus().toUpperCase());
+        statusChip.setText(order.getStatus().toString());
         statusChip.setTextSize(10);
         statusChip.setTypeface(null, Typeface.BOLD);
         statusChip.setTextColor(accentColor);

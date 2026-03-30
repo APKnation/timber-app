@@ -216,14 +216,26 @@ public class SearchService {
     
     // Combined search (products + auctions)
     public void searchAll(SearchFilters filters, CombinedSearchCallback callback) {
-        searchProducts(filters, products -> {
-            searchAuctions(filters, auctions -> {
-                callback.onSuccess(products, auctions);
-            }, error -> {
+        searchProducts(filters, new SearchCallback<Product>() {
+            @Override
+            public void onSuccess(List<Product> products) {
+                searchAuctions(filters, new SearchCallback<Auction>() {
+                    @Override
+                    public void onSuccess(List<Auction> auctions) {
+                        callback.onSuccess(products, auctions);
+                    }
+                    
+                    @Override
+                    public void onError(String error) {
+                        callback.onError(error);
+                    }
+                });
+            }
+            
+            @Override
+            public void onError(String error) {
                 callback.onError(error);
-            });
-        }, error -> {
-            callback.onError(error);
+            }
         });
     }
     

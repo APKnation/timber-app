@@ -207,7 +207,7 @@ public class NewOrderActivity extends Activity {
         customerText.setLayoutParams(custParams);
         
         TextView statusChip = new TextView(this);
-        statusChip.setText(order.getStatus());
+        statusChip.setText(order.getStatus().toString());
         statusChip.setTextSize(12);
         statusChip.setTypeface(null, Typeface.BOLD);
         statusChip.setPadding(dpToPx(12), dpToPx(4), dpToPx(12), dpToPx(4));
@@ -216,7 +216,7 @@ public class NewOrderActivity extends Activity {
         statusBg.setCornerRadius(dpToPx(12));
         
         switch (order.getStatus()) {
-            case "Pending":
+            case PENDING:
                 statusBg.setColor(Color.parseColor("#FEF3C7")); // Amber Light
                 statusChip.setTextColor(Color.parseColor("#D97706"));
                 break;
