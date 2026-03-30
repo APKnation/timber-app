@@ -1,149 +1,253 @@
 package com.timbertrade.app.marketplace;
 
-import androidx.fragment.app.Fragment;
-import android.view.LayoutInflater;
-import android.os.Bundle;
-import android.content.Context;
-import android.widget.FrameLayout;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.ScrollView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputLayout;
-import com.google.android.material.textfield.TextInputEditText;
-import com.timbertrade.app.dashboard.RealDashboardActivity;
-import com.timbertrade.app.models.Order;
-import com.timbertrade.app.utils.DataManager;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import java.util.Locale;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.timbertrade.app.R;
+import com.timbertrade.app.models.Product;
+import com.timbertrade.app.marketplace.adapters.ProductAdapter;
+import com.timbertrade.app.services.FirebaseAuthService;
+import com.timbertrade.app.services.ProductService;
+import com.timbertrade.app.services.SearchService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MarketplaceFragment extends Fragment {
     
     private static final String TAG = "MarketplaceFragment";
     
-    // Modern Color Palette
-    private final int COLOR_PRIMARY = Color.parseColor("#059669"); 
-    private final int COLOR_PRIMARY_DARK = Color.parseColor("#047857");
-    private final int COLOR_BG = Color.parseColor("#F3F4F6"); 
-    private final int COLOR_TEXT_PRIMARY = Color.parseColor("#1F2937");
-    private final int COLOR_TEXT_SECONDARY = Color.parseColor("#6B7280");
-    private final int COLOR_WHITE = Color.WHITE;
-    
-    private String selectedCategory = "All Wood";
+    private RecyclerView recyclerView;
+    private ProgressBar progressBar;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private TextView tvNoProducts;
+    private FloatingActionButton fabAddProduct;
     private LinearLayout categoryRow;
-    private LinearLayout productsContainer;
-
-    private static class Product {
-        String name, desc, price, iconBg, iconText, category;
-        int imagePlaceholderColor; // Using colors to represent timber types in this demo
-        Product(String cat, String n, String d, String p, String ib, String it, int imgColor) {
-            this.category = cat; this.name = n; this.desc = d; this.price = p; this.iconBg = ib; this.iconText = it;
-            this.imagePlaceholderColor = imgColor;
-        }
-    }
-
-    private final Product[] allProducts = {
-        new Product("Hardwood", "Premium Oak Wood", "Grade A timber for luxury furniture and flooring.", "$120.00", "#FDE68A", "#D97706", Color.parseColor("#A16207")),
-        new Product("Softwood", "Treated Pine", "Pressure-treated pine, ideal for outdoor deck construction.", "$85.00", "#BFDBFE", "#2563EB", Color.parseColor("#1E40AF")),
-        new Product("Hardwood", "Mahogany Beams", "Strong, durable beams with rich reddish-brown wood grain.", "$210.00", "#FBCFE8", "#DB2777", Color.parseColor("#9D174D")),
-        new Product("Plywood",  "Marine Plywood", "High-grade water-resistant plywood for boat building.", "$65.00", "#D1FAE5", "#059669", Color.parseColor("#065F46")),
-        new Product("Softwood", "Cedar Decking", "Naturally rot-resistant cedar planks for premium decks.", "$145.00", "#FFEDD5", "#C2410C", Color.parseColor("#9A3412")),
-        new Product("Plywood",  "Standard Plywood", "Multi-purpose plywood for general interior construction.", "$45.00", "#F3F4F6", "#374151", Color.parseColor("#4B5563"))
-    };
-
+    
+    private ProductAdapter productAdapter;
+    private ProductService productService;
+    private SearchService searchService;
+    private FirebaseAuthService authService;
+    
+    private List<Product> productList;
+    private String selectedCategory = "All";
+    private String currentUserId;
+    
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        try {
-            return createAdvancedLayout();
-        } catch (Exception e) {
-            Log.e(TAG, "Error rendering marketplace", e);
-            return new FrameLayout(getContext());
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        productService = ProductService.getInstance();
+        searchService = SearchService.getInstance();
+        authService = FirebaseAuthService.getInstance();
+        
+        productList = new ArrayList<>();
+    }
+    
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_marketplace, container, false);
+        
+        initViews(view);
+        setupRecyclerView();
+        setupClickListeners();
+        loadProducts();
+        
+        return view;
+    }
+    
+    private void initViews(View view) {
+        recyclerView = view.findViewById(R.id.recyclerView);
+        progressBar = view.findViewById(R.id.progressBar);
+        swipeRefreshLayout = view.findViewById(R.id.swipeRefreshLayout);
+        tvNoProducts = view.findViewById(R.id.tvNoProducts);
+        fabAddProduct = view.findViewById(R.id.fabAddProduct);
+        categoryRow = view.findViewById(R.id.categoryRow);
+        
+        // Setup categories
+        setupCategories();
+    }
+    
+    private void setupCategories() {
+        String[] categories = {"All", "Hardwood", "Softwood", "Exotic", "Treated", "Rough Sawn", "Planed"};
+        
+        for (String category : categories) {
+            TextView categoryView = new TextView(getContext());
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(8, 8, 8, 8);
+            categoryView.setLayoutParams(params);
+            categoryView.setText(category);
+            categoryView.setPadding(16, 8, 16, 8);
+            categoryView.setBackgroundResource(R.drawable.bg_category_unselected);
+            categoryView.setTextColor(getResources().getColor(R.color.timber_text_secondary));
+            
+            categoryView.setOnClickListener(v -> {
+                selectedCategory = category;
+                updateCategoryUI();
+                filterProductsByCategory();
+            });
+            
+            categoryRow.addView(categoryView);
+        }
+        
+        // Select "All" by default
+        selectedCategory = "All";
+        updateCategoryUI();
+    }
+    
+    private void updateCategoryUI() {
+        for (int i = 0; i < categoryRow.getChildCount(); i++) {
+            TextView categoryView = (TextView) categoryRow.getChildAt(i);
+            String category = categoryView.getText().toString();
+            
+            if (category.equals(selectedCategory)) {
+                categoryView.setBackgroundResource(R.drawable.bg_category_selected);
+                categoryView.setTextColor(getResources().getColor(R.color.timber_primary));
+            } else {
+                categoryView.setBackgroundResource(R.drawable.bg_category_unselected);
+                categoryView.setTextColor(getResources().getColor(R.color.timber_text_secondary));
+            }
         }
     }
     
-    private void switchTab(int tabIndex) {
-        if (getActivity() instanceof RealDashboardActivity) {
-            ((RealDashboardActivity) getActivity()).switchTab(tabIndex);
+    private void setupRecyclerView() {
+        productAdapter = new ProductAdapter(productList, getContext());
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        recyclerView.setAdapter(productAdapter);
+        
+        // Set item click listener
+        productAdapter.setOnItemClickListener(position -> {
+            Product product = productList.get(position);
+            // Navigate to product details
+            // TODO: Implement product details navigation
+            Toast.makeText(getContext(), "Product: " + product.getTitle(), Toast.LENGTH_SHORT).show();
+        });
+    }
+    
+    private void setupClickListeners() {
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            loadProducts();
+        });
+        
+        fabAddProduct.setOnClickListener(v -> {
+            // Check if user is logged in and is a seller
+            if (authService.isUserLoggedIn()) {
+                authService.getCurrentUser(new FirebaseAuthService.AuthCallback() {
+                    @Override
+                    public void onSuccess(com.timbertrade.app.models.User user) {
+                        if (user.getRole().equals("SELLER") || user.getRole().equals("ADMIN")) {
+                            showAddProductDialog();
+                        } else {
+                            Toast.makeText(getContext(), "Only sellers can add products", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                    
+                    @Override
+                    public void onError(String error) {
+                        Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "Please login to add products", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    
+    private void loadProducts() {
+        showLoading(true);
+        
+        productService.getAllProducts(new ProductService.ProductCallback() {
+            @Override
+            public void onSuccess(List<Product> products) {
+                showLoading(false);
+                swipeRefreshLayout.setRefreshing(false);
+                
+                productList.clear();
+                productList.addAll(products);
+                
+                filterProductsByCategory();
+                updateEmptyState();
+            }
+            
+            @Override
+            public void onError(String error) {
+                showLoading(false);
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                updateEmptyState();
+            }
+        });
+    }
+    
+    private void filterProductsByCategory() {
+        List<Product> filteredList = new ArrayList<>();
+        
+        if (selectedCategory.equals("All")) {
+            filteredList.addAll(productList);
+        } else {
+            for (Product product : productList) {
+                if (product.getCategory() != null && 
+                    product.getCategory().toString().equalsIgnoreCase(selectedCategory)) {
+                    filteredList.add(product);
+                }
+            }
+        }
+        
+        productAdapter.updateList(filteredList);
+        updateEmptyState();
+    }
+    
+    private void showAddProductDialog() {
+        AddProductDialog dialog = AddProductDialog.newInstance();
+        dialog.setProductSavedListener(product -> {
+            // Refresh the product list
+            loadProducts();
+        });
+        dialog.show(getChildFragmentManager(), "add_product_dialog");
+    }
+    
+    private void showLoading(boolean show) {
+        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
+    }
+    
+    private void updateEmptyState() {
+        if (productAdapter.getItemCount() == 0) {
+            tvNoProducts.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
+        } else {
+            tvNoProducts.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
         }
     }
-
-    private View createAdvancedLayout()  {
-        RelativeLayout root = new RelativeLayout(getContext());
-        root.setBackgroundColor(COLOR_BG);
-        
-        // 1. Decorative Header Background
-        View headerBg = new View(getContext());
-        GradientDrawable gradientBg = new GradientDrawable(
-                GradientDrawable.Orientation.TL_BR,
-                new int[]{COLOR_PRIMARY, COLOR_PRIMARY_DARK}
-        );
-        headerBg.setBackground(gradientBg);
-        
-        RelativeLayout.LayoutParams headerBgParams = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(260)
-        );
-        headerBgParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
-        root.addView(headerBg, headerBgParams);
-        
-        // Custom App Bar Toolbar
-        int toolbarId = View.generateViewId();
-        LinearLayout toolbar = new LinearLayout(getContext());
-        toolbar.setId(toolbarId);
-        toolbar.setOrientation(LinearLayout.HORIZONTAL);
-        toolbar.setPadding(dpToPx(20), dpToPx(56), dpToPx(20), dpToPx(20));
-        toolbar.setGravity(Gravity.CENTER_VERTICAL);
-        
-        // Premium Back Button
-        TextView backBtn = new TextView(getContext());
-        backBtn.setText("←");
-        backBtn.setTextColor(COLOR_PRIMARY);
-        backBtn.setTextSize(22);
-        backBtn.setGravity(Gravity.CENTER);
-        backBtn.setTypeface(null, Typeface.BOLD);
-        
-        GradientDrawable backBg = new GradientDrawable();
-        backBg.setShape(GradientDrawable.OVAL);
-        backBg.setColor(COLOR_WHITE);
-        backBtn.setBackground(backBg);
-        backBtn.setElevation(dpToPx(4));
-        
-        LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(dpToPx(44), dpToPx(44));
-        backParams.setMargins(0, 0, dpToPx(16), 0);
-        backBtn.setLayoutParams(backParams);
-        backBtn.setClickable(true);
-        backBtn.setOnClickListener(v -> switchTab(0));
-        
-        TextView titleText = new TextView(getContext());
-        titleText.setText("Timber Market");
-        titleText.setTextSize(26);
-        titleText.setTextColor(COLOR_WHITE);
-        titleText.setTypeface(null, Typeface.BOLD);
-        titleText.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
-
-        TextView addItem = new TextView(getContext());
-        addItem.setText("+ Sell");
-        addItem.setTextColor(Color.WHITE);
-        addItem.setTypeface(null, Typeface.BOLD);
-        addItem.setPadding(dpToPx(12), dpToPx(6), dpToPx(12), dpToPx(6));
-        GradientDrawable itemBg = new GradientDrawable();
-        itemBg.setColor(Color.argb(50, 255, 255, 255));
-        itemBg.setCornerRadius(dpToPx(100));
-        addItem.setBackground(itemBg);
-        addItem.setClickable(true);
-        addItem.setOnClickListener(v -> showAddProductSheet());
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh data when fragment resumes
+        loadProducts();
+    }
+}
         
         toolbar.addView(backBtn);
         toolbar.addView(titleText);
