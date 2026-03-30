@@ -248,16 +248,6 @@ public class MarketplaceFragment extends Fragment {
         loadProducts();
     }
 }
-        scrollContent.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        
-        scrollContent.addView(createPromotionBanner());
-        
-        // Search Bar
-        scrollContent.addView(createSearchBar());
-
-        // Categories Row
-        scrollContent.addView(createSectionTitle("Product Categories"));
-        HorizontalScrollView hScroll = new HorizontalScrollView(getContext());
         hScroll.setHorizontalScrollBarEnabled(false);
         hScroll.setClipToPadding(false);
         hScroll.setPadding(dpToPx(4), dpToPx(10), dpToPx(4), dpToPx(10));
