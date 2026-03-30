@@ -207,11 +207,11 @@ public class User implements Serializable {
     }
     
     public Date getLastLoginAtDate() {
-        return lastLoginAt != null ? new Date(lastLoginAt) : null;
+        return lastLoginAt > 0 ? new Date(lastLoginAt) : null;
     }
     
     public void setLastLoginAtDate(Date date) {
-        this.lastLoginAt = date != null ? date.getTime() : null;
+        this.lastLoginAt = date != null ? date.getTime() : 0;
     }
     
     public enum UserRole {

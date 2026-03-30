@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -310,16 +311,16 @@ public class FirebaseAuthService {
                     if (documentSnapshot.exists()) {
                         User user = documentSnapshot.toObject(User.class);
                         if (user != null) {
-                            callback.onComplete(Task.forResult(user.getRole()));
+                            callback.onComplete(Tasks.forResult(user.getRole()));
                         } else {
-                            callback.onComplete(Task.forException(new Exception("User not found")));
+                            callback.onComplete(Tasks.forException(new Exception("User not found")));
                         }
                     } else {
-                        callback.onComplete(Task.forException(new Exception("User profile not found")));
+                        callback.onComplete(Tasks.forException(new Exception("User profile not found")));
                     }
                 })
                 .addOnFailureListener(e -> {
-                    callback.onComplete(Task.forException(e));
+                    callback.onComplete(Tasks.forException(e));
                 });
     }
     
